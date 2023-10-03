@@ -1,147 +1,1933 @@
 import {
     Plugin,
-    showMessage,
-    confirm,
-    Dialog,
-    Menu,
-    openTab,
     adaptHotkey,
     getFrontend,
     getBackend,
-    IModel,
-    Setting,
-    fetchPost,
-    Protyle, openWindow, IOperation
+    Setting
 } from "siyuan";
 import "./index.scss";
+import * as echarts from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import {
+    GraphChart,
+    GraphSeriesOption,
+} from "echarts/charts";
 
-const STORAGE_NAME = "menu-config";
-const TAB_TYPE = "custom_tab";
+echarts.use([
+    GraphChart,
+    CanvasRenderer
+]);
+
+import type {
+    ComposeOption,
+} from "echarts/core";
+
+type ECOption = ComposeOption<
+    | GraphSeriesOption
+>;
+
+let myChart: echarts.ECharts;
+
+const STORAGE_NAME = "graph-enhance-config";
 const DOCK_TYPE = "dock_tab";
 
 export default class PluginSample extends Plugin {
-
-    private customTab: () => IModel;
-    private isMobile: boolean;
-    private blockIconEventBindThis = this.blockIconEvent.bind(this);
-
     onload() {
-        this.data[STORAGE_NAME] = {readonlyText: "Readonly"};
-
-        const frontEnd = getFrontend();
-        this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
-        // 图标的制作参见帮助文档
-        this.addIcons(`<symbol id="iconFace" viewBox="0 0 32 32">
-<path d="M13.667 17.333c0 0.92-0.747 1.667-1.667 1.667s-1.667-0.747-1.667-1.667 0.747-1.667 1.667-1.667 1.667 0.747 1.667 1.667zM20 15.667c-0.92 0-1.667 0.747-1.667 1.667s0.747 1.667 1.667 1.667 1.667-0.747 1.667-1.667-0.747-1.667-1.667-1.667zM29.333 16c0 7.36-5.973 13.333-13.333 13.333s-13.333-5.973-13.333-13.333 5.973-13.333 13.333-13.333 13.333 5.973 13.333 13.333zM14.213 5.493c1.867 3.093 5.253 5.173 9.12 5.173 0.613 0 1.213-0.067 1.787-0.16-1.867-3.093-5.253-5.173-9.12-5.173-0.613 0-1.213 0.067-1.787 0.16zM5.893 12.627c2.28-1.293 4.040-3.4 4.88-5.92-2.28 1.293-4.040 3.4-4.88 5.92zM26.667 16c0-1.040-0.16-2.040-0.44-2.987-0.933 0.2-1.893 0.32-2.893 0.32-4.173 0-7.893-1.92-10.347-4.92-1.4 3.413-4.187 6.093-7.653 7.4 0.013 0.053 0 0.12 0 0.187 0 5.88 4.787 10.667 10.667 10.667s10.667-4.787 10.667-10.667z"></path>
-</symbol>
-<symbol id="iconSaving" viewBox="0 0 32 32">
-<path d="M20 13.333c0-0.733 0.6-1.333 1.333-1.333s1.333 0.6 1.333 1.333c0 0.733-0.6 1.333-1.333 1.333s-1.333-0.6-1.333-1.333zM10.667 12h6.667v-2.667h-6.667v2.667zM29.333 10v9.293l-3.76 1.253-2.24 7.453h-7.333v-2.667h-2.667v2.667h-7.333c0 0-3.333-11.28-3.333-15.333s3.28-7.333 7.333-7.333h6.667c1.213-1.613 3.147-2.667 5.333-2.667 1.107 0 2 0.893 2 2 0 0.28-0.053 0.533-0.16 0.773-0.187 0.453-0.347 0.973-0.427 1.533l3.027 3.027h2.893zM26.667 12.667h-1.333l-4.667-4.667c0-0.867 0.12-1.72 0.347-2.547-1.293 0.333-2.347 1.293-2.787 2.547h-8.227c-2.573 0-4.667 2.093-4.667 4.667 0 2.507 1.627 8.867 2.68 12.667h2.653v-2.667h8v2.667h2.68l2.067-6.867 3.253-1.093v-4.707z"></path>
-</symbol>`);
-
-        const topBarElement = this.addTopBar({
-            icon: "iconFace",
-            title: this.i18n.addTopBarIcon,
-            position: "right",
-            callback: () => {
-                if (this.isMobile) {
-                    this.addMenu();
-                } else {
-                    let rect = topBarElement.getBoundingClientRect();
-                    // 如果被隐藏，则使用更多按钮
-                    if (rect.width === 0) {
-                        rect = document.querySelector("#barMore").getBoundingClientRect();
-                    }
-                    if (rect.width === 0) {
-                        rect = document.querySelector("#barPlugins").getBoundingClientRect();
-                    }
-                    this.addMenu(rect);
-                }
-            }
-        });
-
-        const statusIconTemp = document.createElement("template");
-        statusIconTemp.innerHTML = `<div class="toolbar__item ariaLabel" aria-label="Remove plugin-sample Data">
-    <svg>
-        <use xlink:href="#iconTrashcan"></use>
-    </svg>
-</div>`;
-        statusIconTemp.content.firstElementChild.addEventListener("click", () => {
-            confirm("⚠️", this.i18n.confirmRemove.replace("${name}", this.name), () => {
-                this.removeData(STORAGE_NAME).then(() => {
-                    this.data[STORAGE_NAME] = {readonlyText: "Readonly"};
-                    showMessage(`[${this.name}]: ${this.i18n.removedData}`);
-                });
-            });
-        });
-
-        this.addStatusBar({
-            element: statusIconTemp.content.firstElementChild as HTMLElement,
-        });
-
-        this.customTab = this.addTab({
-            type: TAB_TYPE,
-            init() {
-                this.element.innerHTML = `<div class="plugin-sample__custom-tab">${this.data.text}</div>`;
-            },
-            beforeDestroy() {
-                console.log("before destroy tab:", TAB_TYPE);
-            },
-            destroy() {
-                console.log("destroy tab:", TAB_TYPE);
-            }
-        });
-
-        this.addCommand({
-            langKey: "showDialog",
-            hotkey: "⇧⌘O",
-            callback: () => {
-                this.showDialog();
-            },
-        });
-
-        this.addCommand({
-            langKey: "getTab",
-            hotkey: "⇧⌘M",
-            globalCallback: () => {
-                console.log(this.getOpenedTab());
-            },
-        });
+        this.data[STORAGE_NAME] = { readonlyText: "Readonly" };
 
         this.addDock({
             config: {
                 position: "LeftBottom",
-                size: {width: 200, height: 0},
-                icon: "iconSaving",
+                size: { width: 200, height: 0 },
+                icon: "iconM",
                 title: "Custom Dock",
             },
             data: {
-                text: "This is my custom dock"
+                text: "graph-enhance-hello-world"
             },
             type: DOCK_TYPE,
             init() {
                 this.element.innerHTML = `<div class="fn__flex-1 fn__flex-column">
     <div class="block__icons">
         <div class="block__logo">
-            <svg><use xlink:href="#iconEmoji"></use></svg>
+            <svg><use xlink:href="#iconM"></use></svg>
             Custom Dock
         </div>
         <span class="fn__flex-1 fn__space"></span>
         <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__flex-1 plugin-sample__custom-dock">
-        ${this.data.text}
+        <div id="graph_enhance_container">hello</div>
     </div>
 </div>`;
+                myChart = echarts.init(document.getElementById("graph_enhance_container"));
+
+                console.log(myChart);
+
+                const dagreLayout = {
+                    "options": {
+                        "directed": true,
+                        "multigraph": false,
+                        "compound": false
+                    },
+                    "nodes": [
+                        {
+                            "v": "20200812220555-lj3enxa",
+                            "value": {
+                                "label": "请从这里开始",
+                                "width": 200,
+                                "height": 10,
+                                "x": 100,
+                                "y": 225
+                            }
+                        },
+                        {
+                            "v": "20200813004931-q4cu8na",
+                            "value": {
+                                "label": "什么是内容块",
+                                "width": 200,
+                                "height": 10,
+                                "x": 850,
+                                "y": 125
+                            }
+                        },
+                        {
+                            "v": "20200813131152-0wk5akh",
+                            "value": {
+                                "label": "在内容块中遨游",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1100,
+                                "y": 25
+                            }
+                        },
+                        {
+                            "v": "20200822191536-rm6hwid",
+                            "value": {
+                                "label": "窗口和页签",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1350,
+                                "y": 215
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "value": {
+                                "label": "常见问题",
+                                "width": 200,
+                                "height": 10,
+                                "x": 350,
+                                "y": 535
+                            }
+                        },
+                        {
+                            "v": "20230428153709-hioyy5l",
+                            "value": {
+                                "label": "社区资源",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 1125
+                            }
+                        },
+                        {
+                            "v": "20200813013559-sgbzl5k",
+                            "value": {
+                                "label": "引用内容块",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1350,
+                                "y": 55
+                            }
+                        },
+                        {
+                            "v": "20201117101902-2ewjjum",
+                            "value": {
+                                "label": "嵌入内容块",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1100,
+                                "y": 155
+                            }
+                        },
+                        {
+                            "v": "20200905090211-2vixtlf",
+                            "value": {
+                                "label": "内容块类型",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 85
+                            }
+                        },
+                        {
+                            "v": "20211010211311-ffz0wbu",
+                            "value": {
+                                "label": "虚拟引用",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 5
+                            }
+                        },
+                        {
+                            "v": "20201004184819-nj8ibyg",
+                            "value": {
+                                "label": "在浏览器上使用",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 215
+                            }
+                        },
+                        {
+                            "v": "20200915214115-42b8zma",
+                            "value": {
+                                "label": "资源文件",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 465
+                            }
+                        },
+                        {
+                            "v": "20210615211733-v6rzowm",
+                            "value": {
+                                "label": "数据历史",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1350,
+                                "y": 595
+                            }
+                        },
+                        {
+                            "v": "20201204181006-7bkppue",
+                            "value": {
+                                "label": "模板片段",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 275
+                            }
+                        },
+                        {
+                            "v": "20210824201257-cy7icrc",
+                            "value": {
+                                "label": "挂件",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1350,
+                                "y": 385
+                            }
+                        },
+                        {
+                            "v": "20230104144904-39br4c6",
+                            "value": {
+                                "label": "分享文档",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 335
+                            }
+                        },
+                        {
+                            "v": "20230106101434-e6g4av3",
+                            "value": {
+                                "label": "工作空间",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 705
+                            }
+                        },
+                        {
+                            "v": "20221223215557-o6gfsoy",
+                            "value": {
+                                "label": "闪卡",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 525
+                            }
+                        },
+                        {
+                            "v": "20230506210010-houyyvy",
+                            "value": {
+                                "label": "插件",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 395
+                            }
+                        },
+                        {
+                            "v": "20230805230131-sn7obzb",
+                            "value": {
+                                "label": "对接第三方云端存储",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1350,
+                                "y": 765
+                            }
+                        },
+                        {
+                            "v": "20230805222417-2lj3dvk",
+                            "value": {
+                                "label": "会员特权",
+                                "width": 200,
+                                "height": 10,
+                                "x": 600,
+                                "y": 905
+                            }
+                        },
+                        {
+                            "v": "20201222093044-rx4zjoy",
+                            "value": {
+                                "label": "数据库表",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1350,
+                                "y": 155
+                            }
+                        },
+                        {
+                            "v": "20220628204444-9n0y9h2",
+                            "value": {
+                                "label": "优化排版",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 585
+                            }
+                        },
+                        {
+                            "v": "20230808120347-3cob0nb",
+                            "value": {
+                                "label": "数据同步",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 645
+                            }
+                        },
+                        {
+                            "v": "20230808120347-pzvmkik",
+                            "value": {
+                                "label": "存储空间",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 765
+                            }
+                        },
+                        {
+                            "v": "20230805225107-qm1m2f5",
+                            "value": {
+                                "label": "功能特性",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1100,
+                                "y": 825
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "value": {
+                                "label": "云端服务",
+                                "width": 200,
+                                "height": 10,
+                                "x": 850,
+                                "y": 935
+                            }
+                        },
+                        {
+                            "v": "20201222095049-hghafhe",
+                            "value": {
+                                "label": "类型过滤",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 155
+                            }
+                        },
+                        {
+                            "v": "20230805230218-aea8icj",
+                            "value": {
+                                "label": "搜索资源文件内容",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 825
+                            }
+                        },
+                        {
+                            "v": "20230808120348-hynr7og",
+                            "value": {
+                                "label": "收集箱",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 885
+                            }
+                        },
+                        {
+                            "v": "20230808120348-vaxi6eq",
+                            "value": {
+                                "label": "微信提醒",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 945
+                            }
+                        },
+                        {
+                            "v": "20230808120348-lgcp9zm",
+                            "value": {
+                                "label": "数据备份",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1100,
+                                "y": 575
+                            }
+                        },
+                        {
+                            "v": "20230808120347-mw3qrwy",
+                            "value": {
+                                "label": "资源文件图床",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 1005
+                            }
+                        },
+                        {
+                            "v": "20230808120348-yut741f",
+                            "value": {
+                                "label": "限制",
+                                "width": 200,
+                                "height": 10,
+                                "x": 1600,
+                                "y": 1065
+                            }
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "v": "20200812220555-lj3enxa",
+                            "w": "20200813004931-q4cu8na",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 106.25,
+                                        "y": 220
+                                    },
+                                    {
+                                        "x": 225,
+                                        "y": 125
+                                    },
+                                    {
+                                        "x": 350,
+                                        "y": 125
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 125
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 125
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 125
+                                    },
+                                    {
+                                        "x": 750,
+                                        "y": 125
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200812220555-lj3enxa",
+                            "w": "20200813131152-0wk5akh",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 103.47222222222223,
+                                        "y": 220
+                                    },
+                                    {
+                                        "x": 225,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 350,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 45
+                                    },
+                                    {
+                                        "x": 1068.75,
+                                        "y": 30
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200812220555-lj3enxa",
+                            "w": "20200822191536-rm6hwid",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 162.5,
+                                        "y": 220
+                                    },
+                                    {
+                                        "x": 225,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 350,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 1250,
+                                        "y": 215
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200812220555-lj3enxa",
+                            "w": "20200813093015-u6bopdt",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 102.01612903225806,
+                                        "y": 230
+                                    },
+                                    {
+                                        "x": 225,
+                                        "y": 535
+                                    },
+                                    {
+                                        "x": 250,
+                                        "y": 535
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200812220555-lj3enxa",
+                            "w": "20230428153709-hioyy5l",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 100.69444444444444,
+                                        "y": 230
+                                    },
+                                    {
+                                        "x": 225,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 350,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 1125
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 1125
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813004931-q4cu8na",
+                            "w": "20200813131152-0wk5akh",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 855.6818181818181,
+                                        "y": 120
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 15
+                                    },
+                                    {
+                                        "x": 1037.5,
+                                        "y": 20
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813004931-q4cu8na",
+                            "w": "20200813013559-sgbzl5k",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 865.625,
+                                        "y": 120
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 85
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 85
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 85
+                                    },
+                                    {
+                                        "x": 1329.1666666666667,
+                                        "y": 60
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813004931-q4cu8na",
+                            "w": "20201117101902-2ewjjum",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 870.8333333333334,
+                                        "y": 130
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 155
+                                    },
+                                    {
+                                        "x": 1000,
+                                        "y": 155
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813004931-q4cu8na",
+                            "w": "20200905090211-2vixtlf",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 881.25,
+                                        "y": 120
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 105
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 105
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 105
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 105
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 105
+                                    },
+                                    {
+                                        "x": 1568.75,
+                                        "y": 90
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813131152-0wk5akh",
+                            "w": "20200813013559-sgbzl5k",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1120.8333333333333,
+                                        "y": 30
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 55
+                                    },
+                                    {
+                                        "x": 1250,
+                                        "y": 55
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813131152-0wk5akh",
+                            "w": "20211010211311-ffz0wbu",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1131.25,
+                                        "y": 20
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 5
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 5
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 5
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 5
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200822191536-rm6hwid",
+                            "w": "20201004184819-nj8ibyg",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1450,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 215
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 215
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20200915214115-42b8zma",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 362.5,
+                                        "y": 530
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 485
+                                    },
+                                    {
+                                        "x": 1568.75,
+                                        "y": 470
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20210615211733-v6rzowm",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 357.8125,
+                                        "y": 540
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 1318.75,
+                                        "y": 600
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20201204181006-7bkppue",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 352.40384615384613,
+                                        "y": 530
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 275
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 275
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20210824201257-cy7icrc",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 354.1666666666667,
+                                        "y": 530
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 385
+                                    },
+                                    {
+                                        "x": 1250,
+                                        "y": 385
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20230104144904-39br4c6",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 353.125,
+                                        "y": 530
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 335
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 335
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20230106101434-e6g4av3",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 353.47222222222223,
+                                        "y": 540
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 715
+                                    },
+                                    {
+                                        "x": 1537.5,
+                                        "y": 710
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20221223215557-o6gfsoy",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 412.5,
+                                        "y": 530
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 525
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 525
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20230506210010-houyyvy",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 356.25,
+                                        "y": 530
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 435
+                                    },
+                                    {
+                                        "x": 1584.375,
+                                        "y": 400
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20230805230131-sn7obzb",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 352.6041666666667,
+                                        "y": 540
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 775
+                                    },
+                                    {
+                                        "x": 1287.5,
+                                        "y": 770
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813093015-u6bopdt",
+                            "w": "20230805222417-2lj3dvk",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 351.68918918918916,
+                                        "y": 540
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 905
+                                    },
+                                    {
+                                        "x": 500,
+                                        "y": 905
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813013559-sgbzl5k",
+                            "w": "20200813131152-0wk5akh",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1318.75,
+                                        "y": 50
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 35
+                                    },
+                                    {
+                                        "x": 1162.5,
+                                        "y": 30
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20200813013559-sgbzl5k",
+                            "w": "20200905090211-2vixtlf",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1450,
+                                        "y": 55
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 55
+                                    },
+                                    {
+                                        "x": 1579.1666666666667,
+                                        "y": 80
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20201117101902-2ewjjum",
+                            "w": "20201222093044-rx4zjoy",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1200,
+                                        "y": 155
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 155
+                                    },
+                                    {
+                                        "x": 1250,
+                                        "y": 155
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20210615211733-v6rzowm",
+                            "w": "20220628204444-9n0y9h2",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1450,
+                                        "y": 595
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 595
+                                    },
+                                    {
+                                        "x": 1537.5,
+                                        "y": 590
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20210615211733-v6rzowm",
+                            "w": "20200915214115-42b8zma",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1354.4642857142858,
+                                        "y": 590
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 455
+                                    },
+                                    {
+                                        "x": 1537.5,
+                                        "y": 460
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20210615211733-v6rzowm",
+                            "w": "20230808120347-3cob0nb",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1357.8125,
+                                        "y": 600
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 675
+                                    },
+                                    {
+                                        "x": 1579.1666666666667,
+                                        "y": 650
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20210824201257-cy7icrc",
+                            "w": "20230506210010-houyyvy",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1412.5,
+                                        "y": 390
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 395
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 395
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230106101434-e6g4av3",
+                            "w": "20200813093015-u6bopdt",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1537.5,
+                                        "y": 700
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 600,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 475,
+                                        "y": 695
+                                    },
+                                    {
+                                        "x": 353.90625,
+                                        "y": 540
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230506210010-houyyvy",
+                            "w": "20210824201257-cy7icrc",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1579.1666666666667,
+                                        "y": 390
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 365
+                                    },
+                                    {
+                                        "x": 1381.25,
+                                        "y": 380
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230805230131-sn7obzb",
+                            "w": "20230808120347-pzvmkik",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1450,
+                                        "y": 765
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 765
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 765
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230805222417-2lj3dvk",
+                            "w": "20230805225107-qm1m2f5",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 607.8125,
+                                        "y": 900
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 850,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 1000,
+                                        "y": 825
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230805222417-2lj3dvk",
+                            "w": "20230808120348-orm8sjf",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 620.8333333333334,
+                                        "y": 910
+                                    },
+                                    {
+                                        "x": 725,
+                                        "y": 935
+                                    },
+                                    {
+                                        "x": 750,
+                                        "y": 935
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20201222093044-rx4zjoy",
+                            "w": "20201222095049-hghafhe",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1450,
+                                        "y": 155
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 155
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 155
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20220628204444-9n0y9h2",
+                            "w": "20210615211733-v6rzowm",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1568.75,
+                                        "y": 580
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 565
+                                    },
+                                    {
+                                        "x": 1370.8333333333333,
+                                        "y": 590
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120347-3cob0nb",
+                            "w": "20210615211733-v6rzowm",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1579.1666666666667,
+                                        "y": 640
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 615
+                                    },
+                                    {
+                                        "x": 1381.25,
+                                        "y": 600
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230805225107-qm1m2f5",
+                            "w": "20230805230218-aea8icj",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1200,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 825
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 825
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230805225107-qm1m2f5",
+                            "w": "20230805230131-sn7obzb",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1107.8125,
+                                        "y": 820
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 745
+                                    },
+                                    {
+                                        "x": 1318.75,
+                                        "y": 760
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "w": "20230808120347-3cob0nb",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 852.1551724137931,
+                                        "y": 930
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 645
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 645
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 645
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 645
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 645
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 645
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "w": "20230808120348-hynr7og",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 862.5,
+                                        "y": 930
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 885
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 885
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 885
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 885
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 885
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 885
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "w": "20230808120348-vaxi6eq",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 912.5,
+                                        "y": 940
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 945
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 945
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 945
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 945
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 945
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 945
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "w": "20230808120348-lgcp9zm",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 851.7361111111111,
+                                        "y": 930
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 575
+                                    },
+                                    {
+                                        "x": 1000,
+                                        "y": 575
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "w": "20230808120347-mw3qrwy",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 858.9285714285714,
+                                        "y": 940
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 1005
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 1005
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 1005
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 1005
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 1005
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 1005
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-orm8sjf",
+                            "w": "20230808120348-yut741f",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 854.8076923076923,
+                                        "y": 940
+                                    },
+                                    {
+                                        "x": 975,
+                                        "y": 1065
+                                    },
+                                    {
+                                        "x": 1100,
+                                        "y": 1065
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 1065
+                                    },
+                                    {
+                                        "x": 1350,
+                                        "y": 1065
+                                    },
+                                    {
+                                        "x": 1475,
+                                        "y": 1065
+                                    },
+                                    {
+                                        "x": 1500,
+                                        "y": 1065
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "v": "20230808120348-lgcp9zm",
+                            "w": "20210615211733-v6rzowm",
+                            "value": {
+                                "points": [
+                                    {
+                                        "x": 1200,
+                                        "y": 575
+                                    },
+                                    {
+                                        "x": 1225,
+                                        "y": 575
+                                    },
+                                    {
+                                        "x": 1318.75,
+                                        "y": 590
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "value": {
+                        "rankdir": "LR",
+                        "ranker": "longest-path",
+                        "width": 1700,
+                        "height": 1130
+                    }
+                };
+
+                console.log(dagreLayout);
+
+                const option: ECOption = {
+                    title: {
+                        text: "Les Miserables",
+                        subtext: "Default layout",
+                        top: "bottom",
+                        left: "right",
+                    },
+                    tooltip: {},
+                    animationDuration: 1500,
+                    animationEasingUpdate: "quinticInOut",
+                    series: [
+                        {
+                            name: "Les Miserables",
+                            type: "graph",
+                            layout: "none",
+                            edgeSymbol: ["none", "arrow"],
+                            draggable: true,
+                            roam: true,
+                            label: {
+                                show: true,
+                            },
+                            data: dagreLayout.nodes.map((x: any) => {
+                                return { id: x.v, name: x.value.label, x: x.value.x, y: x.value.y };
+                            }),
+                            links: dagreLayout.edges.map((x: any) => {
+                                return { source: x.v, target: x.w };
+                            }),
+                        },
+                    ],
+                };
+
+                console.log(option);
+
+                myChart.setOption(option);
             },
             destroy() {
                 console.log("destroy dock:", DOCK_TYPE);
             }
         });
 
+
+
+
+
         const textareaElement = document.createElement("textarea");
         this.setting = new Setting({
             confirmCallback: () => {
-                this.saveData(STORAGE_NAME, {readonlyText: textareaElement.value});
+                this.saveData(STORAGE_NAME, { readonlyText: textareaElement.value });
             }
         });
         this.setting.addItem({
@@ -165,15 +1951,6 @@ export default class PluginSample extends Plugin {
             actionElement: btnaElement,
         });
 
-        this.protyleSlash = [{
-            filter: ["insert emoji 😊", "插入表情 😊", "crbqwx"],
-            html: `<div class="b3-list-item__first"><span class="b3-list-item__text">${this.i18n.insertEmoji}</span><span class="b3-list-item__meta">😊</span></div>`,
-            id: "insertEmoji",
-            callback(protyle: Protyle) {
-                protyle.insert("😊");
-            }
-        }];
-
         console.log(this.i18n.helloPlugin);
     }
 
@@ -184,452 +1961,5 @@ export default class PluginSample extends Plugin {
 
     onunload() {
         console.log(this.i18n.byePlugin);
-    }
-
-    /* 自定义设置
-    openSetting() {
-        const dialog = new Dialog({
-            title: this.name,
-            content: `<div class="b3-dialog__content"><textarea class="b3-text-field fn__block" placeholder="readonly text in the menu"></textarea></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${this.i18n.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${this.i18n.save}</button>
-</div>`,
-            width: this.isMobile ? "92vw" : "520px",
-        });
-        const inputElement = dialog.element.querySelector("textarea");
-        inputElement.value = this.data[STORAGE_NAME].readonlyText;
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-        dialog.bindInput(inputElement, () => {
-            (btnsElement[1] as HTMLButtonElement).click();
-        });
-        inputElement.focus();
-        btnsElement[0].addEventListener("click", () => {
-            dialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            this.saveData(STORAGE_NAME, {readonlyText: inputElement.value});
-            dialog.destroy();
-        });
-    }
-    */
-
-    private eventBusLog({detail}: any) {
-        console.log(detail);
-    }
-
-    private blockIconEvent({detail}: any) {
-        const ids: string[] = [];
-        detail.menu.addItem({
-            iconHTML: "",
-            label: this.i18n.removeSpace,
-            click: () => {
-                const doOperations: IOperation[] = []
-                detail.blockElements.forEach((item: HTMLElement) => {
-                    const editElement = item.querySelector('[contenteditable="true"]');
-                    if (editElement) {
-                        editElement.textContent = editElement.textContent.replace(/ /g, "");
-                        doOperations.push({
-                            id: item.dataset.nodeId,
-                            data: item.outerHTML,
-                            action: "update"
-                        });
-                    }
-                });
-                detail.protyle.getInstance().transaction(doOperations);
-            }
-        });
-    }
-
-    private showDialog() {
-        const dialog = new Dialog({
-            title: "Info",
-            content: `<div class="b3-dialog__content">
-    <div>API demo:</div>
-    <div class="fn__hr"></div>
-    <div class="plugin-sample__time">System current time: <span id="time"></span></div>
-    <div class="fn__hr"></div>
-    <div class="fn__hr"></div>
-    <div>Protyle demo:</div>
-    <div class="fn__hr"></div>
-    <div id="protyle" style="height: 360px;"></div>
-</div>`,
-            width: this.isMobile ? "92vw" : "560px",
-            height: "540px",
-        });
-        new Protyle(this.app, dialog.element.querySelector("#protyle"), {
-            blockId: "20200812220555-lj3enxa",
-        });
-        fetchPost("/api/system/currentTime", {}, (response) => {
-            dialog.element.querySelector("#time").innerHTML = new Date(response.data).toString();
-        });
-    }
-
-    private addMenu(rect?: DOMRect) {
-        const menu = new Menu("topBarSample", () => {
-            console.log(this.i18n.byeMenu);
-        });
-        menu.addItem({
-            icon: "iconInfo",
-            label: "Dialog(open help first)",
-            accelerator: this.commands[0].customHotkey,
-            click: () => {
-                this.showDialog();
-            }
-        });
-        if (!this.isMobile) {
-            menu.addItem({
-                icon: "iconFace",
-                label: "Open Custom Tab",
-                click: () => {
-                    const tab = openTab({
-                        app: this.app,
-                        custom: {
-                            icon: "iconFace",
-                            title: "Custom Tab",
-                            data: {
-                                text: "This is my custom tab",
-                            },
-                            id: this.name + TAB_TYPE
-                        },
-                    });
-                    console.log(tab);
-                }
-            });
-            menu.addItem({
-                icon: "iconImage",
-                label: "Open Asset Tab(open help first)",
-                click: () => {
-                    const tab = openTab({
-                        app: this.app,
-                        asset: {
-                            path: "assets/paragraph-20210512165953-ag1nib4.svg"
-                        }
-                    });
-                    console.log(tab);
-                }
-            });
-            menu.addItem({
-                icon: "iconFile",
-                label: "Open Doc Tab(open help first)",
-                click: async () => {
-                    const tab = await openTab({
-                        app: this.app,
-                        doc: {
-                            id: "20200812220555-lj3enxa",
-                        }
-                    });
-                    console.log(tab);
-                }
-            });
-            menu.addItem({
-                icon: "iconSearch",
-                label: "Open Search Tab",
-                click: () => {
-                    const tab = openTab({
-                        app: this.app,
-                        search: {
-                            k: "SiYuan"
-                        }
-                    });
-                    console.log(tab);
-                }
-            });
-            menu.addItem({
-                icon: "iconRiffCard",
-                label: "Open Card Tab",
-                click: () => {
-                    const tab = openTab({
-                        app: this.app,
-                        card: {
-                            type: "all"
-                        }
-                    });
-                    console.log(tab);
-                }
-            });
-            menu.addItem({
-                icon: "iconLayout",
-                label: "Open Float Layer(open help first)",
-                click: () => {
-                    this.addFloatLayer({
-                        ids: ["20210428212840-8rqwn5o", "20201225220955-l154bn4"],
-                        defIds: ["20230415111858-vgohvf3", "20200813131152-0wk5akh"],
-                        x: window.innerWidth - 768 - 120,
-                        y: 32
-                    });
-                }
-            });
-            menu.addItem({
-                icon: "iconOpenWindow",
-                label: "Open Doc Window(open help first)",
-                click: () => {
-                    openWindow({
-                        doc: {id: "20200812220555-lj3enxa"}
-                    });
-                }
-            });
-        }
-        menu.addItem({
-            icon: "iconScrollHoriz",
-            label: "Event Bus",
-            type: "submenu",
-            submenu: [{
-                icon: "iconSelect",
-                label: "On ws-main",
-                click: () => {
-                    this.eventBus.on("ws-main", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off ws-main",
-                click: () => {
-                    this.eventBus.off("ws-main", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On click-blockicon",
-                click: () => {
-                    this.eventBus.on("click-blockicon", this.blockIconEventBindThis);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off click-blockicon",
-                click: () => {
-                    this.eventBus.off("click-blockicon", this.blockIconEventBindThis);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On click-pdf",
-                click: () => {
-                    this.eventBus.on("click-pdf", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off click-pdf",
-                click: () => {
-                    this.eventBus.off("click-pdf", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On click-editorcontent",
-                click: () => {
-                    this.eventBus.on("click-editorcontent", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off click-editorcontent",
-                click: () => {
-                    this.eventBus.off("click-editorcontent", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On click-editortitleicon",
-                click: () => {
-                    this.eventBus.on("click-editortitleicon", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off click-editortitleicon",
-                click: () => {
-                    this.eventBus.off("click-editortitleicon", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-noneditableblock",
-                click: () => {
-                    this.eventBus.on("open-noneditableblock", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-noneditableblock",
-                click: () => {
-                    this.eventBus.off("open-noneditableblock", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On loaded-protyle",
-                click: () => {
-                    this.eventBus.on("loaded-protyle", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off loaded-protyle",
-                click: () => {
-                    this.eventBus.off("loaded-protyle", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On loaded-protyle-dynamic",
-                click: () => {
-                    this.eventBus.on("loaded-protyle-dynamic", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off loaded-protyle-dynamic",
-                click: () => {
-                    this.eventBus.off("loaded-protyle-dynamic", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On destroy-protyle",
-                click: () => {
-                    this.eventBus.on("destroy-protyle", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off destroy-protyle",
-                click: () => {
-                    this.eventBus.off("destroy-protyle", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-blockref",
-                click: () => {
-                    this.eventBus.on("open-menu-blockref", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-blockref",
-                click: () => {
-                    this.eventBus.off("open-menu-blockref", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-fileannotationref",
-                click: () => {
-                    this.eventBus.on("open-menu-fileannotationref", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-fileannotationref",
-                click: () => {
-                    this.eventBus.off("open-menu-fileannotationref", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-tag",
-                click: () => {
-                    this.eventBus.on("open-menu-tag", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-tag",
-                click: () => {
-                    this.eventBus.off("open-menu-tag", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-link",
-                click: () => {
-                    this.eventBus.on("open-menu-link", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-link",
-                click: () => {
-                    this.eventBus.off("open-menu-link", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-image",
-                click: () => {
-                    this.eventBus.on("open-menu-image", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-image",
-                click: () => {
-                    this.eventBus.off("open-menu-image", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-av",
-                click: () => {
-                    this.eventBus.on("open-menu-av", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-av",
-                click: () => {
-                    this.eventBus.off("open-menu-av", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-content",
-                click: () => {
-                    this.eventBus.on("open-menu-content", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-content",
-                click: () => {
-                    this.eventBus.off("open-menu-content", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-menu-breadcrumbmore",
-                click: () => {
-                    this.eventBus.on("open-menu-breadcrumbmore", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-menu-breadcrumbmore",
-                click: () => {
-                    this.eventBus.off("open-menu-breadcrumbmore", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On input-search",
-                click: () => {
-                    this.eventBus.on("input-search", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off input-search",
-                click: () => {
-                    this.eventBus.off("input-search", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-siyuan-url-plugin",
-                click: () => {
-                    this.eventBus.on("open-siyuan-url-plugin", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-siyuan-url-plugin",
-                click: () => {
-                    this.eventBus.off("open-siyuan-url-plugin", this.eventBusLog);
-                }
-            }, {
-                icon: "iconSelect",
-                label: "On open-siyuan-url-block",
-                click: () => {
-                    this.eventBus.on("open-siyuan-url-block", this.eventBusLog);
-                }
-            }, {
-                icon: "iconClose",
-                label: "Off open-siyuan-url-block",
-                click: () => {
-                    this.eventBus.off("open-siyuan-url-block", this.eventBusLog);
-                }
-            }]
-        });
-        menu.addSeparator();
-        menu.addItem({
-            icon: "iconSparkles",
-            label: this.data[STORAGE_NAME].readonlyText || "Readonly",
-            type: "readonly",
-        });
-        if (this.isMobile) {
-            menu.fullscreen();
-        } else {
-            menu.open({
-                x: rect.right,
-                y: rect.bottom,
-                isLeft: true,
-            });
-        }
     }
 }
