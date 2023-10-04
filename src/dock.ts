@@ -1,0 +1,116 @@
+import { enhancedGraph } from "./graph";
+import { pluginSetting } from "./settings";
+import { i18n, plugin, isMobile } from "./utils";
+import { adaptHotkey, fetchSyncPost } from "siyuan";
+
+import "./index.scss";
+const DOCK_TYPE = "dock_tab";
+
+interface GraphData {
+    links: { from: string, to: string }[]
+    nodes: { id: string, label: string }[]
+}
+
+//const eventBus: EventBus = new EventBus();
+
+export function initDock() {
+    const dockHtml = `<div class="fn__flex-1 fn__flex-column">
+    <div class="block__icons">
+        <div class="block__logo">
+            <svg><use xlink:href="#iconM"></use></svg>
+            ${i18n.pluginName}
+        </div>
+        <span class="fn__flex-1 fn__space"></span>
+        <span id="graph_enhance_refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="刷新"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+        <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
+    </div>
+    <div class="fn__flex-1 plugin-sample__custom-dock">
+    <div id="graph_enhance_container" style="position:absolute;width:100%;height:100%;" ></div>
+    </div>
+    </div>`;
+
+    plugin.addDock({
+        config: {
+            position: "LeftBottom",
+            size: { width: 300, height: 500 },
+            icon: "iconM",
+            title: i18n.pluginName,
+        },
+        data: {
+            text: "graph-enhance-hello-world"
+        },
+        type: DOCK_TYPE,
+        init() {
+            this.element.innerHTML = dockHtml;
+            //eventBus.emit("ws-main", "hello world event bus");
+
+            document.getElementById("graph_enhance_refresh").onclick = async () => {
+                const curDocId = getDocid();
+                if (!curDocId)
+                    return;
+
+                const graphData: GraphData = await getGraphData();
+                enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                enhancedGraph.processGraph(curDocId);
+                enhancedGraph.Display();
+            };
+
+            enhancedGraph.init();
+            pluginSetting.init();
+        },
+        resize() {
+            const container = document.getElementById("graph_enhance_container");
+            enhancedGraph.resize({
+                width: container.offsetWidth,
+                height: container.offsetHeight
+            });
+        },
+        destroy() {
+            console.log("destroy dock:", DOCK_TYPE);
+        }
+    });
+}
+
+//获取当前文档id
+function getDocid() {
+    if (isMobile)
+        return document.querySelector("#editor .protyle-content .protyle-background")?.getAttribute("data-node-id");
+    else
+        return document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background")?.getAttribute("data-node-id");
+}
+
+
+async function getGraphData() {
+    const param = {
+        "conf": {
+            "d3": {
+                "arrow": true,
+                "centerStrength": 0.015,
+                "collideRadius": 600,
+                "collideStrength": 0.08,
+                "lineOpacity": 0.36,
+                "linkDistance": 400,
+                "linkWidth": 8,
+                "nodeSize": 16
+            },
+            "dailyNote": false,
+            "minRefs": 0,
+            "type": {
+                "blockquote": false,
+                "code": false,
+                "heading": false,
+                "list": false,
+                "listItem": false,
+                "math": false,
+                "paragraph": false,
+                "super": false,
+                "table": false,
+                "tag": false
+            }
+        },
+        "k": "",
+        "reqId": 1696411473563
+    };
+
+    return (await fetchSyncPost("api/graph/getGraph", param)).data;
+}

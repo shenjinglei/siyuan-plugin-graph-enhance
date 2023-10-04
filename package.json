@@ -12,6 +12,7 @@
   "author": "Vanessa",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.8.2",
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.29.0",
     "copy-webpack-plugin": "^11.0.0",
@@ -29,6 +30,7 @@
     "zip-webpack-plugin": "^4.0.1"
   },
   "dependencies": {
+    "dagre": "^0.8.5",
     "echarts": "^5.4.3"
   }
 }
