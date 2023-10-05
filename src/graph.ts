@@ -1,4 +1,5 @@
 import * as echarts from "echarts/core";
+import { pluginSetting } from "./settings";
 import { CanvasRenderer } from "echarts/renderers";
 import {
     GraphChart,
@@ -40,7 +41,8 @@ class EnhancedGraph {
 
     public processGraph(sourceNodeId: string) {
         this.processedGraph = new graphlib.Graph();
-        this.processedGraph.setGraph({ rankdir: "LR", ranker: "longest-path" });
+        console.log(pluginSetting.getSetting("direction"));
+        this.processedGraph.setGraph({ rankdir: pluginSetting.getSetting("direction"), ranker: "longest-path" });
         this.processedGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
 
         const q = [];
@@ -70,18 +72,12 @@ class EnhancedGraph {
         const dagreLayout = dagre.graphlib.json.write(this.processedGraph);
 
         const option: ECOption = {
-            title: {
-                text: "Les Miserables",
-                subtext: "Default layout",
-                top: "bottom",
-                left: "right",
-            },
             tooltip: {},
             animationDuration: 1500,
             animationEasingUpdate: "quinticInOut",
             series: [
                 {
-                    name: "Les Miserables",
+                    name: "graph",
                     type: "graph",
                     layout: "none",
                     edgeSymbol: ["none", "arrow"],
