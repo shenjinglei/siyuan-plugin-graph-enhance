@@ -169,6 +169,8 @@ class EnhancedGraph {
 
         const dagreLayout = dagre.graphlib.json.write(this.processedGraph);
 
+        this.myChart.dispose();
+        this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
         const option: ECOption = {
             tooltip: {},
             animationDuration: 1500,

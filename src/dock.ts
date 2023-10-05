@@ -34,7 +34,7 @@ export function initDock() {
 
     plugin.addDock({
         config: {
-            position: "LeftBottom",
+            position: "RightTop",
             size: { width: 300, height: 500 },
             icon: "iconM",
             title: i18n.pluginName,
