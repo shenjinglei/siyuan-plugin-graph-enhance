@@ -9,13 +9,14 @@ class PluginSetting {
     }
 
     public init() {
-        plugin.data[STORAGE_NAME] = { direction: "LR" };
+        plugin.data[STORAGE_NAME] = { rankdir: "LR", ranker: "longest-path" };
 
         plugin.setting = new Setting({
             confirmCallback: () => {
                 plugin.saveData(STORAGE_NAME,
                     {
-                        direction: directionElement.options[directionElement.selectedIndex].value
+                        rankdir: directionElement.options[directionElement.selectedIndex].value,
+                        ranker: algorithmElement.options[algorithmElement.selectedIndex].value
                     });
             }
         });
@@ -27,10 +28,23 @@ class PluginSetting {
         directionElement.add(new Option("Top -> Bottom", "TB"));
         directionElement.add(new Option("Bottom -> Top", "BT"));
         plugin.setting.addItem({
-            title: "Direction",
+            title: "布局方向",
             createActionElement: () => {
-                directionElement.value = plugin.data[STORAGE_NAME].direction;
+                directionElement.value = plugin.data[STORAGE_NAME].rankdir;
                 return directionElement;
+            },
+        });
+
+        const algorithmElement = document.createElement("select");
+        algorithmElement.id = "algorithm";
+        algorithmElement.add(new Option("network-simplex", "network-simplex"));
+        algorithmElement.add(new Option("tight-tree", "tight-tree"));
+        algorithmElement.add(new Option("longest-path", "longest-path"));
+        plugin.setting.addItem({
+            title: "布局算法",
+            createActionElement: () => {
+                algorithmElement.value = plugin.data[STORAGE_NAME].ranker;
+                return algorithmElement;
             },
         });
 

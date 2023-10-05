@@ -21,6 +21,9 @@ export function initDock() {
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
+        <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="全局图"><svg><use xlink:href="#iconLanguage"></use></svg></span>
+        <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="纵向图"><svg><use xlink:href="#iconGraph"></use></svg></span>
+        <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="横向图"><svg><use xlink:href="#iconWorkspace"></use></svg></span>
         <span id="graph_enhance_refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="刷新"><svg><use xlink:href="#iconRefresh"></use></svg></span>
         <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
@@ -42,16 +45,56 @@ export function initDock() {
         type: DOCK_TYPE,
         init() {
             this.element.innerHTML = dockHtml;
-            //eventBus.emit("ws-main", "hello world event bus");
 
             document.getElementById("graph_enhance_refresh").onclick = async () => {
                 const curDocId = getDocid();
-                if (!curDocId)
-                    return;
+                if (curDocId)
+                    enhancedGraph.sourceNodeId = curDocId;
 
                 const graphData: GraphData = await getGraphData();
                 enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
-                enhancedGraph.processGraph(curDocId);
+                enhancedGraph.Display();
+            };
+
+            document.getElementById("graph_enhance_global").onclick = async () => {
+                const curDocId = getDocid();
+                if (curDocId)
+                    enhancedGraph.sourceNodeId = curDocId;
+
+                if (!enhancedGraph.rawGraph) {
+                    const graphData: GraphData = await getGraphData();
+                    enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                }
+
+                enhancedGraph.searchMethod = "global";
+                enhancedGraph.Display();
+            };
+
+            document.getElementById("graph_enhance_ancestor").onclick = async () => {
+                const curDocId = getDocid();
+                if (curDocId)
+                    enhancedGraph.sourceNodeId = curDocId;
+
+                if (!enhancedGraph.rawGraph) {
+                    const graphData: GraphData = await getGraphData();
+                    enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                }
+
+                enhancedGraph.searchMethod = "ancestor";
+                enhancedGraph.Display();
+            };
+
+            document.getElementById("graph_enhance_brother").onclick = async () => {
+                const curDocId = getDocid();
+                if (curDocId)
+                    enhancedGraph.sourceNodeId = curDocId;
+
+                if (!enhancedGraph.rawGraph) {
+                    const graphData: GraphData = await getGraphData();
+                    enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                }
+
+                enhancedGraph.searchMethod = "brother";
                 enhancedGraph.Display();
             };
 
@@ -108,8 +151,7 @@ async function getGraphData() {
                 "tag": false
             }
         },
-        "k": "",
-        "reqId": 1696411473563
+        "k": ""
     };
 
     return (await fetchSyncPost("api/graph/getGraph", param)).data;

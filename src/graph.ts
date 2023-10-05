@@ -26,6 +26,8 @@ class EnhancedGraph {
     myChart: echarts.ECharts;
     rawGraph: any;
     processedGraph: any;
+    public sourceNodeId: string;
+    public searchMethod = "ancestor";
 
     public resize(param: { width: number, height: number }) {
         this.myChart.resize(param);
@@ -34,19 +36,39 @@ class EnhancedGraph {
     public initRawGraph(nodes: { id: string; label: string; }[], edges: { from: string; to: string; }[]) {
         this.rawGraph = new graphlib.Graph();
         this.rawGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
-        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 10 }));
+        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
         edges.map((x: { from: string; to: string; }) => this.rawGraph.setEdge(x.from, x.to));
         console.log(this.rawGraph);
     }
 
-    public processGraph(sourceNodeId: string) {
+    public processGraph() {
+        switch (this.searchMethod) {
+            case "ancestor":
+                this.getAncestorGraph();
+                break;
+            case "brother":
+                this.getBrotherGraph();
+                break;
+            case "global":
+                this.getGlobalGraph();
+                break;
+            default:
+                this.getAncestorGraph();
+                break;
+        }
+    }
+
+    private initProcessedGraph() {
         this.processedGraph = new graphlib.Graph();
-        console.log(pluginSetting.getSetting("direction"));
-        this.processedGraph.setGraph({ rankdir: pluginSetting.getSetting("direction"), ranker: "longest-path" });
+        this.processedGraph.setGraph({ rankdir: pluginSetting.getSetting("rankdir"), ranker: pluginSetting.getSetting("ranker") });
         this.processedGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
+    }
+
+    public getAncestorGraph() {
+        this.initProcessedGraph();
 
         const q = [];
-        q.push(sourceNodeId);
+        q.push(this.sourceNodeId);
         while (q.length > 0) {
             const cur = q.shift();
             if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
@@ -58,7 +80,80 @@ class EnhancedGraph {
             });
         }
 
-        console.log(this.processedGraph);
+        const sourceInEdges = this.rawGraph.inEdges(this.sourceNodeId);
+        console.log("source in edges");
+        console.log(sourceInEdges);
+        sourceInEdges.map((x: any) => {
+            this.processedGraph.setEdge(x.v, x.w);
+            q.push(x.v);
+        });
+        while (q.length > 0) {
+            const cur = q.shift();
+            if (cur != this.sourceNodeId && this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
+            this.insertToGraph(cur);
+            const inEdges = this.rawGraph.inEdges(cur);
+            inEdges.map((x: any) => {
+                this.processedGraph.setEdge(x.v, x.w);
+                q.push(x.v);
+            });
+        }
+    }
+
+    public getBrotherGraph() {
+        this.initProcessedGraph();
+
+        const q: string[] = [];
+        this.insertToGraph(this.sourceNodeId);
+        const sourceOutEdges = this.rawGraph.outEdges(this.sourceNodeId);
+        sourceOutEdges.map((x: any) => {
+            this.processedGraph.setEdge(x.v, x.w);
+            q.push(x.w);
+        });
+        while (q.length > 0) {
+            const cur = q.shift();
+            this.insertToGraph(cur);
+            const inEdges = this.rawGraph.inEdges(cur);
+            inEdges.map((x: any) => {
+                this.processedGraph.setEdge(x.v, x.w);
+                this.insertToGraph(x.v);
+            });
+        }
+        const sourceInEdges = this.rawGraph.inEdges(this.sourceNodeId);
+        sourceInEdges.map((x: any) => {
+            this.processedGraph.setEdge(x.v, x.w);
+            q.push(x.v);
+        });
+        while (q.length > 0) {
+            const cur = q.shift();
+            this.insertToGraph(cur);
+            const outEdges = this.rawGraph.outEdges(cur);
+            outEdges.map((x: any) => {
+                this.processedGraph.setEdge(x.v, x.w);
+                this.insertToGraph(x.w);
+            });
+        }
+    }
+
+    public getGlobalGraph() {
+        this.initProcessedGraph();
+
+        const q = [];
+        q.push(this.sourceNodeId);
+        while (q.length > 0) {
+            const cur = q.shift();
+            if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
+            this.insertToGraph(cur);
+            const outEdges = this.rawGraph.outEdges(cur);
+            outEdges.map((x: any) => {
+                this.processedGraph.setEdge(x.v, x.w);
+                q.push(x.w);
+            });
+            const inEdges = this.rawGraph.inEdges(cur);
+            inEdges.map((x: any) => {
+                this.processedGraph.setEdge(x.v, x.w);
+                q.push(x.v);
+            });
+        }
     }
 
     private insertToGraph = (node: string) => {
@@ -67,6 +162,9 @@ class EnhancedGraph {
     };
 
     public Display() {
+        if (!this.sourceNodeId || this.sourceNodeId == "")
+            return;
+        this.processGraph();
         dagre.layout(this.processedGraph);
 
         const dagreLayout = dagre.graphlib.json.write(this.processedGraph);
@@ -87,6 +185,13 @@ class EnhancedGraph {
                         show: true,
                     },
                     data: dagreLayout.nodes.map((x: any) => {
+                        if (x.v === this.sourceNodeId) {
+                            return {
+                                id: x.v, name: x.value.label, x: x.value.x, y: x.value.y, itemStyle: {
+                                    color: "rgba(205, 112, 112, 1)"
+                                }
+                            };
+                        }
                         return { id: x.v, name: x.value.label, x: x.value.x, y: x.value.y };
                     }),
                     links: dagreLayout.edges.map((x: any) => {
@@ -96,6 +201,7 @@ class EnhancedGraph {
             ],
         };
 
+        console.log(option);
         this.myChart.setOption(option);
     }
 
