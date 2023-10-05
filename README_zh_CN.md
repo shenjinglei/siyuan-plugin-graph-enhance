@@ -6,7 +6,7 @@
 
 启用本插件后，会在左下方添加一个侧边栏，打开侧边栏后点击右上方的功能按钮，插件会根据当前文档（需要选中当前文档 tab 页）绘制关系图并展示在该侧边栏中。
 例如，选中思源用户指南中的【请从这里开始】，再点击【关系图增强】中的【全局图】按钮。得到的关系图如下图所示：
-![预览图](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/blob/main/preview.png)
+![预览图](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/raw/main/preview.png)
 
 ## 生成子图分类
 
