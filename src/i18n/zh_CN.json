@@ -12,5 +12,20 @@
   "insertEmoji": "插入表情",
   "removeSpace": "移除空格",
 
-  "pluginName": "关系图增强"
+  "pluginName": "关系图增强",
+  "settingDirTitle": "布局方向",
+  "settingDirLR": "从左向右",
+  "settingDirRL": "从右向左",
+  "settingDirTB": "自顶向下",
+  "settingDirBT": "自底向上",
+  "settingAlgTitle": "布局算法",
+  "settingAlgNS": "网络简单",
+  "settingAlgTT": "紧密树",
+  "settingAlgLP": "最长路径",
+  "settingBtnaTitle": "打开插件网址",
+
+  "dockBtnGlobel": "全局图",
+  "dockBtnAncestor": "纵向图",
+  "dockBtnBrother": "横向图",
+  "dockBtnRefresh": "刷新"
 }

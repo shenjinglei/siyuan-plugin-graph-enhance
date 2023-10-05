@@ -12,5 +12,20 @@
   "insertEmoji": "Insert Emoji",
   "removeSpace": "Remove Space",
 
-  "pluginName": "Enhanced Graph"
+  "pluginName": "Enhanced Graph",
+  "settingDirTitle": "Layout Dirction",
+  "settingDirLR": "Left to Right",
+  "settingDirRL": "Right to Left",
+  "settingDirTB": "Top Down",
+  "settingDirBT": "Bottom Up",
+  "settingAlgTitle": "Layout Algorithm",
+  "settingAlgNS": "network-simplex",
+  "settingAlgTT": "tight-tree",
+  "settingAlgLP": "longest-path",
+  "settingBtnaTitle": "Open Plugin URL",
+
+  "dockBtnGlobel": "Global",
+  "dockBtnAncestor": "Vertical",
+  "dockBtnBrother": "Horizontal",
+  "dockBtnRefresh": "Refresh"
 }

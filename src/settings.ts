@@ -1,4 +1,4 @@
-import { plugin, STORAGE_NAME } from "./utils";
+import { i18n, plugin, STORAGE_NAME } from "./utils";
 import {
     Setting
 } from "siyuan";
@@ -23,12 +23,12 @@ class PluginSetting {
 
         const directionElement = document.createElement("select");
         directionElement.id = "direction";
-        directionElement.add(new Option("Left -> Right", "LR"));
-        directionElement.add(new Option("Right -> Left", "RL"));
-        directionElement.add(new Option("Top -> Bottom", "TB"));
-        directionElement.add(new Option("Bottom -> Top", "BT"));
+        directionElement.add(new Option(i18n.settingDirLR, "LR"));
+        directionElement.add(new Option(i18n.settingDirRL, "RL"));
+        directionElement.add(new Option(i18n.settingDirTB, "TB"));
+        directionElement.add(new Option(i18n.settingDirBT, "BT"));
         plugin.setting.addItem({
-            title: "布局方向",
+            title: i18n.settingDirTitle,
             createActionElement: () => {
                 directionElement.value = plugin.data[STORAGE_NAME].rankdir;
                 return directionElement;
@@ -37,11 +37,11 @@ class PluginSetting {
 
         const algorithmElement = document.createElement("select");
         algorithmElement.id = "algorithm";
-        algorithmElement.add(new Option("network-simplex", "network-simplex"));
-        algorithmElement.add(new Option("tight-tree", "tight-tree"));
-        algorithmElement.add(new Option("longest-path", "longest-path"));
+        algorithmElement.add(new Option(i18n.settingAlgNS, "network-simplex"));
+        algorithmElement.add(new Option(i18n.settingAlgTT, "tight-tree"));
+        algorithmElement.add(new Option(i18n.settingAlgLP, "longest-path"));
         plugin.setting.addItem({
-            title: "布局算法",
+            title: i18n.settingAlgTitle,
             createActionElement: () => {
                 algorithmElement.value = plugin.data[STORAGE_NAME].ranker;
                 return algorithmElement;
@@ -55,8 +55,7 @@ class PluginSetting {
             window.open("https://github.com/shenjinglei/siyuan-plugin-graph-enhance");
         });
         plugin.setting.addItem({
-            title: "Open plugin url",
-            description: "Open plugin url in browser",
+            title: i18n.settingBtnaTitle,
             actionElement: btnaElement,
         });
     }
