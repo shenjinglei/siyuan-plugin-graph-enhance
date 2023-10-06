@@ -9,14 +9,13 @@ class PluginSetting {
     }
 
     public init() {
-        plugin.data[STORAGE_NAME] = { rankdir: "LR", ranker: "longest-path" };
-
         plugin.setting = new Setting({
             confirmCallback: () => {
                 plugin.saveData(STORAGE_NAME,
                     {
                         rankdir: directionElement.options[directionElement.selectedIndex].value,
-                        ranker: algorithmElement.options[algorithmElement.selectedIndex].value
+                        ranker: algorithmElement.options[algorithmElement.selectedIndex].value,
+                        dailynoteExcluded: dailynoteExcludedElement.options[dailynoteExcludedElement.selectedIndex].value
                     });
             }
         });
@@ -48,9 +47,21 @@ class PluginSetting {
             },
         });
 
+        const dailynoteExcludedElement = document.createElement("select");
+        dailynoteExcludedElement.id = "dailynoteExcluded";
+        dailynoteExcludedElement.add(new Option(i18n.yes, "true"));
+        dailynoteExcludedElement.add(new Option(i18n.no, "false"));
+        plugin.setting.addItem({
+            title: i18n.settingDailynoteExcluded,
+            createActionElement: () => {
+                dailynoteExcludedElement.value = plugin.data[STORAGE_NAME].dailynoteExcluded;
+                return dailynoteExcludedElement;
+            },
+        });
+
         const btnaElement = document.createElement("button");
         btnaElement.className = "b3-button b3-button--outline fn__flex-center fn__size200";
-        btnaElement.textContent = "Open";
+        btnaElement.textContent = i18n.open;
         btnaElement.addEventListener("click", () => {
             window.open("https://github.com/shenjinglei/siyuan-plugin-graph-enhance");
         });

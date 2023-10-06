@@ -23,6 +23,10 @@
   "settingAlgTT": "紧密树",
   "settingAlgLP": "最长路径",
   "settingBtnaTitle": "打开插件网址",
+  "settingDailynoteExcluded": "是否排除Dailynote",
+  "yes": "是",
+  "no": "否",
+  "open": "打开",
 
   "dockBtnGlobel": "全局图",
   "dockBtnAncestor": "纵向图",

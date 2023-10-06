@@ -136,7 +136,7 @@ async function getGraphData() {
                 "linkWidth": 8,
                 "nodeSize": 16
             },
-            "dailyNote": false,
+            "dailyNote": pluginSetting.getSetting("dailynoteExcluded") !== "true",
             "minRefs": 0,
             "type": {
                 "blockquote": false,

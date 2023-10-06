@@ -23,6 +23,10 @@
   "settingAlgTT": "tight-tree",
   "settingAlgLP": "longest-path",
   "settingBtnaTitle": "Open Plugin URL",
+  "settingDailynoteExcluded": "Exclude Dailynote",
+  "yes": "yes",
+  "no": "no",
+  "open": "open",
 
   "dockBtnGlobel": "Global",
   "dockBtnAncestor": "Vertical",

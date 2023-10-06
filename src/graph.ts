@@ -38,7 +38,7 @@ class EnhancedGraph {
         this.rawGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
         nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
         edges.map((x: { from: string; to: string; }) => this.rawGraph.setEdge(x.from, x.to));
-        console.log(this.rawGraph);
+        //console.log(this.rawGraph);
     }
 
     public processGraph() {
@@ -81,8 +81,8 @@ class EnhancedGraph {
         }
 
         const sourceInEdges = this.rawGraph.inEdges(this.sourceNodeId);
-        console.log("source in edges");
-        console.log(sourceInEdges);
+        //console.log("source in edges");
+        //console.log(sourceInEdges);
         sourceInEdges.map((x: any) => {
             this.processedGraph.setEdge(x.v, x.w);
             q.push(x.v);
@@ -164,6 +164,8 @@ class EnhancedGraph {
     public Display() {
         if (!this.sourceNodeId || this.sourceNodeId == "")
             return;
+        if (!this.rawGraph.hasNode(this.sourceNodeId))
+            return;
         this.processGraph();
         dagre.layout(this.processedGraph);
 
@@ -203,7 +205,7 @@ class EnhancedGraph {
             ],
         };
 
-        console.log(option);
+        //console.log(option);
         this.myChart.setOption(option);
     }
 

@@ -18,16 +18,14 @@ export default class GraphEnhancePlugin extends Plugin {
     }
 
     onLayoutReady() {
-        this.loadData(STORAGE_NAME);
+        this.loadData(STORAGE_NAME).then(
+            x => Object.assign(x, { rankdir: "LR", ranker: "longest-path", dailynoteExcluded: "false" })
+        );
         console.log(`frontend: ${getFrontend()}; backend: ${getBackend()}`);
     }
 
     onunload() {
         console.log(this.i18n.byePlugin);
-    }
-
-    private eventBusLog({ detail }: any) {
-        console.log(detail);
     }
 
 }
