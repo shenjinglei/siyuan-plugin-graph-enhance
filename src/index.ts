@@ -14,6 +14,25 @@ export default class GraphEnhancePlugin extends Plugin {
         setI18n(this.i18n);
         setPlugin(this);
         initDock();
+
+        this.addCommand({
+            langKey: "showDialog",
+            hotkey: "⇧⌘O",
+            callback: () => {
+                console.log("showDialog!");
+                console.log(this.getOpenedTab());
+            },
+        });
+
+        this.addCommand({
+            langKey: "getTab",
+            hotkey: "⇧⌘M",
+            globalCallback: () => {
+                console.log("get tab!");
+                console.log(this.getOpenedTab());
+            },
+        });
+
         console.log(this.i18n.helloPlugin);
     }
 

@@ -6,13 +6,6 @@ import { adaptHotkey, fetchSyncPost } from "siyuan";
 import "./index.scss";
 const DOCK_TYPE = "dock_tab";
 
-interface GraphData {
-    links: { from: string, to: string }[]
-    nodes: { id: string, label: string }[]
-}
-
-//const eventBus: EventBus = new EventBus();
-
 export function initDock() {
     const dockHtml = `<div class="fn__flex-1 fn__flex-column">
     <div class="block__icons">
@@ -47,12 +40,7 @@ export function initDock() {
             this.element.innerHTML = dockHtml;
 
             document.getElementById("graph_enhance_refresh").onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    enhancedGraph.sourceNodeId = curDocId;
-
-                const graphData: GraphData = await getGraphData();
-                enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                await refreashGraph();
                 enhancedGraph.Display();
             };
 
@@ -62,8 +50,7 @@ export function initDock() {
                     enhancedGraph.sourceNodeId = curDocId;
 
                 if (!enhancedGraph.rawGraph) {
-                    const graphData: GraphData = await getGraphData();
-                    enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                    await refreashGraph();
                 }
 
                 enhancedGraph.searchMethod = "global";
@@ -76,8 +63,7 @@ export function initDock() {
                     enhancedGraph.sourceNodeId = curDocId;
 
                 if (!enhancedGraph.rawGraph) {
-                    const graphData: GraphData = await getGraphData();
-                    enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                    await refreashGraph();
                 }
 
                 enhancedGraph.searchMethod = "ancestor";
@@ -90,8 +76,7 @@ export function initDock() {
                     enhancedGraph.sourceNodeId = curDocId;
 
                 if (!enhancedGraph.rawGraph) {
-                    const graphData: GraphData = await getGraphData();
-                    enhancedGraph.initRawGraph(graphData.nodes, graphData.links);
+                    await refreashGraph();
                 }
 
                 enhancedGraph.searchMethod = "brother";
@@ -122,37 +107,33 @@ function getDocid() {
         return document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background")?.getAttribute("data-node-id");
 }
 
-
-async function getGraphData() {
-    const param = {
-        "conf": {
-            "d3": {
-                "arrow": true,
-                "centerStrength": 0.015,
-                "collideRadius": 600,
-                "collideStrength": 0.08,
-                "lineOpacity": 0.36,
-                "linkDistance": 400,
-                "linkWidth": 8,
-                "nodeSize": 16
+function refreashGraph() {
+    return new Promise<void>((resolve, reject) => {
+        fetchSyncPost("api/graph/getGraph", {
+            "conf": {
+                "dailyNote": pluginSetting.getSetting("dailynoteExcluded") !== "true",
+                "minRefs": 0,
+                "type": {
+                    "blockquote": false,
+                    "code": false,
+                    "heading": false,
+                    "list": false,
+                    "listItem": false,
+                    "math": false,
+                    "paragraph": false,
+                    "super": false,
+                    "table": false,
+                    "tag": false
+                }
             },
-            "dailyNote": pluginSetting.getSetting("dailynoteExcluded") !== "true",
-            "minRefs": 0,
-            "type": {
-                "blockquote": false,
-                "code": false,
-                "heading": false,
-                "list": false,
-                "listItem": false,
-                "math": false,
-                "paragraph": false,
-                "super": false,
-                "table": false,
-                "tag": false
+            "k": ""
+        }).then(
+            result => {
+                console.log(result);
+                enhancedGraph.initRawGraph(result.data.nodes, result.data.links);
+                resolve();
             }
-        },
-        "k": ""
-    };
+        );
+    });
 
-    return (await fetchSyncPost("api/graph/getGraph", param)).data;
 }

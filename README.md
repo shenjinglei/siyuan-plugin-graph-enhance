@@ -6,16 +6,18 @@
 
 After enabling this plug-in, a sidebar will be added in the right top corner. After opening the sidebar, click the function button in the right top corner. The plug-in will draw a diagram according to the current document and display it in the sidebar.
 For example, select "Start here" in the Siyuan User Guide, and then click the "Global" button in "Diagram Enhance". The resulting relationship diagram is shown in the figure below:
+
 ![preview](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/raw/main/preview.png)
 
-## Graph Classification
+[Manual in Chinese](https://ld246.com/article/1696579047798)
 
-- Global
-  - from the current node, all reachable nodes are collected with ignoring the direction of the edge
-- Vertical
-  - from the current node，all reachable nodes are collected with all dege are forward or reverse.
-- Horizontal
-  - from the current node，all reachable nodes are collected with one forward edge and a reverse edge.
+## Function
+
+- Global Graph
+- Vertical Graph
+- Vertical Graph
+- Jump To Note
+- Setting
 
 ## Settings
 
@@ -31,13 +33,19 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 
 ## Changelog
 
-- v0.0.1
+- v0.1.2
+  - Jump to note
+- v0.1.1
+  - setting: Dailynote exclusion
+- v0.1.0
   - Basic function
 
 ## Planning
 
+- [x] Jump to note
+- [ ] Global Graph Nodes Exclusion
+- [ ] Neighborhood Graph
 - [ ] Color
-- [ ] Jump to note
 
 ## Acknowledge
 

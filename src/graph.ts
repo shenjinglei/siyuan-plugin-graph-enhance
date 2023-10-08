@@ -1,4 +1,6 @@
+import { plugin } from "./utils";
 import * as echarts from "echarts/core";
+import { openTab } from "siyuan";
 import { pluginSetting } from "./settings";
 import { CanvasRenderer } from "echarts/renderers";
 import {
@@ -26,8 +28,8 @@ class EnhancedGraph {
     myChart: echarts.ECharts;
     rawGraph: any;
     processedGraph: any;
-    public sourceNodeId: string;
-    public searchMethod = "ancestor";
+    sourceNodeId: string;
+    searchMethod = "ancestor";
 
     public resize(param: { width: number, height: number }) {
         this.myChart.resize(param);
@@ -66,6 +68,7 @@ class EnhancedGraph {
 
     public getAncestorGraph() {
         this.initProcessedGraph();
+
 
         const q = [];
         q.push(this.sourceNodeId);
@@ -136,10 +139,11 @@ class EnhancedGraph {
 
     public getGlobalGraph() {
         this.initProcessedGraph();
-
+        const nodesMaximun = 200;
+        let count = 0;
         const q = [];
         q.push(this.sourceNodeId);
-        while (q.length > 0) {
+        while (q.length > 0 && count < nodesMaximun) {
             const cur = q.shift();
             if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
             this.insertToGraph(cur);
@@ -153,6 +157,7 @@ class EnhancedGraph {
                 this.processedGraph.setEdge(x.v, x.w);
                 q.push(x.v);
             });
+            count++;
         }
     }
 
@@ -196,7 +201,7 @@ class EnhancedGraph {
                                 }
                             };
                         }
-                        return { id: x.v, name: x.value.label, x: x.value.x, y: x.value.y };
+                        return { id: x.v, name: x.value.label, value: x.v, x: x.value.x, y: x.value.y };
                     }),
                     links: dagreLayout.edges.map((x: any) => {
                         return { source: x.v, target: x.w };
@@ -207,6 +212,10 @@ class EnhancedGraph {
 
         //console.log(option);
         this.myChart.setOption(option);
+        this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
+            // @ts-ignore
+            openTab({ app: plugin.app, doc: { id: params.value, action: ["cb-get-focus"] } });
+        });
     }
 
     public init() {
