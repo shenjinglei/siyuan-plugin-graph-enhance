@@ -36,6 +36,8 @@
 - [ ] 附近图
 - [ ] 色彩
 
+欢迎提 ISSUE 反馈，及爱发电赞助
+
 ## 感谢
 
 - [Dagre](https://github.com/dagrejs/dagre)

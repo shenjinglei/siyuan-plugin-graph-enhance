@@ -47,6 +47,8 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 - [ ] Neighborhood Graph
 - [ ] Color
 
+Welcome to feedback and sponsorship
+
 ## Acknowledge
 
 - [Dagre](https://github.com/dagrejs/dagre) Dagre is a JavaScript library that makes it easy to lay out directed graphs on the client-side.
