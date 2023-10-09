@@ -15,7 +15,7 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 
 - Global Graph
 - Vertical Graph
-- Vertical Graph
+- Horizontal Graph
 - Jump To Note
 - Setting
 

@@ -1,6 +1,6 @@
-import { plugin } from "./utils";
+import { i18n, plugin } from "./utils";
 
-import { openTab } from "siyuan";
+import { openTab, showMessage } from "siyuan";
 import { pluginSetting } from "./settings";
 import { CanvasRenderer } from "echarts/renderers";
 import * as echarts from "echarts/core";
@@ -20,6 +20,23 @@ echarts.use([
 type ECOption = ComposeOption<
     | GraphSeriesOption
 >;
+
+interface Graph {
+    options: {
+        directed: boolean,
+        multigraph: boolean,
+        compound: boolean
+    };
+    nodes: {
+        v: string,
+        value: any
+    }[];
+    edges: {
+        v: string,
+        w: string,
+        value: any
+    }[];
+}
 
 const dagre = require("dagre");
 const graphlib = dagre.graphlib;
@@ -134,11 +151,19 @@ class EnhancedGraph {
 
     public getGlobalGraph() {
         this.initProcessedGraph();
-        const nodesMaximun = 200;
+        const nodesMaximum = Number(pluginSetting.getSetting("nodesMaximum"));
+        if (isNaN(nodesMaximum)) {
+            showMessage(
+                i18n.nodesMaximumParseErrorMsg,
+                3000,
+                "info"
+            );
+        }
+
         let count = 0;
         const q = [];
         q.push(this.sourceNodeId);
-        while (q.length > 0 && count < nodesMaximun) {
+        while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
             if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
             this.insertToGraph(cur);
@@ -169,7 +194,7 @@ class EnhancedGraph {
         this.processGraph();
         dagre.layout(this.processedGraph);
 
-        const dagreLayout = dagre.graphlib.json.write(this.processedGraph);
+        const dagreLayout: Graph = dagre.graphlib.json.write(this.processedGraph);
 
         this.myChart.dispose();
         this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
@@ -188,13 +213,17 @@ class EnhancedGraph {
                     label: {
                         show: true,
                     },
-                    data: dagreLayout.nodes.map((x: any) => {
+                    data: dagreLayout.nodes.filter(x => x.value).map(x => {
                         if (x.v === this.sourceNodeId) {
                             return {
                                 id: x.v, name: x.value.label, x: x.value.x, y: x.value.y, itemStyle: {
                                     color: "rgba(205, 112, 112, 1)"
                                 }
                             };
+                        }
+                        if (!x.value) {
+                            console.log("no node value");
+                            console.log(x);
                         }
                         return { id: x.v, name: x.value.label, value: x.v, x: x.value.x, y: x.value.y };
                     }),

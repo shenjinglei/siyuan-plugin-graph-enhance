@@ -17,7 +17,8 @@ export default class GraphEnhancePlugin extends Plugin {
             x => Object.assign(x, {
                 rankdir: "LR",
                 ranker: "longest-path",
-                dailynoteExcluded: "false"
+                dailynoteExcluded: "false",
+                nodesMaximum: "200"
             })
         );
     }

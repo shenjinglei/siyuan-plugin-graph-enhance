@@ -13,8 +13,13 @@
   "yes": "是",
   "no": "否",
 
-  "dockBtnGlobel": "全局图",
+  "dockBtnGlobal": "全局图",
   "dockBtnAncestor": "纵向图",
   "dockBtnBrother": "横向图",
-  "dockBtnRefresh": "刷新"
+  "dockBtnRefresh": "刷新",
+
+  "pleaseInputNumber": "请输入数字",
+  "nodesMaximum": "全局图最大节点数",
+  "checkNodesMaximumErrorMsg": "全局图最大节点数不是数字！设置未保存",
+  "nodesMaximumParseErrorMsg": "全局图最大节点数设置不是一个数字，停止绘制"
 }

@@ -1,5 +1,5 @@
 import { i18n, plugin, STORAGE_NAME } from "./utils";
-import { Setting } from "siyuan";
+import { Setting, showMessage } from "siyuan";
 
 class PluginSetting {
     public getSetting(settingName: string) {
@@ -9,11 +9,20 @@ class PluginSetting {
     public init() {
         plugin.setting = new Setting({
             confirmCallback: () => {
+                if (!/^[0-9]+$/.test(nodesMaximumElement.value)) {
+                    showMessage(
+                        i18n.checkNodesMaximumErrorMsg,
+                        3000,
+                        "error"
+                    );
+                    return;
+                }
                 plugin.saveData(STORAGE_NAME,
                     {
-                        rankdir: directionElement.options[directionElement.selectedIndex].value,
-                        ranker: algorithmElement.options[algorithmElement.selectedIndex].value,
-                        dailynoteExcluded: dailynoteExcludedElement.options[dailynoteExcludedElement.selectedIndex].value
+                        rankdir: directionElement.value,
+                        ranker: algorithmElement.value,
+                        dailynoteExcluded: dailynoteExcludedElement.value,
+                        nodesMaximum: nodesMaximumElement.value
                     });
             }
         });
@@ -54,6 +63,18 @@ class PluginSetting {
             createActionElement: () => {
                 dailynoteExcludedElement.value = plugin.data[STORAGE_NAME].dailynoteExcluded;
                 return dailynoteExcludedElement;
+            },
+        });
+
+        const nodesMaximumElement = document.createElement("input");
+        nodesMaximumElement.id = "nodesMaximum";
+        nodesMaximumElement.placeholder = i18n.pleaseInputNumber;
+        nodesMaximumElement.className = "b3-text-field";
+        plugin.setting.addItem({
+            title: i18n.nodesMaximum,
+            createActionElement: () => {
+                nodesMaximumElement.value = plugin.data[STORAGE_NAME].nodesMaximum;
+                return nodesMaximumElement;
             },
         });
 

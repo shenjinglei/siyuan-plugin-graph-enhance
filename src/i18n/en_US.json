@@ -13,8 +13,13 @@
   "yes": "yes",
   "no": "no",
 
-  "dockBtnGlobel": "Global",
-  "dockBtnAncestor": "Vertical",
-  "dockBtnBrother": "Horizontal",
-  "dockBtnRefresh": "Refresh"
+  "dockBtnGlobel": "Global Graph",
+  "dockBtnAncestor": "Vertical Graph",
+  "dockBtnBrother": "Horizontal Graph",
+  "dockBtnRefresh": "Refresh",
+
+  "pleaseInputNumber": "please input a number",
+  "nodesMaximum": "Nodes Maximum in Global Graph",
+  "checkNodesMaximumErrorMsg": "Maximum in Global Graph is not a number! Setting hasn't saved",
+  "nodesMaximumParseErrorMsg": "Maximum in Global Graph is not a number! Drawing stopped"
 }
