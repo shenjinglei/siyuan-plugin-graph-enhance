@@ -1,21 +1,21 @@
 import { plugin } from "./utils";
-import * as echarts from "echarts/core";
+
 import { openTab } from "siyuan";
 import { pluginSetting } from "./settings";
 import { CanvasRenderer } from "echarts/renderers";
+import * as echarts from "echarts/core";
 import {
     GraphChart,
     GraphSeriesOption,
 } from "echarts/charts";
+import type {
+    ComposeOption,
+} from "echarts/core";
 
 echarts.use([
     GraphChart,
     CanvasRenderer
 ]);
-
-import type {
-    ComposeOption,
-} from "echarts/core";
 
 type ECOption = ComposeOption<
     | GraphSeriesOption
@@ -40,7 +40,6 @@ class EnhancedGraph {
         this.rawGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
         nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
         edges.map((x: { from: string; to: string; }) => this.rawGraph.setEdge(x.from, x.to));
-        //console.log(this.rawGraph);
     }
 
     public processGraph() {
@@ -69,7 +68,6 @@ class EnhancedGraph {
     public getAncestorGraph() {
         this.initProcessedGraph();
 
-
         const q = [];
         q.push(this.sourceNodeId);
         while (q.length > 0) {
@@ -82,10 +80,7 @@ class EnhancedGraph {
                 q.push(x.w);
             });
         }
-
         const sourceInEdges = this.rawGraph.inEdges(this.sourceNodeId);
-        //console.log("source in edges");
-        //console.log(sourceInEdges);
         sourceInEdges.map((x: any) => {
             this.processedGraph.setEdge(x.v, x.w);
             q.push(x.v);
@@ -210,7 +205,6 @@ class EnhancedGraph {
             ],
         };
 
-        //console.log(option);
         this.myChart.setOption(option);
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
             // @ts-ignore

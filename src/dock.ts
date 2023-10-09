@@ -92,9 +92,6 @@ export function initDock() {
                 width: container.offsetWidth,
                 height: container.offsetHeight
             });
-        },
-        destroy() {
-            console.log("destroy dock:", DOCK_TYPE);
         }
     });
 }
@@ -129,7 +126,6 @@ function refreashGraph() {
             "k": ""
         }).then(
             result => {
-                console.log(result);
                 enhancedGraph.initRawGraph(result.data.nodes, result.data.links);
                 resolve();
             }

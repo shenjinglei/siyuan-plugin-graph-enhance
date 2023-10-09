@@ -1,7 +1,5 @@
 import { i18n, plugin, STORAGE_NAME } from "./utils";
-import {
-    Setting
-} from "siyuan";
+import { Setting } from "siyuan";
 
 class PluginSetting {
     public getSetting(settingName: string) {
@@ -59,16 +57,6 @@ class PluginSetting {
             },
         });
 
-        const btnaElement = document.createElement("button");
-        btnaElement.className = "b3-button b3-button--outline fn__flex-center fn__size200";
-        btnaElement.textContent = i18n.open;
-        btnaElement.addEventListener("click", () => {
-            window.open("https://github.com/shenjinglei/siyuan-plugin-graph-enhance");
-        });
-        plugin.setting.addItem({
-            title: i18n.settingBtnaTitle,
-            actionElement: btnaElement,
-        });
     }
 }
 
