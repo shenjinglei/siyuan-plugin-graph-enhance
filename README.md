@@ -33,6 +33,9 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 
 ## Changelog
 
+- v0.1.3
+  -  fix Bug
+  - setting：Global nodes maximum
 - v0.1.2
   - Jump to note
 - v0.1.1
