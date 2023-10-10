@@ -1,5 +1,5 @@
 import { enhancedGraph } from "./graph";
-import { pluginSetting } from "./settings";
+import { getSetting } from "./settings";
 import { i18n, plugin, isMobile } from "./utils";
 import { adaptHotkey, fetchSyncPost } from "siyuan";
 
@@ -84,7 +84,7 @@ export function initDock() {
             };
 
             enhancedGraph.init();
-            pluginSetting.init();
+
         },
         resize() {
             const container = document.getElementById("graph_enhance_container");
@@ -108,7 +108,7 @@ function refreashGraph() {
     return new Promise<void>((resolve, reject) => {
         fetchSyncPost("api/graph/getGraph", {
             "conf": {
-                "dailyNote": pluginSetting.getSetting("dailynoteExcluded") !== "true",
+                "dailyNote": getSetting("dailynoteExcluded") !== "true",
                 "minRefs": 0,
                 "type": {
                     "blockquote": false,

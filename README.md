@@ -5,9 +5,7 @@
 ## Get Start
 
 After enabling this plug-in, a sidebar will be added in the right top corner. After opening the sidebar, click the function button in the right top corner. The plug-in will draw a diagram according to the current document and display it in the sidebar.
-For example, select "Start here" in the Siyuan User Guide, and then click the "Global" button in "Diagram Enhance". The resulting relationship diagram is shown in the figure below:
-
-![preview](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/raw/main/preview.png)
+For example, select "Start here" in the Siyuan User Guide, and then click the "Global" button in "Diagram Enhance". The resulting relationship diagram is shown in the preview picture:
 
 [Manual in Chinese](https://ld246.com/article/1696579047798)
 
@@ -19,22 +17,12 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 - Jump To Note
 - Setting
 
-## Settings
-
-- Layout Dirction
-  - Left to Right
-  - Right to Left
-  - Top Down
-  - Bottom Up
-- Layout Algorithm
-  - network-simplex
-  - tight-tree
-  - longest-path
-
 ## Changelog
 
+- v0.1.4
+  - fix Bug: Setting init
 - v0.1.3
-  -  fix Bug
+  - fix Bug: Global graph can not draw
   - setting：Global nodes maximum
 - v0.1.2
   - Jump to note

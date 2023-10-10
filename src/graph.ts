@@ -1,7 +1,7 @@
 import { i18n, plugin } from "./utils";
 
 import { openTab, showMessage } from "siyuan";
-import { pluginSetting } from "./settings";
+import { getSetting } from "./settings";
 import { CanvasRenderer } from "echarts/renderers";
 import * as echarts from "echarts/core";
 import {
@@ -78,7 +78,7 @@ class EnhancedGraph {
 
     private initProcessedGraph() {
         this.processedGraph = new graphlib.Graph();
-        this.processedGraph.setGraph({ rankdir: pluginSetting.getSetting("rankdir"), ranker: pluginSetting.getSetting("ranker") });
+        this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
         this.processedGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
     }
 
@@ -151,7 +151,7 @@ class EnhancedGraph {
 
     public getGlobalGraph() {
         this.initProcessedGraph();
-        const nodesMaximum = Number(pluginSetting.getSetting("nodesMaximum"));
+        const nodesMaximum = Number(getSetting("nodesMaximum"));
         if (isNaN(nodesMaximum)) {
             showMessage(
                 i18n.nodesMaximumParseErrorMsg,
