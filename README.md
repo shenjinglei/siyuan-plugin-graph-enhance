@@ -19,16 +19,18 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 
 ## Changelog
 
-- v0.1.4
+- 0.1.5
+  - fix Bug
+- 0.1.4
   - fix Bug: Setting init
-- v0.1.3
+- 0.1.3
   - fix Bug: Global graph can not draw
   - setting：Global nodes maximum
-- v0.1.2
+- 0.1.2
   - Jump to note
-- v0.1.1
+- 0.1.1
   - setting: Dailynote exclusion
-- v0.1.0
+- 0.1.0
   - Basic function
 
 ## Planning
