@@ -179,6 +179,12 @@ class EnhancedGraph {
             });
             count++;
         }
+
+        while (q.length > 0) {
+            const cur = q.shift();
+            if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
+            this.processedGraph.removeNode(cur);
+        }
     }
 
     private insertToGraph = (node: string) => {

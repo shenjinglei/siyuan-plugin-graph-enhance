@@ -13,7 +13,7 @@
   "yes": "yes",
   "no": "no",
 
-  "dockBtnGlobel": "Global Graph",
+  "dockBtnGlobal": "Global Graph",
   "dockBtnAncestor": "Vertical Graph",
   "dockBtnBrother": "Horizontal Graph",
   "dockBtnRefresh": "Refresh",
