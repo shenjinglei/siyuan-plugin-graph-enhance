@@ -19,6 +19,8 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 
 ## Changelog
 
+- 0.1.6
+  - add prompt of current note not found
 - 0.1.5
   - fix Bug
 - 0.1.4

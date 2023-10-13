@@ -21,5 +21,7 @@
   "pleaseInputNumber": "please input a number",
   "nodesMaximum": "Nodes Maximum in Global Graph",
   "checkNodesMaximumErrorMsg": "Maximum in Global Graph is not a number! Setting hasn't saved",
-  "nodesMaximumParseErrorMsg": "Maximum in Global Graph is not a number! Drawing stopped"
+  "nodesMaximumParseErrorMsg": "Maximum in Global Graph is not a number! Drawing stopped",
+  "needStartPointMsg": "need select a note first",
+  "needRefreshMsg": "current note not fund, try to refresh data"
 }

@@ -193,10 +193,23 @@ class EnhancedGraph {
     };
 
     public Display() {
-        if (!this.sourceNodeId || this.sourceNodeId == "")
+        if (!this.sourceNodeId || this.sourceNodeId == "") {
+            showMessage(
+                i18n.needStartPointMsg,
+                3000,
+                "info"
+            );
             return;
-        if (!this.rawGraph.hasNode(this.sourceNodeId))
+        }
+
+        if (!this.rawGraph.hasNode(this.sourceNodeId)) {
+            showMessage(
+                i18n.needRefreshMsg,
+                3000,
+                "info"
+            );
             return;
+        }
         this.processGraph();
         dagre.layout(this.processedGraph);
 
