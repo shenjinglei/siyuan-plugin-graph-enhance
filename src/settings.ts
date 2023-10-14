@@ -23,7 +23,9 @@ export function settingInit() {
                     ranker: algorithmElement.value,
                     dailynoteExcluded: dailynoteExcludedElement.value,
                     nodesMaximum: nodesMaximumElement.value,
-                    autoFollow: autoFollowElement.value
+                    autoFollow: autoFollowElement.value,
+                    sourceThreshold: sourceThresholdElement.value,
+                    sinkThreshold: sinkThresholdElement.value
                 });
 
 
@@ -97,6 +99,30 @@ export function settingInit() {
         createActionElement: () => {
             nodesMaximumElement.value = plugin.data[STORAGE_NAME].nodesMaximum;
             return nodesMaximumElement;
+        },
+    });
+
+    const sourceThresholdElement = document.createElement("input");
+    sourceThresholdElement.id = "sourceThreshold";
+    sourceThresholdElement.placeholder = i18n.pleaseInputNumber;
+    sourceThresholdElement.className = "b3-text-field";
+    plugin.setting.addItem({
+        title: "源图阈值",
+        createActionElement: () => {
+            sourceThresholdElement.value = plugin.data[STORAGE_NAME].sourceThreshold;
+            return sourceThresholdElement;
+        },
+    });
+
+    const sinkThresholdElement = document.createElement("input");
+    sinkThresholdElement.id = "sinkThreshold";
+    sinkThresholdElement.placeholder = i18n.pleaseInputNumber;
+    sinkThresholdElement.className = "b3-text-field";
+    plugin.setting.addItem({
+        title: "尽图阈值",
+        createActionElement: () => {
+            sinkThresholdElement.value = plugin.data[STORAGE_NAME].sinkThreshold;
+            return sinkThresholdElement;
         },
     });
 }

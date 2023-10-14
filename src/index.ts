@@ -15,7 +15,9 @@ export default class GraphEnhancePlugin extends Plugin {
                     ranker: "longest-path",
                     dailynoteExcluded: "false",
                     nodesMaximum: "200",
-                    autoFollow: "false"
+                    autoFollow: "false",
+                    sourceThreshold: "3",
+                    sinkThreshold: "3"
                 }, this.data[STORAGE_NAME])
             );
         });

@@ -14,6 +14,8 @@ export function initDock() {
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
+        <span id="graph_enhance_source" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="起点图"><svg><use xlink:href="#iconLight"></use></svg></span>
+        <span id="graph_enhance_sink" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="终点图"><svg><use xlink:href="#iconGitHubI"></use></svg></span>
         <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg><use xlink:href="#iconLanguage"></use></svg></span>
         <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg><use xlink:href="#iconGraph"></use></svg></span>
         <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg><use xlink:href="#iconWorkspace"></use></svg></span>
@@ -83,6 +85,24 @@ export function initDock() {
                 enhancedGraph.Display();
             };
 
+            document.getElementById("graph_enhance_source").onclick = async () => {
+                if (!enhancedGraph.rawGraph) {
+                    await refreashGraph();
+                }
+
+                enhancedGraph.searchMethod = "source";
+                enhancedGraph.sunbrushDisplay();
+            };
+
+            document.getElementById("graph_enhance_sink").onclick = async () => {
+                if (!enhancedGraph.rawGraph) {
+                    await refreashGraph();
+                }
+
+                enhancedGraph.searchMethod = "sink";
+                enhancedGraph.sunbrushDisplay();
+            };
+
             enhancedGraph.init();
 
         },
@@ -122,7 +142,7 @@ function refreashGraph() {
     return new Promise<void>((resolve, reject) => {
         fetchSyncPost("api/graph/getGraph", {
             "conf": {
-                "dailyNote": getSetting("dailynoteExcluded") !== "true",
+                "dailyNote": true,
                 "minRefs": 0,
                 "type": {
                     "blockquote": false,
