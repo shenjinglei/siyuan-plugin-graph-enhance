@@ -23,6 +23,7 @@ export function settingInit() {
                     ranker: algorithmElement.value,
                     dailynoteExcluded: dailynoteExcludedElement.value,
                     nodesMaximum: nodesMaximumElement.value,
+                    neighborDepth: neighborDepthElement.value,
                     autoFollow: autoFollowElement.value,
                     sourceThreshold: sourceThresholdElement.value,
                     sinkThreshold: sinkThresholdElement.value
@@ -99,6 +100,18 @@ export function settingInit() {
         createActionElement: () => {
             nodesMaximumElement.value = plugin.data[STORAGE_NAME].nodesMaximum;
             return nodesMaximumElement;
+        },
+    });
+
+    const neighborDepthElement = document.createElement("input");
+    neighborDepthElement.id = "neighborDepth";
+    neighborDepthElement.placeholder = i18n.pleaseInputNumber;
+    neighborDepthElement.className = "b3-text-field";
+    plugin.setting.addItem({
+        title: "邻近图深度",
+        createActionElement: () => {
+            neighborDepthElement.value = plugin.data[STORAGE_NAME].neighborDepth;
+            return neighborDepthElement;
         },
     });
 

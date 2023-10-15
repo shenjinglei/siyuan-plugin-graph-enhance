@@ -53,7 +53,7 @@ class EnhancedGraph {
         outEdges: (arg0: string) => any[];
         inEdges: (arg0: string) => { v: string, w: string }[];
         sources: () => string[];
-        node: (arg0: string) => { (): any; new(): any; label: any; };
+        node: (arg0: string) => any;
         sinks: () => string[];
         nodes: () => string[];
         removeNode: (arg0: string) => void;
@@ -71,7 +71,7 @@ class EnhancedGraph {
     public initRawGraph(nodes: { id: string; label: string; }[], edges: { from: string; to: string; }[]) {
         this.rawGraph = new graphlib.Graph();
         this.rawGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
-        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
+        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 100, height: 30 }));
         edges.map((x: { from: string; to: string; }) => this.rawGraph.setEdge(x.from, x.to));
 
         if (getSetting("dailynoteExcluded") === "true") {
@@ -106,21 +106,21 @@ class EnhancedGraph {
                     {},
                     {
                         r0: "15%",
-                        r: "35%",
+                        r: "40%",
                         itemStyle: {
                             borderWidth: 2,
                         },
                         label: {
                             align: "right",
-                            minAngle: 7,
+                            minAngle: 6,
                         },
                     },
                     {
-                        r0: "35%",
+                        r0: "40%",
                         r: "70%",
                         label: {
                             align: "center",
-                            minAngle: 5,
+                            minAngle: 4,
                         },
                     },
                     {
@@ -130,7 +130,7 @@ class EnhancedGraph {
                             position: "outside",
                             padding: 3,
                             silent: false,
-                            minAngle: 3,
+                            minAngle: 2,
                         },
                         itemStyle: {
                             borderWidth: 3,
@@ -160,6 +160,9 @@ class EnhancedGraph {
                 break;
             case "global":
                 this.getGlobalGraph();
+                break;
+            case "neighbor":
+                this.getNeighborGraph();
                 break;
             case "source":
                 this.getSourceGraph();
@@ -283,6 +286,40 @@ class EnhancedGraph {
             if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
             this.processedGraph.removeNode(cur);
         }
+    }
+
+    getNeighborGraph() {
+        const maxNeighborDepth = getSetting("neighborDepth");
+        this.initProcessedGraph();
+
+        const q = [];
+        q.push({ id: this.sourceNodeId, level: 0 });
+        while (q.length > 0) {
+            const cur = q.shift();
+            if (this.processedGraph.node(cur.id)) continue;
+
+            this.insertToGraph(cur.id);
+            const outEdges = this.rawGraph.outEdges(cur.id);
+            outEdges.map(x => {
+                if (cur.level < maxNeighborDepth || this.processedGraph.hasNode(x.w)) {
+                    this.processedGraph.setEdge(x.v, x.w);
+                }
+                if (this.processedGraph.hasNode(x.w)) {
+                    q.push({ id: x.w, level: cur.level + 1 });
+                }
+            });
+            const inEdges = this.rawGraph.inEdges(cur.id);
+            inEdges.map((x: any) => {
+
+                if (cur.level < maxNeighborDepth || this.processedGraph.hasNode(x.v)) {
+                    this.processedGraph.setEdge(x.v, x.w);
+                }
+                if (this.processedGraph.hasNode(x.v)) {
+                    q.push({ id: x.v, level: cur.level + 1 });
+                }
+            });
+        }
+
     }
 
     Threshold: number;
@@ -410,6 +447,9 @@ class EnhancedGraph {
                 },
             ],
         };
+
+        console.log("echart option");
+        console.log(option);
 
         this.myChart.setOption(option);
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {

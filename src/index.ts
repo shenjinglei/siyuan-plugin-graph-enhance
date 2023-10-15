@@ -15,6 +15,7 @@ export default class GraphEnhancePlugin extends Plugin {
                     ranker: "longest-path",
                     dailynoteExcluded: "false",
                     nodesMaximum: "200",
+                    neighborDepth: "3",
                     autoFollow: "false",
                     sourceThreshold: "3",
                     sinkThreshold: "3"
