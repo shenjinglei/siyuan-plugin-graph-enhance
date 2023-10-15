@@ -19,6 +19,9 @@ For example, select "Start here" in the Siyuan User Guide, and then click the "G
 
 ## Changelog
 
+- 0.1.7
+  - [update start node style](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/4)
+  - [automatically follows the currently open document](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/3)
 - 0.1.6
   - add prompt of current note not found
 - 0.1.5

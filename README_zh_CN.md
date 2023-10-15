@@ -20,6 +20,9 @@
 
 ## 更新日志
 
+- 0.1.7
+  - [修改了起始点样式](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/4)
+  - [自动跟随当前打开的文档](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/3)
 - 0.1.6
   - 增加了未获取到当前文档的提示
 - 0.1.5
