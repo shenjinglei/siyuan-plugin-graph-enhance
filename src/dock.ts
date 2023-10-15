@@ -104,6 +104,20 @@ function getDocid() {
         return document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background")?.getAttribute("data-node-id");
 }
 
+export async function autoFollow({ detail }: any) {
+
+    if (enhancedGraph.sourceNodeId !== detail.protyle.block.rootID) {
+        enhancedGraph.sourceNodeId = detail.protyle.block.rootID;
+
+        if (!enhancedGraph.rawGraph) {
+            await refreashGraph();
+        }
+
+        enhancedGraph.Display();
+    }
+
+}
+
 function refreashGraph() {
     return new Promise<void>((resolve, reject) => {
         fetchSyncPost("api/graph/getGraph", {

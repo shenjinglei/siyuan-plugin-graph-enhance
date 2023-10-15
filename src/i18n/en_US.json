@@ -23,5 +23,7 @@
   "checkNodesMaximumErrorMsg": "Maximum in Global Graph is not a number! Setting hasn't saved",
   "nodesMaximumParseErrorMsg": "Maximum in Global Graph is not a number! Drawing stopped",
   "needStartPointMsg": "need select a note first",
-  "needRefreshMsg": "current note not fund, try to refresh data"
+  "needRefreshMsg": "current note not fund, try to refresh data",
+
+  "autoFollow": "automatic follow the opened note"
 }

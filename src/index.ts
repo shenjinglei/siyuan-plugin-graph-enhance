@@ -2,17 +2,24 @@ import { Plugin } from "siyuan";
 import "./index.scss";
 
 import { setI18n, STORAGE_NAME, setPlugin } from "./utils";
-import { initDock } from "./dock";
+import { initDock, autoFollow } from "./dock";
 import { settingInit } from "./settings";
 
 export default class GraphEnhancePlugin extends Plugin {
     onload() {
-        this.data[STORAGE_NAME] = {
-            rankdir: "LR",
-            ranker: "longest-path",
-            dailynoteExcluded: "false",
-            nodesMaximum: "200"
-        };
+        this.loadData(STORAGE_NAME).then(() => {
+            this.saveData(
+                STORAGE_NAME,
+                Object.assign({
+                    rankdir: "LR",
+                    ranker: "longest-path",
+                    dailynoteExcluded: "false",
+                    nodesMaximum: "200",
+                    autoFollow: "false"
+                }, this.data[STORAGE_NAME])
+            );
+        });
+
         setI18n(this.i18n);
         setPlugin(this);
         initDock();
@@ -20,6 +27,10 @@ export default class GraphEnhancePlugin extends Plugin {
     }
 
     onLayoutReady() {
-        this.loadData(STORAGE_NAME);
+        if (this.data[STORAGE_NAME].autoFollow === "true") {
+            this.eventBus.on("click-editorcontent", autoFollow);
+        } else {
+            this.eventBus.off("click-editorcontent", autoFollow);
+        }
     }
 }

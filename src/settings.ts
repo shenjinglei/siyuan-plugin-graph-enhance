@@ -1,6 +1,6 @@
 import { i18n, plugin, STORAGE_NAME } from "./utils";
 import { Setting, showMessage } from "siyuan";
-
+import { autoFollow } from "./dock";
 
 export function getSetting(settingName: string) {
     return plugin.data[STORAGE_NAME][settingName];
@@ -22,8 +22,18 @@ export function settingInit() {
                     rankdir: directionElement.value,
                     ranker: algorithmElement.value,
                     dailynoteExcluded: dailynoteExcludedElement.value,
-                    nodesMaximum: nodesMaximumElement.value
+                    nodesMaximum: nodesMaximumElement.value,
+                    autoFollow: autoFollowElement.value
                 });
+
+
+            if (autoFollowElement.value === "true") {
+                plugin.eventBus.off("click-editorcontent", autoFollow);
+                plugin.eventBus.on("click-editorcontent", autoFollow);
+            } else {
+                plugin.eventBus.off("click-editorcontent", autoFollow);
+            }
+
         }
     });
 
@@ -63,6 +73,18 @@ export function settingInit() {
         createActionElement: () => {
             dailynoteExcludedElement.value = plugin.data[STORAGE_NAME].dailynoteExcluded;
             return dailynoteExcludedElement;
+        },
+    });
+
+    const autoFollowElement = document.createElement("select");
+    autoFollowElement.id = "autoFollow";
+    autoFollowElement.add(new Option(i18n.yes, "true"));
+    autoFollowElement.add(new Option(i18n.no, "false"));
+    plugin.setting.addItem({
+        title: i18n.autoFollow,
+        createActionElement: () => {
+            autoFollowElement.value = plugin.data[STORAGE_NAME].autoFollow;
+            return autoFollowElement;
         },
     });
 

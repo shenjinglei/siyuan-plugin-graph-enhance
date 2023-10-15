@@ -264,6 +264,12 @@ class EnhancedGraph {
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
             // @ts-ignore
             openTab({ app: plugin.app, doc: { id: params.value, action: ["cb-get-focus"] } });
+
+            if (getSetting("autoFollow") === "true") {
+                // @ts-ignore
+                enhancedGraph.sourceNodeId = params.value;
+                enhancedGraph.Display();
+            }
         });
     }
 
