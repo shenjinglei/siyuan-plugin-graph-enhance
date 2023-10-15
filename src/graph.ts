@@ -235,9 +235,16 @@ class EnhancedGraph {
                     data: dagreLayout.nodes.filter(x => x.value).map(x => {
                         if (x.v === this.sourceNodeId) {
                             return {
-                                id: x.v, name: x.value.label, x: x.value.x, y: x.value.y, itemStyle: {
-                                    color: "rgba(205, 112, 112, 1)"
+                                id: x.v, name: x.value.label, x: x.value.x, y: x.value.y,
+                                itemStyle: {
+                                    color: "rgba(205, 112, 112, 1)",
+                                },
+                                label: {
+                                    color: "#FFF",
+                                    textBorderColor: "inherit",
+                                    textBorderWidth: 2
                                 }
+
                             };
                         }
                         if (!x.value) {
