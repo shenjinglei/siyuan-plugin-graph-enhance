@@ -12,7 +12,7 @@ export default class GraphEnhancePlugin extends Plugin {
                 STORAGE_NAME,
                 Object.assign({
                     rankdir: "LR",
-                    ranker: "longest-path",
+                    ranker: "network-simplex",
                     dailynoteExcluded: "false",
                     nodesMaximum: "200",
                     neighborDepth: "3",
@@ -21,19 +21,17 @@ export default class GraphEnhancePlugin extends Plugin {
                     sinkThreshold: "3"
                 }, this.data[STORAGE_NAME])
             );
+
+            if (this.data[STORAGE_NAME].autoFollow === "true") {
+                this.eventBus.on("click-editorcontent", autoFollow);
+            } else {
+                this.eventBus.off("click-editorcontent", autoFollow);
+            }
         });
 
         setI18n(this.i18n);
         setPlugin(this);
         initDock();
         settingInit();
-    }
-
-    onLayoutReady() {
-        if (this.data[STORAGE_NAME].autoFollow === "true") {
-            this.eventBus.on("click-editorcontent", autoFollow);
-        } else {
-            this.eventBus.off("click-editorcontent", autoFollow);
-        }
     }
 }

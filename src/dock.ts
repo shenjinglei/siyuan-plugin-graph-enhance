@@ -1,5 +1,4 @@
 import { enhancedGraph } from "./graph";
-import { getSetting } from "./settings";
 import { i18n, plugin, isMobile } from "./utils";
 import { adaptHotkey, fetchSyncPost } from "siyuan";
 
@@ -15,8 +14,8 @@ export function initDock() {
         </div>
         <span class="fn__flex-1 fn__space"></span>
         <span id="graph_enhance_source" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="起点图"><svg><use xlink:href="#iconLight"></use></svg></span>
-        <span id="graph_enhance_sink" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="终点图"><svg><use xlink:href="#iconGitHubI"></use></svg></span>
-        <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="邻近图"><svg><use xlink:href="#iconFullscreenExit"></use></svg></span>
+        <span id="graph_enhance_sink" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="终点图"><svg><use xlink:href="#iconDark"></use></svg></span>
+        <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="邻近图"><svg><use xlink:href="#iconFullscreen"></use></svg></span>
         <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg><use xlink:href="#iconLanguage"></use></svg></span>
         <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg><use xlink:href="#iconGraph"></use></svg></span>
         <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg><use xlink:href="#iconWorkspace"></use></svg></span>
@@ -104,7 +103,8 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "source";
+                enhancedGraph.sourceNodeId = undefined;
+                enhancedGraph.sunburstMethod = "source";
                 enhancedGraph.sunbrushDisplay();
             };
 
@@ -113,7 +113,8 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "sink";
+                enhancedGraph.sourceNodeId = undefined;
+                enhancedGraph.sunburstMethod = "sink";
                 enhancedGraph.sunbrushDisplay();
             };
 

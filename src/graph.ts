@@ -59,9 +59,11 @@ class EnhancedGraph {
         removeNode: (arg0: string) => void;
     };
     processedGraph: any;
-    sunburstGraphData: any;
+    sourceGraphData: any = undefined;
+    sinkGraphData: any = undefined;
     sourceNodeId: string;
     searchMethod = "ancestor";
+    sunburstMethod = "source";
 
 
     public resize(param: { width: number, height: number }) {
@@ -71,7 +73,7 @@ class EnhancedGraph {
     public initRawGraph(nodes: { id: string; label: string; }[], edges: { from: string; to: string; }[]) {
         this.rawGraph = new graphlib.Graph();
         this.rawGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
-        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 100, height: 30 }));
+        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
         edges.map((x: { from: string; to: string; }) => this.rawGraph.setEdge(x.from, x.to));
 
         if (getSetting("dailynoteExcluded") === "true") {
@@ -79,10 +81,15 @@ class EnhancedGraph {
                 .filter(x => /^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
                 .map(x => this.rawGraph.removeNode(x));
         }
+
+        this.sourceGraphData = undefined;
+        this.sinkGraphData = undefined;
     }
 
+
+
     public sunbrushDisplay() {
-        this.processGraph();
+        this.processSunburst();
 
         this.myChart.dispose();
         this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
@@ -92,7 +99,7 @@ class EnhancedGraph {
                 type: "sunburst",
 
                 nodeClick: "link",
-                data: this.sunburstGraphData,
+                data: this.sunburstMethod === "source" ? this.sourceGraphData : this.sinkGraphData,
                 radius: [0, "95%"],
                 sort: "desc",
 
@@ -140,15 +147,36 @@ class EnhancedGraph {
             },
         };
 
+
+        console.log("sunOption");
+        console.log(option);
+
         option && this.myChart.setOption(option);
 
         this.myChart.on("click", function (params: echarts.ECElementEvent) {
             // @ts-ignore
             openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
+
+            if (getSetting("autoFollow") === "true") {
+                // @ts-ignore
+                enhancedGraph.sourceNodeId = params.data.id;
+                enhancedGraph.Display();
+            }
         });
     }
 
-
+    public processSunburst() {
+        switch (this.sunburstMethod) {
+            case "source":
+                if (!this.sourceGraphData)
+                    this.getSourceGraph();
+                break;
+            case "sink":
+                if (!this.sinkGraphData)
+                    this.getSinkGraph();
+                break;
+        }
+    }
 
     public processGraph() {
         switch (this.searchMethod) {
@@ -163,12 +191,6 @@ class EnhancedGraph {
                 break;
             case "neighbor":
                 this.getNeighborGraph();
-                break;
-            case "source":
-                this.getSourceGraph();
-                break;
-            case "sink":
-                this.getSinkGraph();
                 break;
             default:
                 this.getAncestorGraph();
@@ -348,8 +370,7 @@ class EnhancedGraph {
 
         const children = this.getNodes(cur).map((x: string) => this.getNodeData(x, level + 1));
         if (children.filter((x) => x.value === 0).length === children.length) {
-            const temp = this.generteLeaf(cur, children.reduce((p, c) => p + c.amount, 0));
-            return temp;
+            return this.generteLeaf(cur, children.reduce((p, c) => p + c.amount, 0));
         }
 
         return {
@@ -360,7 +381,7 @@ class EnhancedGraph {
     }
 
     getNodes(cur: string) {
-        if (this.searchMethod === "source")
+        if (this.sunburstMethod === "source")
             return this.rawGraph.outEdges(cur).map(x => x.w);
         else
             return this.rawGraph.inEdges(cur).map(x => x.v);
@@ -369,13 +390,17 @@ class EnhancedGraph {
     getSinkGraph() {
         this.Threshold = Number(getSetting("sinkThreshold"));
 
-        this.sunburstGraphData = this.rawGraph.sinks().map((x: any) => this.getNodeData(x, 1));
+        this.sinkGraphData = this.rawGraph.sinks()
+            .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
+            .map((x: any) => this.getNodeData(x, 1));
     }
 
     getSourceGraph() {
         this.Threshold = Number(getSetting("sourceThreshold"));
 
-        this.sunburstGraphData = this.rawGraph.sources().map((x: any) => this.getNodeData(x, 1));
+        this.sourceGraphData = this.rawGraph.sources()
+            .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
+            .map((x: any) => this.getNodeData(x, 1));
     }
 
 
