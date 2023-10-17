@@ -41,6 +41,15 @@ interface Graph {
     }[];
 }
 
+interface SunburstNode {
+    id: string,
+    name: string,
+    children?: any[],
+    value?: number,
+    amount?: number,
+    height: number
+}
+
 const dagre = require("dagre");
 const graphlib = dagre.graphlib;
 
@@ -155,12 +164,14 @@ class EnhancedGraph {
 
         this.myChart.on("click", function (params: echarts.ECElementEvent) {
             // @ts-ignore
-            openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
+            const objId: string = params.data.id;
+            if (objId) {
+                openTab({ app: plugin.app, doc: { id: objId, action: ["cb-get-focus"] } });
 
-            if (getSetting("autoFollow") === "true") {
-                // @ts-ignore
-                enhancedGraph.sourceNodeId = params.data.id;
-                enhancedGraph.Display();
+                if (getSetting("autoFollow") === "true") {
+                    enhancedGraph.sourceNodeId = objId;
+                    enhancedGraph.Display();
+                }
             }
         });
     }
@@ -185,6 +196,9 @@ class EnhancedGraph {
                 break;
             case "brother":
                 this.getBrotherGraph();
+                break;
+            case "cross":
+                this.getCrossGraph();
                 break;
             case "global":
                 this.getGlobalGraph();
@@ -271,6 +285,32 @@ class EnhancedGraph {
         }
     }
 
+    getCrossGraph() {
+        this.initProcessedGraph();
+        const q: { id: string, level: number }[] = [];
+        q.push({ id: this.sourceNodeId, level: 0 });
+
+        while (q.length > 0) {
+            const cur = q.shift();
+            this.insertToGraph(cur.id);
+            if (cur.level >= -1) {
+                this.rawGraph.outEdges(cur.id).map(x => {
+                    this.processedGraph.setEdge(x.v, x.w);
+                    if (!this.processedGraph.node(x.w))
+                        q.push({ id: x.w, level: cur.level + 1 === 0 ? NaN : cur.level + 1 });
+                });
+            }
+            if (cur.level <= 1) {
+                this.rawGraph.inEdges(cur.id).map(x => {
+                    this.processedGraph.setEdge(x.v, x.w);
+                    if (!this.processedGraph.node(x.v))
+                        q.push({ id: x.v, level: cur.level - 1 === 0 ? NaN : cur.level - 1 });
+                });
+            }
+        }
+    }
+
+
     public getGlobalGraph() {
         this.initProcessedGraph();
         const nodesMaximum = Number(getSetting("nodesMaximum"));
@@ -352,6 +392,7 @@ class EnhancedGraph {
                 id: cur,
                 name: this.rawGraph.node(cur).label,
                 value: 1,
+                height: 1,
             };
         } else {
             return {
@@ -359,16 +400,18 @@ class EnhancedGraph {
                 name: this.rawGraph.node(cur).label,
                 value: 0,
                 amount: childrenNum,
+                height: 0,
             };
         }
     }
 
-    getNodeData(cur: string, level: number): { id: string, name: string, children?: any[], value?: number, amount?: number } {
+    getNodeData(cur: string, level: number): SunburstNode {
         if (level === 3) {
             return this.generteLeaf(cur, this.getNodes(cur).length);
         }
 
         const children = this.getNodes(cur).map((x: string) => this.getNodeData(x, level + 1));
+
         if (children.filter((x) => x.value === 0).length === children.length) {
             return this.generteLeaf(cur, children.reduce((p, c) => p + c.amount, 0));
         }
@@ -377,6 +420,7 @@ class EnhancedGraph {
             id: cur,
             name: this.rawGraph.node(cur).label,
             children: children,
+            height: children.map(x => x.height).reduce((p, c) => p > c ? p : c, 0) + 1,
         };
     }
 
@@ -387,20 +431,34 @@ class EnhancedGraph {
             return this.rawGraph.inEdges(cur).map(x => x.v);
     }
 
+    genSunburstData(param: SunburstNode[]) {
+        return [...param.filter(x => x.height === 3), {
+            name: "其他",
+            children: [...param.filter(x => x.height === 2), {
+                name: "其他",
+                children: param.filter(x => x.height === 1)
+            }]
+        }];
+    }
+
     getSinkGraph() {
         this.Threshold = Number(getSetting("sinkThreshold"));
 
-        this.sinkGraphData = this.rawGraph.sinks()
+        const result = this.rawGraph.sinks()
             .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
             .map((x: any) => this.getNodeData(x, 1));
+
+        this.sinkGraphData = this.genSunburstData(result);
     }
 
     getSourceGraph() {
         this.Threshold = Number(getSetting("sourceThreshold"));
 
-        this.sourceGraphData = this.rawGraph.sources()
+        const result = this.rawGraph.sources()
             .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
             .map((x: any) => this.getNodeData(x, 1));
+
+        this.sourceGraphData = this.genSunburstData(result);
     }
 
 
