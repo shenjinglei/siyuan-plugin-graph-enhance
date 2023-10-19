@@ -17,6 +17,30 @@ export function settingInit() {
                 );
                 return;
             }
+            if (!/^[0-9]+$/.test(neighborDepthElement.value)) {
+                showMessage(
+                    i18n.checkNeighborDepthErrorMsg,
+                    3000,
+                    "error"
+                );
+                return;
+            }
+            if (!/^[0-9]+$/.test(sourceThresholdElement.value)) {
+                showMessage(
+                    i18n.checkSourceThresholdErrorMsg,
+                    3000,
+                    "error"
+                );
+                return;
+            }
+            if (!/^[0-9]+$/.test(sinkThresholdElement.value)) {
+                showMessage(
+                    i18n.checkSinkThresholdErrorMsg,
+                    3000,
+                    "error"
+                );
+                return;
+            }
             plugin.saveData(STORAGE_NAME,
                 {
                     rankdir: directionElement.value,
@@ -108,7 +132,7 @@ export function settingInit() {
     neighborDepthElement.placeholder = i18n.pleaseInputNumber;
     neighborDepthElement.className = "b3-text-field";
     plugin.setting.addItem({
-        title: "邻近图深度",
+        title: i18n.settingNeighborDepth,
         createActionElement: () => {
             neighborDepthElement.value = plugin.data[STORAGE_NAME].neighborDepth;
             return neighborDepthElement;
@@ -120,7 +144,7 @@ export function settingInit() {
     sourceThresholdElement.placeholder = i18n.pleaseInputNumber;
     sourceThresholdElement.className = "b3-text-field";
     plugin.setting.addItem({
-        title: "源图阈值",
+        title: i18n.settingSourceThreshold,
         createActionElement: () => {
             sourceThresholdElement.value = plugin.data[STORAGE_NAME].sourceThreshold;
             return sourceThresholdElement;
@@ -132,7 +156,7 @@ export function settingInit() {
     sinkThresholdElement.placeholder = i18n.pleaseInputNumber;
     sinkThresholdElement.className = "b3-text-field";
     plugin.setting.addItem({
-        title: "尽图阈值",
+        title: i18n.settingSinkThreshold,
         createActionElement: () => {
             sinkThresholdElement.value = plugin.data[STORAGE_NAME].sinkThreshold;
             return sinkThresholdElement;

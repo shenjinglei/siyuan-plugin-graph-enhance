@@ -15,7 +15,7 @@ export default class GraphEnhancePlugin extends Plugin {
                     ranker: "network-simplex",
                     dailynoteExcluded: "false",
                     nodesMaximum: "200",
-                    neighborDepth: "3",
+                    neighborDepth: "2",
                     autoFollow: "false",
                     sourceThreshold: "3",
                     sinkThreshold: "3"

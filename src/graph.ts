@@ -71,7 +71,7 @@ class EnhancedGraph {
     sourceGraphData: any = undefined;
     sinkGraphData: any = undefined;
     sourceNodeId: string;
-    searchMethod = "ancestor";
+    searchMethod = "cross";
     sunburstMethod = "source";
 
 
@@ -156,10 +156,6 @@ class EnhancedGraph {
             },
         };
 
-
-        console.log("sunOption");
-        console.log(option);
-
         option && this.myChart.setOption(option);
 
         this.myChart.on("click", function (params: echarts.ECElementEvent) {
@@ -207,7 +203,7 @@ class EnhancedGraph {
                 this.getNeighborGraph();
                 break;
             default:
-                this.getAncestorGraph();
+                this.getCrossGraph();
                 break;
         }
     }
@@ -530,9 +526,6 @@ class EnhancedGraph {
                 },
             ],
         };
-
-        console.log("echart option");
-        console.log(option);
 
         this.myChart.setOption(option);
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {

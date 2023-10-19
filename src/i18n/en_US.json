@@ -25,5 +25,16 @@
   "needStartPointMsg": "need select a note first",
   "needRefreshMsg": "current note not fund, try to refresh data",
 
-  "autoFollow": "automatic follow the opened note"
+  "autoFollow": "automatic follow the opened note",
+
+  "dockBtnSource": "Source Graph",
+  "dockBtnSink": "Sink Graph",
+  "dockBtnNeighbor": "Neighbor Graph",
+  "dockBtnCross": "V&H Graph",
+  "settingNeighborDepth": "Neighbor Graph Depth",
+  "settingSourceThreshold": "Source Graph Threshold",
+  "settingSinkThreshold": "Sink Graph Threshold",
+  "checkNeighborDepthErrorMsg": "Neighbor Graph Depth is not a number! Setting hasn't saved",
+  "checkSourceThresholdErrorMsg": "Source Graph Threshold is not a number! Setting hasn't saved",
+  "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved"
 }
