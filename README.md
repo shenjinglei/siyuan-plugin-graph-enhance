@@ -7,6 +7,8 @@
 After enabling this plug-in, a sidebar will be added in the right top corner. After opening the sidebar, click the function button in the right top corner. The plug-in will draw a diagram according to the current document and display it in the sidebar.
 For example, select "Start here" in the Siyuan User Guide, and then click the "Global" button in "Diagram Enhance". The resulting relationship diagram is shown in the preview picture:
 
+![pic2](https://z1.ax1x.com/2023/10/20/piFpN9S.png)
+
 [Manual in Chinese](https://ld246.com/article/1696579047798)
 
 ## Function

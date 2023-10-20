@@ -5,7 +5,7 @@
   "settingDirRL": "Right to Left",
   "settingDirTB": "Top Down",
   "settingDirBT": "Bottom Up",
-  "settingAlgTitle": "Layout Algorithm",
+  "settingAlgTitle": "Layout Mode",
   "settingAlgNS": "network-simplex",
   "settingAlgTT": "tight-tree",
   "settingAlgLP": "longest-path",
