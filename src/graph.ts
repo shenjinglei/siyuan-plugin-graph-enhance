@@ -474,11 +474,11 @@ class EnhancedGraph {
         }
 
         if (!this.rawGraph.hasNode(this.sourceNodeId)) {
-            showMessage(
-                i18n.needRefreshMsg,
-                3000,
-                "info"
-            );
+            // showMessage(
+            //     i18n.needRefreshMsg,
+            //     3000,
+            //     "info"
+            // );
             return;
         }
         this.processGraph();
