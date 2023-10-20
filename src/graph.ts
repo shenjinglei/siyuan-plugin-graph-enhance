@@ -8,11 +8,14 @@ import {
     GraphChart,
     GraphSeriesOption,
     SunburstChart,
-    SunburstSeriesOption
+    SunburstSeriesOption,
 } from "echarts/charts";
 import type {
     ComposeOption,
 } from "echarts/core";
+
+const dagre = require("dagre");
+const graphlib = dagre.graphlib;
 
 echarts.use([
     GraphChart,
@@ -24,7 +27,7 @@ type ECOption = ComposeOption<
     SunburstSeriesOption | GraphSeriesOption
 >;
 
-interface Graph {
+interface GraphJSON {
     options: {
         directed: boolean,
         multigraph: boolean,
@@ -50,24 +53,50 @@ interface SunburstNode {
     height: number
 }
 
-const dagre = require("dagre");
-const graphlib = dagre.graphlib;
+interface Graph {
+    setDefaultEdgeLabel(arg0: () => any): void;
+    setGraph: (g: any) => void;
+    setNode: (v: string, value: any) => Graph;
+    hasNode: (v: string) => boolean;
+    setEdge: (v: string, w: string) => Graph;
+    outEdges: (v: string) => DagreEdge[];
+    inEdges: (w: string) => DagreEdge[];
+    sources: () => string[];
+    sinks: () => string[];
+    node: (v: string) => any;
+    nodes: () => string[];
+    removeNode: (v: string) => void;
+}
+
+interface DagreEdge {
+    v: string,
+    w: string
+}
+
+interface EChartNode {
+    id: string;
+    label: string;
+}
+
+interface EChartEdge {
+    from: string;
+    to: string;
+}
+
+interface QueueItem {
+    id: string,
+    edge?: DagreEdge,
+    level: number,
+    count: number
+}
+
+
+
 
 class EnhancedGraph {
     myChart: echarts.ECharts;
-    rawGraph: {
-        setDefaultEdgeLabel: (arg0: () => { label: string; }) => void;
-        setNode: (arg0: string, arg1: { label: string; width: number; height: number; }) => any;
-        setEdge: (arg0: string, arg1: string) => any; hasNode: (arg0: string) => any;
-        outEdges: (arg0: string) => any[];
-        inEdges: (arg0: string) => { v: string, w: string }[];
-        sources: () => string[];
-        node: (arg0: string) => any;
-        sinks: () => string[];
-        nodes: () => string[];
-        removeNode: (arg0: string) => void;
-    };
-    processedGraph: any;
+    rawGraph: Graph;
+    processedGraph: Graph;
     sourceGraphData: any = undefined;
     sinkGraphData: any = undefined;
     sourceNodeId: string;
@@ -75,104 +104,28 @@ class EnhancedGraph {
     sunburstMethod = "source";
 
 
-    public resize(param: { width: number, height: number }) {
+    resize(param: { width: number, height: number }) {
         this.myChart.resize(param);
     }
 
-    public initRawGraph(nodes: { id: string; label: string; }[], edges: { from: string; to: string; }[]) {
+
+    initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
         this.rawGraph = new graphlib.Graph();
-        this.rawGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
-        nodes.map((x: { id: string; label: string; }) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
-        edges.map((x: { from: string; to: string; }) => this.rawGraph.setEdge(x.from, x.to));
+
+        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
+        edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
 
         if (getSetting("dailynoteExcluded") === "true") {
-            this.rawGraph.nodes()
-                .filter(x => /^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
-                .map(x => this.rawGraph.removeNode(x));
+            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                .map(x => this.rawGraph.removeNode(x.id));
         }
+
 
         this.sourceGraphData = undefined;
         this.sinkGraphData = undefined;
     }
 
-
-
-    public sunbrushDisplay() {
-        this.processSunburst();
-
-        this.myChart.dispose();
-        this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
-
-        const option: ECOption = {
-            series: {
-                type: "sunburst",
-
-                nodeClick: "link",
-                data: this.sunburstMethod === "source" ? this.sourceGraphData : this.sinkGraphData,
-                radius: [0, "95%"],
-                sort: "desc",
-
-                emphasis: {
-                    focus: "descendant",
-                },
-
-                startAngle: 91,
-
-                levels: [
-                    {},
-                    {
-                        r0: "15%",
-                        r: "40%",
-                        itemStyle: {
-                            borderWidth: 2,
-                        },
-                        label: {
-                            align: "right",
-                            minAngle: 6,
-                        },
-                    },
-                    {
-                        r0: "40%",
-                        r: "70%",
-                        label: {
-                            align: "center",
-                            minAngle: 4,
-                        },
-                    },
-                    {
-                        r0: "70%",
-                        r: "72%",
-                        label: {
-                            position: "outside",
-                            padding: 3,
-                            silent: false,
-                            minAngle: 2,
-                        },
-                        itemStyle: {
-                            borderWidth: 3,
-                        },
-                    },
-                ],
-            },
-        };
-
-        option && this.myChart.setOption(option);
-
-        this.myChart.on("click", function (params: echarts.ECElementEvent) {
-            // @ts-ignore
-            const objId: string = params.data.id;
-            if (objId) {
-                openTab({ app: plugin.app, doc: { id: objId, action: ["cb-get-focus"] } });
-
-                if (getSetting("autoFollow") === "true") {
-                    enhancedGraph.sourceNodeId = objId;
-                    enhancedGraph.Display();
-                }
-            }
-        });
-    }
-
-    public processSunburst() {
+    processSunburst() {
         switch (this.sunburstMethod) {
             case "source":
                 if (!this.sourceGraphData)
@@ -211,173 +164,120 @@ class EnhancedGraph {
     private initProcessedGraph() {
         this.processedGraph = new graphlib.Graph();
         this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
-        this.processedGraph.setDefaultEdgeLabel(() => { return { label: "default label" }; });
+        this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
+
     }
 
     public getAncestorGraph() {
         this.initProcessedGraph();
 
-        const q = [];
-        q.push(this.sourceNodeId);
+        const q: QueueItem[] = [];
+        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
+
         while (q.length > 0) {
             const cur = q.shift();
-            if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
             this.insertToGraph(cur);
-            const outEdges = this.rawGraph.outEdges(cur);
-            outEdges.map((x: any) => {
-                this.processedGraph.setEdge(x.v, x.w);
-                q.push(x.w);
-            });
-        }
-        const sourceInEdges = this.rawGraph.inEdges(this.sourceNodeId);
-        sourceInEdges.map((x: any) => {
-            this.processedGraph.setEdge(x.v, x.w);
-            q.push(x.v);
-        });
-        while (q.length > 0) {
-            const cur = q.shift();
-            if (cur != this.sourceNodeId && this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
-            this.insertToGraph(cur);
-            const inEdges = this.rawGraph.inEdges(cur);
-            inEdges.map((x: any) => {
-                this.processedGraph.setEdge(x.v, x.w);
-                q.push(x.v);
-            });
+            if (cur.level >= 0) {
+                this.searchDown(cur, q);
+            }
+            if (cur.level <= 0) {
+                this.searchUp(cur, q);
+            }
         }
     }
 
     public getBrotherGraph() {
         this.initProcessedGraph();
 
-        const q: string[] = [];
-        this.insertToGraph(this.sourceNodeId);
-        const sourceOutEdges = this.rawGraph.outEdges(this.sourceNodeId);
-        sourceOutEdges.map((x: any) => {
-            this.processedGraph.setEdge(x.v, x.w);
-            q.push(x.w);
-        });
+        const q: QueueItem[] = [];
+        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
+
         while (q.length > 0) {
             const cur = q.shift();
             this.insertToGraph(cur);
-            const inEdges = this.rawGraph.inEdges(cur);
-            inEdges.map((x: any) => {
-                this.processedGraph.setEdge(x.v, x.w);
-                this.insertToGraph(x.v);
-            });
-        }
-        const sourceInEdges = this.rawGraph.inEdges(this.sourceNodeId);
-        sourceInEdges.map((x: any) => {
-            this.processedGraph.setEdge(x.v, x.w);
-            q.push(x.v);
-        });
-        while (q.length > 0) {
-            const cur = q.shift();
-            this.insertToGraph(cur);
-            const outEdges = this.rawGraph.outEdges(cur);
-            outEdges.map((x: any) => {
-                this.processedGraph.setEdge(x.v, x.w);
-                this.insertToGraph(x.w);
-            });
+            if (cur.level >= 0) {
+                this.searchUp(cur, q);
+            }
+            if (cur.level <= 0) {
+                this.searchDown(cur, q);
+            }
         }
     }
 
     getCrossGraph() {
         this.initProcessedGraph();
-        const q: { id: string, level: number }[] = [];
-        q.push({ id: this.sourceNodeId, level: 0 });
+
+        const q: QueueItem[] = [];
+        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         while (q.length > 0) {
             const cur = q.shift();
-            this.insertToGraph(cur.id);
+            this.insertToGraph(cur);
             if (cur.level >= -1) {
-                this.rawGraph.outEdges(cur.id).map(x => {
-                    this.processedGraph.setEdge(x.v, x.w);
-                    if (!this.processedGraph.node(x.w))
-                        q.push({ id: x.w, level: cur.level + 1 === 0 ? NaN : cur.level + 1 });
-                });
+                this.searchDown(cur, q);
             }
             if (cur.level <= 1) {
-                this.rawGraph.inEdges(cur.id).map(x => {
-                    this.processedGraph.setEdge(x.v, x.w);
-                    if (!this.processedGraph.node(x.v))
-                        q.push({ id: x.v, level: cur.level - 1 === 0 ? NaN : cur.level - 1 });
-                });
+                this.searchUp(cur, q);
             }
         }
     }
 
-
-    public getGlobalGraph() {
+    getGlobalGraph() {
         this.initProcessedGraph();
-        const nodesMaximum = Number(getSetting("nodesMaximum"));
-        if (isNaN(nodesMaximum)) {
-            showMessage(
-                i18n.nodesMaximumParseErrorMsg,
-                3000,
-                "info"
-            );
-            return;
-        }
+        const nodesMaximum = +getSetting("nodesMaximum");
+
+        const q: QueueItem[] = [];
+        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         let count = 0;
-        const q = [];
-        q.push(this.sourceNodeId);
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
-            if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
             this.insertToGraph(cur);
-            const outEdges = this.rawGraph.outEdges(cur);
-            outEdges.map((x: any) => {
-                this.processedGraph.setEdge(x.v, x.w);
-                q.push(x.w);
-            });
-            const inEdges = this.rawGraph.inEdges(cur);
-            inEdges.map((x: any) => {
-                this.processedGraph.setEdge(x.v, x.w);
-                q.push(x.v);
-            });
+            this.searchDown(cur, q);
+            this.searchUp(cur, q);
             count++;
-        }
-
-        while (q.length > 0) {
-            const cur = q.shift();
-            if (this.processedGraph.hasNode(cur) && this.processedGraph.node(cur)) continue;
-            this.processedGraph.removeNode(cur);
         }
     }
 
     getNeighborGraph() {
-        const maxNeighborDepth = getSetting("neighborDepth");
+        const neighborDepth = +getSetting("neighborDepth");
         this.initProcessedGraph();
 
-        const q = [];
-        q.push({ id: this.sourceNodeId, level: 0 });
+        const q: QueueItem[] = [];
+        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
+
         while (q.length > 0) {
             const cur = q.shift();
-            if (this.processedGraph.node(cur.id)) continue;
-
-            this.insertToGraph(cur.id);
-            const outEdges = this.rawGraph.outEdges(cur.id);
-            outEdges.map(x => {
-                if (cur.level < maxNeighborDepth || this.processedGraph.hasNode(x.w)) {
-                    this.processedGraph.setEdge(x.v, x.w);
-                }
-                if (this.processedGraph.hasNode(x.w)) {
-                    q.push({ id: x.w, level: cur.level + 1 });
-                }
-            });
-            const inEdges = this.rawGraph.inEdges(cur.id);
-            inEdges.map((x: any) => {
-
-                if (cur.level < maxNeighborDepth || this.processedGraph.hasNode(x.v)) {
-                    this.processedGraph.setEdge(x.v, x.w);
-                }
-                if (this.processedGraph.hasNode(x.v)) {
-                    q.push({ id: x.v, level: cur.level + 1 });
-                }
-            });
+            this.insertToGraph(cur);
+            if (cur.count < neighborDepth) {
+                this.searchDown(cur, q);
+                this.searchUp(cur, q);
+            }
         }
+    }
 
+
+
+    searchDown(cur: QueueItem, q: QueueItem[]) {
+        this.rawGraph.outEdges(cur.id)
+            .filter(x => !this.processedGraph.hasNode(x.w))
+            .forEach(x => q.push({
+                id: x.w,
+                edge: x,
+                level: cur.level + 1 === 0 ? NaN : cur.level + 1,
+                count: cur.count + 1
+            }));
+    }
+
+    searchUp(cur: QueueItem, q: QueueItem[]) {
+        this.rawGraph.inEdges(cur.id)
+            .filter(x => !this.processedGraph.hasNode(x.v))
+            .forEach(x => q.push({
+                id: x.v,
+                edge: x,
+                level: cur.level - 1 === 0 ? NaN : cur.level - 1,
+                count: cur.count + 1
+            }));
     }
 
     Threshold: number;
@@ -458,10 +358,86 @@ class EnhancedGraph {
     }
 
 
-    private insertToGraph = (node: string) => {
-        if (!node) return;
-        this.processedGraph.setNode(node, this.rawGraph.node(node));
+    private insertToGraph = (cur: QueueItem) => {
+        this.processedGraph.setNode(cur.id, this.rawGraph.node(cur.id));
+        if (cur.edge)
+            this.processedGraph.setEdge(cur.edge.v, cur.edge.w);
     };
+
+    sunbrushDisplay() {
+        this.processSunburst();
+
+        this.myChart.clear();
+        this.myChart.off("click");
+
+        const option: ECOption = {
+            series: {
+                type: "sunburst",
+
+                nodeClick: "link",
+                data: this.sunburstMethod === "source" ? this.sourceGraphData : this.sinkGraphData,
+                radius: [0, "95%"],
+                sort: "desc",
+
+                emphasis: {
+                    focus: "descendant",
+                },
+
+                startAngle: 91,
+
+                levels: [
+                    {},
+                    {
+                        r0: "15%",
+                        r: "40%",
+                        itemStyle: {
+                            borderWidth: 2,
+                        },
+                        label: {
+                            align: "right",
+                            minAngle: 6,
+                        },
+                    },
+                    {
+                        r0: "40%",
+                        r: "70%",
+                        label: {
+                            align: "center",
+                            minAngle: 4,
+                        },
+                    },
+                    {
+                        r0: "70%",
+                        r: "72%",
+                        label: {
+                            position: "outside",
+                            padding: 3,
+                            silent: false,
+                            minAngle: 2,
+                        },
+                        itemStyle: {
+                            borderWidth: 3,
+                        },
+                    },
+                ],
+            },
+        };
+
+        option && this.myChart.setOption(option);
+
+        this.myChart.on("click", function (params: echarts.ECElementEvent) {
+            // @ts-ignore
+            const objId: string = params.data.id;
+            if (objId) {
+                openTab({ app: plugin.app, doc: { id: objId, action: ["cb-get-focus"] } });
+
+                if (getSetting("autoFollow") === "true") {
+                    enhancedGraph.sourceNodeId = objId;
+                    enhancedGraph.Display();
+                }
+            }
+        });
+    }
 
     public Display() {
         if (!this.sourceNodeId || this.sourceNodeId == "") {
@@ -481,13 +457,18 @@ class EnhancedGraph {
             // );
             return;
         }
+
         this.processGraph();
+        console.log("1");
+        console.log(dagre.graphlib.json.write(this.processedGraph));
         dagre.layout(this.processedGraph);
+        console.log("2");
+        console.log(dagre.graphlib.json.write(this.processedGraph));
+        const dagreLayout: GraphJSON = dagre.graphlib.json.write(this.processedGraph);
 
-        const dagreLayout: Graph = dagre.graphlib.json.write(this.processedGraph);
+        this.myChart.clear();
+        this.myChart.off("click");
 
-        this.myChart.dispose();
-        this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
         const option: ECOption = {
             tooltip: {},
             animationDuration: 1500,
