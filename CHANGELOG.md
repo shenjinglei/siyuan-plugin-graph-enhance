@@ -1,4 +1,12 @@
-# 更改日志 | CHANGE LOG
+# CHANGE LOG
+
+## 0.2.0/2023-10-20
+
+- [v0.1.7 ... v0.2.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.1.7...v0.2.0)
+- Added Source Graph
+- Added Sink Graph
+- Added Neighbor Graph
+- Added V&H Graph
 
 ## 0.1.7/2023-10-15
 
