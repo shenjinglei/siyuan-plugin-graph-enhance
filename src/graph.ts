@@ -35,7 +35,14 @@ interface GraphJSON {
     };
     nodes: {
         v: string,
-        value: any
+        value: {
+            label: string,
+            width: number,
+            height: number,
+            x: number,
+            y: number,
+            color?: "start" | "normal" | "from" | "to"
+        }
     }[];
     edges: {
         v: string,
@@ -56,21 +63,22 @@ interface SunburstNode {
 interface Graph {
     setDefaultEdgeLabel(arg0: () => any): void;
     setGraph: (g: any) => void;
-    setNode: (v: string, value: any) => Graph;
+    setNode: (v: string, label: any) => Graph;
     hasNode: (v: string) => boolean;
-    setEdge: (v: string, w: string) => Graph;
+    setEdge: (v: string, w: string, label?: any) => Graph;
     outEdges: (v: string) => DagreEdge[];
     inEdges: (w: string) => DagreEdge[];
     sources: () => string[];
     sinks: () => string[];
     node: (v: string) => any;
+    edge: (v: string, w: string) => any;
     nodes: () => string[];
     removeNode: (v: string) => void;
 }
 
 interface DagreEdge {
     v: string,
-    w: string
+    w: string,
 }
 
 interface EChartNode {
@@ -90,8 +98,12 @@ interface QueueItem {
     count: number
 }
 
-
-
+const Color = {
+    start: "#aa0000",
+    normal: "#003cb4",
+    from: "#8c13aa",
+    to: "#008600"
+};
 
 class EnhancedGraph {
     myChart: echarts.ECharts;
@@ -108,6 +120,10 @@ class EnhancedGraph {
         this.myChart.resize(param);
     }
 
+    segregation = {
+        nodeReg: "^Phrase$",
+        pos: -3
+    };
 
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
         this.rawGraph = new graphlib.Graph();
@@ -120,6 +136,32 @@ class EnhancedGraph {
                 .map(x => this.rawGraph.removeNode(x.id));
         }
 
+        const disconnSetting = JSON.parse(getSetting("disconnection")) as any[][];
+
+        for (const d of disconnSetting) {
+            let i = d[1];
+            let filteredEdges = nodes
+                .filter(x => RegExp(d[0]).test(x.label))
+                .flatMap(x => i > 0 ? this.rawGraph.outEdges(x.id) : this.rawGraph.inEdges(x.id));
+
+            if (i > 0) {
+                while (i > 1) {
+                    filteredEdges = filteredEdges.flatMap(x => this.rawGraph.outEdges(x.w));
+                    i--;
+                }
+            } else {
+                while (i < -1) {
+                    filteredEdges = filteredEdges.flatMap(x => this.rawGraph.inEdges(x.v));
+                    i++;
+                }
+            }
+
+            filteredEdges.forEach(e => {
+                this.rawGraph.setEdge(e.v, e.w, { state: "broken" });
+                this.rawGraph.setNode(e.v, { ...this.rawGraph.node(e.v), color: "from" });
+                this.rawGraph.setNode(e.w, { ...this.rawGraph.node(e.w), color: "to" });
+            });
+        }
 
         this.sourceGraphData = undefined;
         this.sinkGraphData = undefined;
@@ -256,14 +298,13 @@ class EnhancedGraph {
         }
     }
 
-
-
     searchDown(cur: QueueItem, q: QueueItem[]) {
         this.rawGraph.outEdges(cur.id)
-            .filter(x => !this.processedGraph.hasNode(x.w))
-            .forEach(x => q.push({
-                id: x.w,
-                edge: x,
+            .filter(e => !this.processedGraph.hasNode(e.w))
+            .filter(e => cur.count === 0 || this.rawGraph.edge(e.v, e.w)?.state !== "broken")
+            .forEach(e => q.push({
+                id: e.w,
+                edge: e,
                 level: cur.level + 1 === 0 ? NaN : cur.level + 1,
                 count: cur.count + 1
             }));
@@ -272,6 +313,7 @@ class EnhancedGraph {
     searchUp(cur: QueueItem, q: QueueItem[]) {
         this.rawGraph.inEdges(cur.id)
             .filter(x => !this.processedGraph.hasNode(x.v))
+            .filter(e => cur.count === 0 || this.rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(x => q.push({
                 id: x.v,
                 edge: x,
@@ -358,8 +400,11 @@ class EnhancedGraph {
     }
 
 
-    private insertToGraph = (cur: QueueItem) => {
-        this.processedGraph.setNode(cur.id, this.rawGraph.node(cur.id));
+    insertToGraph = (cur: QueueItem) => {
+        if (cur.count === 0)
+            this.processedGraph.setNode(cur.id, { ...this.rawGraph.node(cur.id), color: "start" });
+        else
+            this.processedGraph.setNode(cur.id, this.rawGraph.node(cur.id));
         if (cur.edge)
             this.processedGraph.setEdge(cur.edge.v, cur.edge.w);
     };
@@ -485,21 +530,20 @@ class EnhancedGraph {
                         show: true,
                     },
                     data: dagreLayout.nodes.filter(x => x.value).map(x => {
-                        if (x.v === this.sourceNodeId) {
-                            return {
-                                id: x.v, name: x.value.label, x: x.value.x, y: x.value.y,
-                                itemStyle: {
-                                    color: "rgba(205, 112, 112, 1)",
-                                },
-                                label: {
-                                    color: "#FFF",
-                                    textBorderColor: "inherit",
-                                    textBorderWidth: 2
-                                }
-
-                            };
-                        }
-                        return { id: x.v, name: x.value.label, value: x.v, x: x.value.x, y: x.value.y };
+                        return {
+                            id: x.v,
+                            name: x.value.label,
+                            x: x.value.x,
+                            y: x.value.y,
+                            itemStyle: {
+                                color: Color[x.value.color ?? "normal"]
+                            },
+                            label: {
+                                color: "#FFF",
+                                textBorderColor: "inherit",
+                                textBorderWidth: 2,
+                            }
+                        };
                     }),
                     links: dagreLayout.edges.map((x: any) => {
                         return { source: x.v, target: x.w };
@@ -511,11 +555,11 @@ class EnhancedGraph {
         this.myChart.setOption(option);
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
             // @ts-ignore
-            openTab({ app: plugin.app, doc: { id: params.value, action: ["cb-get-focus"] } });
+            openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
 
             if (getSetting("autoFollow") === "true") {
                 // @ts-ignore
-                enhancedGraph.sourceNodeId = params.value;
+                enhancedGraph.sourceNodeId = params.data.id;
                 enhancedGraph.Display();
             }
         });

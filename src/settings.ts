@@ -2,7 +2,7 @@ import { i18n, plugin, STORAGE_NAME } from "./utils";
 import { Setting, showMessage } from "siyuan";
 import { autoFollow } from "./dock";
 
-export function getSetting(settingName: string) {
+export function getSetting(settingName: string): string {
     return plugin.data[STORAGE_NAME][settingName];
 }
 
@@ -50,7 +50,8 @@ export function settingInit() {
                     neighborDepth: neighborDepthElement.value,
                     autoFollow: autoFollowElement.value,
                     sourceThreshold: sourceThresholdElement.value,
-                    sinkThreshold: sinkThresholdElement.value
+                    sinkThreshold: sinkThresholdElement.value,
+                    disconnection: disconnectionElement.value
                 });
 
 
@@ -160,6 +161,18 @@ export function settingInit() {
         createActionElement: () => {
             sinkThresholdElement.value = plugin.data[STORAGE_NAME].sinkThreshold;
             return sinkThresholdElement;
+        },
+    });
+
+    const disconnectionElement = document.createElement("textarea");
+    disconnectionElement.id = "disconnection";
+    disconnectionElement.placeholder = "请输入";
+    disconnectionElement.className = "b3-text-field fn__block";
+    plugin.setting.addItem({
+        title: "切断链接",
+        createActionElement: () => {
+            disconnectionElement.value = plugin.data[STORAGE_NAME].disconnection;
+            return disconnectionElement;
         },
     });
 }
