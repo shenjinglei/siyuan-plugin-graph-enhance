@@ -1,7 +1,7 @@
 {
   "name": "graph-enhance",
   "author": "shenjinglei",
-  "url": " https://github.com/shenjinglei/siyuan-plugin-graph-enhance",
+  "url": "https://github.com/shenjinglei/siyuan-plugin-graph-enhance",
   "version": "0.2.1",
   "minAppVersion": "2.10.6",
   "backends": ["all"],
