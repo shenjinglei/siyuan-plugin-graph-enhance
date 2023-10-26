@@ -528,6 +528,7 @@ class EnhancedGraph {
                     roam: true,
                     label: {
                         show: true,
+                        position: "bottom",
                     },
                     data: dagreLayout.nodes.filter(x => x.value).map(x => {
                         return {
@@ -535,12 +536,14 @@ class EnhancedGraph {
                             name: x.value.label,
                             x: x.value.x,
                             y: x.value.y,
+                            symbol: "circle",
+                            symbolSize: 5,
                             itemStyle: {
                                 color: Color[x.value.color ?? "normal"]
                             },
                             label: {
-                                color: "#FFF",
-                                textBorderColor: "inherit",
+                                color: "inherit",
+                                textBorderColor: "#FFF",
                                 textBorderWidth: 2,
                             }
                         };
