@@ -51,7 +51,7 @@ export function settingInit() {
                     autoFollow: autoFollowElement.value,
                     sourceThreshold: sourceThresholdElement.value,
                     sinkThreshold: sinkThresholdElement.value,
-                    disconnection: disconnectionElement.value
+                    separation: separationElement.value
                 });
 
 
@@ -164,15 +164,15 @@ export function settingInit() {
         },
     });
 
-    const disconnectionElement = document.createElement("textarea");
-    disconnectionElement.id = "disconnection";
-    disconnectionElement.placeholder = "请输入";
-    disconnectionElement.className = "b3-text-field fn__block";
+    const separationElement = document.createElement("textarea");
+    separationElement.id = "separation";
+    separationElement.placeholder = i18n.pleaseInput;
+    separationElement.className = "b3-text-field fn__block";
     plugin.setting.addItem({
-        title: "切断链接",
+        title: i18n.separationTitle,
         createActionElement: () => {
-            disconnectionElement.value = plugin.data[STORAGE_NAME].disconnection;
-            return disconnectionElement;
+            separationElement.value = plugin.data[STORAGE_NAME].separation;
+            return separationElement;
         },
     });
 }

@@ -19,7 +19,7 @@ export default class GraphEnhancePlugin extends Plugin {
                     autoFollow: "false",
                     sourceThreshold: "3",
                     sinkThreshold: "3",
-                    disconnection: "[]",
+                    separation: "",
                 }, this.data[STORAGE_NAME])
             );
 

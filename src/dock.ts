@@ -1,7 +1,6 @@
 import { enhancedGraph } from "./graph";
 import { i18n, plugin, isMobile } from "./utils";
 import { adaptHotkey, fetchSyncPost } from "siyuan";
-import { getSetting } from "./settings";
 
 import "./index.scss";
 const DOCK_TYPE = "dock_tab";

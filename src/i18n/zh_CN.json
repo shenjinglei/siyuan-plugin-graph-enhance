@@ -36,5 +36,8 @@
   "settingSinkThreshold": "终点图阈值",
   "checkNeighborDepthErrorMsg": "邻近图深度不是数字！设置未保存",
   "checkSourceThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
-  "checkSinkThresholdErrorMsg": "起点图阈值不是数字！设置未保存"
+  "checkSinkThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
+
+  "separationTitle": "图分割配置",
+  "pleaseInput": "请输入"
 }

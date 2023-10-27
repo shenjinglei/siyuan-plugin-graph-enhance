@@ -1,5 +1,17 @@
 # CHANGE LOG
 
+## 0.3.0/2023-10-28
+
+- [v0.2.1 ... v0.3.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.2.1...v0.3.0)
+- Added a function that separates the graph.
+- Adjusted the style of graphs.
+- Fit the dark mode
+
+## 0.2.1/2023-10-21
+
+- [v0.2.0 ... v0.2.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.2.0...v0.2.1)
+- none
+
 ## 0.2.0/2023-10-20
 
 - [v0.1.7 ... v0.2.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.1.7...v0.2.0)

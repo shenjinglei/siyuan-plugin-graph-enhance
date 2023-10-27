@@ -36,5 +36,8 @@
   "settingSinkThreshold": "Sink Graph Threshold",
   "checkNeighborDepthErrorMsg": "Neighbor Graph Depth is not a number! Setting hasn't saved",
   "checkSourceThresholdErrorMsg": "Source Graph Threshold is not a number! Setting hasn't saved",
-  "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved"
+  "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved",
+
+  "separationTitle": "graph separation configuration",
+  "pleaseInput": "please input"
 }
