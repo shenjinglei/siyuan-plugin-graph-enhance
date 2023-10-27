@@ -27,29 +27,7 @@ type ECOption = ComposeOption<
     SunburstSeriesOption | GraphSeriesOption
 >;
 
-interface GraphJSON {
-    options: {
-        directed: boolean,
-        multigraph: boolean,
-        compound: boolean
-    };
-    nodes: {
-        v: string,
-        value: {
-            label: string,
-            width: number,
-            height: number,
-            x: number,
-            y: number,
-            color?: "start" | "normal" | "from" | "to"
-        }
-    }[];
-    edges: {
-        v: string,
-        w: string,
-        value: any
-    }[];
-}
+
 
 interface SunburstNode {
     id: string,
@@ -63,17 +41,45 @@ interface SunburstNode {
 interface Graph {
     setDefaultEdgeLabel(arg0: () => any): void;
     setGraph: (g: any) => void;
-    setNode: (v: string, label: any) => Graph;
+    setNode: (v: string, label: DagreNodeValue) => Graph;
     hasNode: (v: string) => boolean;
     setEdge: (v: string, w: string, label?: any) => Graph;
     outEdges: (v: string) => DagreEdge[];
     inEdges: (w: string) => DagreEdge[];
     sources: () => string[];
     sinks: () => string[];
-    node: (v: string) => any;
+    node: (v: string) => DagreNodeValue;
     edge: (v: string, w: string) => any;
     nodes: () => string[];
     removeNode: (v: string) => void;
+}
+
+interface DagreOutput {
+    options: {
+        directed: boolean,
+        multigraph: boolean,
+        compound: boolean
+    };
+    nodes: {
+        v: string,
+        value: DagreNodeValue
+    }[];
+    edges: {
+        v: string,
+        w: string,
+        value: any
+    }[];
+}
+
+interface DagreNodeValue {
+    label: string,
+    width: number,
+    height: number,
+    x?: number,
+    y?: number,
+    color?: "start" | "normal" | "from" | "to" | "separate",
+    separate?: boolean
+    state?: number
 }
 
 interface DagreEdge {
@@ -102,7 +108,8 @@ const Color = {
     start: "#aa0000",
     normal: "#003cb4",
     from: "#8c13aa",
-    to: "#008600"
+    to: "#008600",
+    separate: "#ac7300",
 };
 
 class EnhancedGraph {
@@ -120,11 +127,6 @@ class EnhancedGraph {
         this.myChart.resize(param);
     }
 
-    segregation = {
-        nodeReg: "^Phrase$",
-        pos: -3
-    };
-
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
         this.rawGraph = new graphlib.Graph();
 
@@ -136,32 +138,67 @@ class EnhancedGraph {
                 .map(x => this.rawGraph.removeNode(x.id));
         }
 
-        const disconnSetting = JSON.parse(getSetting("disconnection")) as any[][];
+        const disconnSetting = getSetting("disconnection").split("\n").map(x => {
+            const index = x.lastIndexOf(",");
+            return {
+                nodeReg: x.slice(0, index),
+                pos: Number(x.slice(index + 1))
+            };
+        });
+
+        console.log("disconnSetting");
+        console.log(disconnSetting);
 
         for (const d of disconnSetting) {
-            let i = d[1];
-            let filteredEdges = nodes
-                .filter(x => RegExp(d[0]).test(x.label))
-                .flatMap(x => i > 0 ? this.rawGraph.outEdges(x.id) : this.rawGraph.inEdges(x.id));
+            if (/^\s*$/.test(d.nodeReg) || Number.isNaN(d.pos)) continue;
 
-            if (i > 0) {
-                while (i > 1) {
-                    filteredEdges = filteredEdges.flatMap(x => this.rawGraph.outEdges(x.w));
-                    i--;
+            let i = d.pos;
+            if (Number.isInteger(i)) {
+                let filteredNodes = nodes.filter(x => RegExp(d.nodeReg).test(x.label)).map(x => x.id);
+
+                if (i > 0) {
+                    while (i > 0) {
+                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.outEdges(x)).map(x => x.w);
+                        i--;
+                    }
+                } else {
+                    while (i < 0) {
+                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.inEdges(x).map(x => x.v));
+                        i++;
+                    }
                 }
+
+                filteredNodes.forEach(s => {
+                    this.rawGraph.setNode(s, { ...this.rawGraph.node(s), separate: true, color: "separate" });
+                });
+
             } else {
-                while (i < -1) {
-                    filteredEdges = filteredEdges.flatMap(x => this.rawGraph.inEdges(x.v));
-                    i++;
-                }
-            }
+                let filteredEdges = nodes
+                    .filter(x => RegExp(d.nodeReg).test(x.label))
+                    .flatMap(x => i > 0 ? this.rawGraph.outEdges(x.id) : this.rawGraph.inEdges(x.id));
 
-            filteredEdges.forEach(e => {
-                this.rawGraph.setEdge(e.v, e.w, { state: "broken" });
-                this.rawGraph.setNode(e.v, { ...this.rawGraph.node(e.v), color: "from" });
-                this.rawGraph.setNode(e.w, { ...this.rawGraph.node(e.w), color: "to" });
-            });
+                if (i > 0) {
+                    while (i > 1) {
+                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.outEdges(x.w));
+                        i--;
+                    }
+                } else {
+                    while (i < -1) {
+                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.inEdges(x.v));
+                        i++;
+                    }
+                }
+
+                filteredEdges.forEach(e => {
+                    this.rawGraph.setEdge(e.v, e.w, { state: "broken" });
+                    this.rawGraph.setNode(e.v, { ...this.rawGraph.node(e.v), color: "from" });
+                    this.rawGraph.setNode(e.w, { ...this.rawGraph.node(e.w), color: "to" });
+                });
+            }
         }
+
+        console.log("rawGraph");
+        console.log(dagre.graphlib.json.write(this.rawGraph));
 
         this.sourceGraphData = undefined;
         this.sinkGraphData = undefined;
@@ -218,7 +255,8 @@ class EnhancedGraph {
 
         while (q.length > 0) {
             const cur = q.shift();
-            this.insertToGraph(cur);
+            this.insertNode(cur);
+            this.insertEdge(cur.edge);
             if (cur.level >= 0) {
                 this.searchDown(cur, q);
             }
@@ -236,7 +274,8 @@ class EnhancedGraph {
 
         while (q.length > 0) {
             const cur = q.shift();
-            this.insertToGraph(cur);
+            this.insertNode(cur);
+            this.insertEdge(cur.edge);
             if (cur.level >= 0) {
                 this.searchUp(cur, q);
             }
@@ -254,7 +293,8 @@ class EnhancedGraph {
 
         while (q.length > 0) {
             const cur = q.shift();
-            this.insertToGraph(cur);
+            this.insertNode(cur);
+            this.insertEdge(cur.edge);
             if (cur.level >= -1) {
                 this.searchDown(cur, q);
             }
@@ -274,7 +314,8 @@ class EnhancedGraph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
-            this.insertToGraph(cur);
+            this.insertNode(cur);
+            this.insertEdge(cur.edge);
             this.searchDown(cur, q);
             this.searchUp(cur, q);
             count++;
@@ -290,7 +331,8 @@ class EnhancedGraph {
 
         while (q.length > 0) {
             const cur = q.shift();
-            this.insertToGraph(cur);
+            this.insertNode(cur);
+            this.insertEdge(cur.edge);
             if (cur.count < neighborDepth) {
                 this.searchDown(cur, q);
                 this.searchUp(cur, q);
@@ -298,9 +340,36 @@ class EnhancedGraph {
         }
     }
 
+    insertNode = (cur: QueueItem) => {
+        if (this.processedGraph.hasNode(cur.id)) return;
+
+        const rawNodeValue = this.rawGraph.node(cur.id);
+        if (cur.count === 0)
+            this.processedGraph.setNode(cur.id, { ...rawNodeValue, color: "start" });
+        else
+            this.processedGraph.setNode(cur.id, { ...rawNodeValue });
+
+    };
+
+    insertEdge = (edge: DagreEdge) => {
+        if (!edge) return;
+        this.processedGraph.setEdge(edge.v, edge.w);
+    };
+
     searchDown(cur: QueueItem, q: QueueItem[]) {
+        const curNodeValue = this.processedGraph.node(cur.id);
+
+        if (curNodeValue?.state & 1) return; // search is already done
+
+        if (curNodeValue?.separate && cur.id === cur.edge?.w) return; // can't penetrate
+
+        console.log(cur);
+        console.log(curNodeValue);
+
+        curNodeValue["state"] = curNodeValue?.state | 1;
+
         this.rawGraph.outEdges(cur.id)
-            .filter(e => !this.processedGraph.hasNode(e.w))
+            .filter(e => this.processedGraph.node(e.w)?.state !== 3)
             .filter(e => cur.count === 0 || this.rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(e => q.push({
                 id: e.w,
@@ -311,8 +380,19 @@ class EnhancedGraph {
     }
 
     searchUp(cur: QueueItem, q: QueueItem[]) {
+        const curNodeValue = this.processedGraph.node(cur.id);
+
+        if (curNodeValue?.state & 2) return; // search is already done
+
+        if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
+
+        console.log(cur);
+        console.log(curNodeValue);
+
+        curNodeValue["state"] = curNodeValue?.state | 2;
+
         this.rawGraph.inEdges(cur.id)
-            .filter(x => !this.processedGraph.hasNode(x.v))
+            .filter(e => this.processedGraph.node(e.v)?.state !== 3)
             .filter(e => cur.count === 0 || this.rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(x => q.push({
                 id: x.v,
@@ -321,6 +401,7 @@ class EnhancedGraph {
                 count: cur.count + 1
             }));
     }
+
 
     Threshold: number;
 
@@ -400,14 +481,6 @@ class EnhancedGraph {
     }
 
 
-    insertToGraph = (cur: QueueItem) => {
-        if (cur.count === 0)
-            this.processedGraph.setNode(cur.id, { ...this.rawGraph.node(cur.id), color: "start" });
-        else
-            this.processedGraph.setNode(cur.id, this.rawGraph.node(cur.id));
-        if (cur.edge)
-            this.processedGraph.setEdge(cur.edge.v, cur.edge.w);
-    };
 
     sunbrushDisplay() {
         this.processSunburst();
@@ -509,7 +582,7 @@ class EnhancedGraph {
         dagre.layout(this.processedGraph);
         console.log("2");
         console.log(dagre.graphlib.json.write(this.processedGraph));
-        const dagreLayout: GraphJSON = dagre.graphlib.json.write(this.processedGraph);
+        const dagreLayout: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
 
         this.myChart.clear();
         this.myChart.off("click");
@@ -518,6 +591,7 @@ class EnhancedGraph {
             tooltip: {},
             animationDuration: 1500,
             animationEasingUpdate: "quinticInOut",
+            backgroundColor: "#FFF",
             series: [
                 {
                     name: "graph",
@@ -543,7 +617,6 @@ class EnhancedGraph {
                             },
                             label: {
                                 color: "inherit",
-                                textBorderColor: "#FFF",
                                 textBorderWidth: 2,
                             }
                         };
