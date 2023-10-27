@@ -104,12 +104,12 @@ interface QueueItem {
     count: number
 }
 
-const Color = {
+let Color = {
     start: "#aa0000",
     normal: "#003cb4",
     from: "#8c13aa",
     to: "#008600",
-    separate: "#ac7300",
+    separate: "#aaaa00",
 };
 
 class EnhancedGraph {
@@ -121,7 +121,6 @@ class EnhancedGraph {
     sourceNodeId: string;
     searchMethod = "cross";
     sunburstMethod = "source";
-
 
     resize(param: { width: number, height: number }) {
         this.myChart.resize(param);
@@ -138,7 +137,7 @@ class EnhancedGraph {
                 .map(x => this.rawGraph.removeNode(x.id));
         }
 
-        const disconnSetting = getSetting("disconnection").split("\n").map(x => {
+        const separationSetting = getSetting("separation").split("\n").map(x => {
             const index = x.lastIndexOf(",");
             return {
                 nodeReg: x.slice(0, index),
@@ -146,10 +145,7 @@ class EnhancedGraph {
             };
         });
 
-        console.log("disconnSetting");
-        console.log(disconnSetting);
-
-        for (const d of disconnSetting) {
+        for (const d of separationSetting) {
             if (/^\s*$/.test(d.nodeReg) || Number.isNaN(d.pos)) continue;
 
             let i = d.pos;
@@ -197,8 +193,23 @@ class EnhancedGraph {
             }
         }
 
-        console.log("rawGraph");
-        console.log(dagre.graphlib.json.write(this.rawGraph));
+        if (getThemeMode() === "dark") {
+            Color = {
+                start: "#ffa87c",
+                normal: "#ffff7f",
+                from: "#e6b4e8",
+                to: "#6bff6b",
+                separate: "#8ea3e8",
+            };
+        } else {
+            Color = {
+                start: "#aa0000",
+                normal: "#003cb4",
+                from: "#8c13aa",
+                to: "#008600",
+                separate: "#aaaa00",
+            };
+        }
 
         this.sourceGraphData = undefined;
         this.sinkGraphData = undefined;
@@ -363,9 +374,6 @@ class EnhancedGraph {
 
         if (curNodeValue?.separate && cur.id === cur.edge?.w) return; // can't penetrate
 
-        console.log(cur);
-        console.log(curNodeValue);
-
         curNodeValue["state"] = curNodeValue?.state | 1;
 
         this.rawGraph.outEdges(cur.id)
@@ -385,9 +393,6 @@ class EnhancedGraph {
         if (curNodeValue?.state & 2) return; // search is already done
 
         if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
-
-        console.log(cur);
-        console.log(curNodeValue);
 
         curNodeValue["state"] = curNodeValue?.state | 2;
 
@@ -577,11 +582,9 @@ class EnhancedGraph {
         }
 
         this.processGraph();
-        console.log("1");
-        console.log(dagre.graphlib.json.write(this.processedGraph));
+
         dagre.layout(this.processedGraph);
-        console.log("2");
-        console.log(dagre.graphlib.json.write(this.processedGraph));
+
         const dagreLayout: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
 
         this.myChart.clear();
@@ -591,7 +594,6 @@ class EnhancedGraph {
             tooltip: {},
             animationDuration: 1500,
             animationEasingUpdate: "quinticInOut",
-            backgroundColor: "#FFF",
             series: [
                 {
                     name: "graph",
@@ -617,7 +619,6 @@ class EnhancedGraph {
                             },
                             label: {
                                 color: "inherit",
-                                textBorderWidth: 2,
                             }
                         };
                     }),
@@ -643,7 +644,13 @@ class EnhancedGraph {
 
     public init() {
         this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
+
+
     }
+}
+
+function getThemeMode() {
+    return document.querySelector("html")?.getAttribute("data-theme-mode");
 }
 
 export const enhancedGraph: EnhancedGraph = new EnhancedGraph();
