@@ -3,6 +3,7 @@ import { i18n, plugin, isMobile } from "./utils";
 import { adaptHotkey, fetchSyncPost } from "siyuan";
 
 import "./index.scss";
+import { getSetting } from "./settings";
 const DOCK_TYPE = "dock_tab";
 
 export function initDock() {
@@ -146,6 +147,12 @@ export function initDock() {
                 width: container.offsetWidth,
                 height: container.offsetHeight
             });
+            if (getSetting("autoFollow") === "true" && container.offsetWidth !== 0 && container.offsetHeight !== 0) {
+                plugin.eventBus.off("switch-protyle", autoFollow);
+                plugin.eventBus.on("switch-protyle", autoFollow);
+            } else {
+                plugin.eventBus.off("switch-protyle", autoFollow);
+            }
         }
     });
 }
@@ -160,16 +167,15 @@ function getDocid() {
 
 export async function autoFollow({ detail }: any) {
 
-    if (enhancedGraph.sourceNodeId !== detail.protyle.block.rootID) {
-        enhancedGraph.sourceNodeId = detail.protyle.block.rootID;
+    if (enhancedGraph.sourceNodeId === detail.protyle.block.rootID) return;
 
-        if (!enhancedGraph.rawGraph) {
-            await refreashGraph();
-        }
+    enhancedGraph.sourceNodeId = detail.protyle.block.rootID;
 
-        enhancedGraph.Display();
+    if (!enhancedGraph.rawGraph) {
+        await refreashGraph();
     }
 
+    enhancedGraph.Display();
 }
 
 function refreashGraph() {

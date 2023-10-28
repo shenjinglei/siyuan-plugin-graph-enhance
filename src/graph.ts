@@ -573,11 +573,6 @@ class EnhancedGraph {
             const objId: string = params.data.id;
             if (objId) {
                 openTab({ app: plugin.app, doc: { id: objId, action: ["cb-get-focus"] } });
-
-                if (getSetting("autoFollow") === "true") {
-                    enhancedGraph.sourceNodeId = objId;
-                    enhancedGraph.Display();
-                }
             }
         });
     }
@@ -653,12 +648,6 @@ class EnhancedGraph {
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
             // @ts-ignore
             openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
-
-            if (getSetting("autoFollow") === "true") {
-                // @ts-ignore
-                enhancedGraph.sourceNodeId = params.data.id;
-                enhancedGraph.Display();
-            }
         });
     }
 

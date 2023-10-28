@@ -56,10 +56,10 @@ export function settingInit() {
 
 
             if (autoFollowElement.value === "true") {
-                plugin.eventBus.off("click-editorcontent", autoFollow);
-                plugin.eventBus.on("click-editorcontent", autoFollow);
+                plugin.eventBus.off("switch-protyle", autoFollow);
+                plugin.eventBus.on("switch-protyle", autoFollow);
             } else {
-                plugin.eventBus.off("click-editorcontent", autoFollow);
+                plugin.eventBus.off("switch-protyle", autoFollow);
             }
 
         }

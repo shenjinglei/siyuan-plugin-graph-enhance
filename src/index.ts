@@ -2,7 +2,7 @@ import { Plugin } from "siyuan";
 import "./index.scss";
 
 import { setI18n, STORAGE_NAME, setPlugin } from "./utils";
-import { initDock, autoFollow } from "./dock";
+import { initDock } from "./dock";
 import { settingInit } from "./settings";
 
 export default class GraphEnhancePlugin extends Plugin {
@@ -23,11 +23,7 @@ export default class GraphEnhancePlugin extends Plugin {
                 }, this.data[STORAGE_NAME])
             );
 
-            if (this.data[STORAGE_NAME].autoFollow === "true") {
-                this.eventBus.on("click-editorcontent", autoFollow);
-            } else {
-                this.eventBus.off("click-editorcontent", autoFollow);
-            }
+
         });
 
         setI18n(this.i18n);
