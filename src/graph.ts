@@ -79,6 +79,7 @@ interface DagreNodeValue {
     y?: number,
     color?: "start" | "normal" | "from" | "to" | "separate",
     separate?: boolean
+    dailynote?: boolean
     state?: number
 }
 
@@ -134,7 +135,10 @@ class EnhancedGraph {
 
         if (getSetting("dailynoteExcluded") === "true") {
             nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .map(x => this.rawGraph.removeNode(x.id));
+                .forEach(x => this.rawGraph.removeNode(x.id));
+        } else {
+            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                .forEach(x => this.rawGraph.node(x.id).dailynote = true);
         }
 
         const separationSetting = getSetting("separation").split("\n").map(x => {
@@ -260,11 +264,13 @@ class EnhancedGraph {
 
     public getAncestorGraph() {
         this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
 
         const q: QueueItem[] = [];
         q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
-        while (q.length > 0) {
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
             this.insertNode(cur);
             this.insertEdge(cur.edge);
@@ -274,16 +280,19 @@ class EnhancedGraph {
             if (cur.level <= 0) {
                 this.searchUp(cur, q);
             }
+            count++;
         }
     }
 
     public getBrotherGraph() {
         this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
 
         const q: QueueItem[] = [];
         q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
-        while (q.length > 0) {
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
             this.insertNode(cur);
             this.insertEdge(cur.edge);
@@ -293,16 +302,19 @@ class EnhancedGraph {
             if (cur.level <= 0) {
                 this.searchDown(cur, q);
             }
+            count++;
         }
     }
 
     getCrossGraph() {
         this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
 
         const q: QueueItem[] = [];
         q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
-        while (q.length > 0) {
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
             this.insertNode(cur);
             this.insertEdge(cur.edge);
@@ -312,6 +324,7 @@ class EnhancedGraph {
             if (cur.level <= 1) {
                 this.searchUp(cur, q);
             }
+            count++;
         }
     }
 
@@ -335,12 +348,14 @@ class EnhancedGraph {
 
     getNeighborGraph() {
         const neighborDepth = +getSetting("neighborDepth");
+        const nodesMaximum = +getSetting("nodesMaximum");
         this.initProcessedGraph();
 
         const q: QueueItem[] = [];
         q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
-        while (q.length > 0) {
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift();
             this.insertNode(cur);
             this.insertEdge(cur.edge);
@@ -348,6 +363,7 @@ class EnhancedGraph {
                 this.searchDown(cur, q);
                 this.searchUp(cur, q);
             }
+            count++;
         }
     }
 
@@ -374,6 +390,8 @@ class EnhancedGraph {
 
         if (curNodeValue?.separate && cur.id === cur.edge?.w) return; // can't penetrate
 
+        if (curNodeValue?.dailynote && cur.count !== 0) return;
+
         curNodeValue["state"] = curNodeValue?.state | 1;
 
         this.rawGraph.outEdges(cur.id)
@@ -393,6 +411,8 @@ class EnhancedGraph {
         if (curNodeValue?.state & 2) return; // search is already done
 
         if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
+
+        if (curNodeValue?.dailynote && cur.count !== 0) return;
 
         curNodeValue["state"] = curNodeValue?.state | 2;
 

@@ -19,9 +19,9 @@
   "dockBtnRefresh": "刷新",
 
   "pleaseInputNumber": "请输入数字",
-  "nodesMaximum": "全局图最大节点数",
-  "checkNodesMaximumErrorMsg": "全局图最大节点数不是数字！设置未保存",
-  "nodesMaximumParseErrorMsg": "全局图最大节点数设置不是一个数字，停止绘制",
+  "nodesMaximum": "最大节点数",
+  "checkNodesMaximumErrorMsg": "最大节点数不是数字！设置未保存",
+  "nodesMaximumParseErrorMsg": "最大节点数设置不是一个数字，停止绘制",
   "needStartPointMsg": "需要先选中一篇笔记",
   "needRefreshMsg": "未找到当前节点，可尝试刷新数据",
 
