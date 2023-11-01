@@ -133,14 +133,6 @@ class EnhancedGraph {
         nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
         edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
 
-        if (getSetting("dailynoteExcluded") === "true") {
-            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => this.rawGraph.removeNode(x.id));
-        } else {
-            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => this.rawGraph.node(x.id).dailynote = true);
-        }
-
         const separationSetting = getSetting("separation").split("\n").map(x => {
             const index = x.lastIndexOf(",");
             return {
@@ -195,6 +187,23 @@ class EnhancedGraph {
                     this.rawGraph.setNode(e.w, { ...this.rawGraph.node(e.w), color: "to" });
                 });
             }
+        }
+
+        if (getSetting("dailynoteExcluded") === "true") {
+            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                .forEach(x => this.rawGraph.removeNode(x.id));
+        } else {
+            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                .forEach(x => this.rawGraph.node(x.id).dailynote = true);
+        }
+
+        const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
+
+        for (const item of nodesExclusionSetting) {
+            if (/^\s*$/.test(item)) continue;
+
+            nodes.filter(x => RegExp(item).test(x.label))
+                .forEach(x => this.rawGraph.removeNode(x.id));
         }
 
         if (getThemeMode() === "dark") {
@@ -634,6 +643,7 @@ class EnhancedGraph {
                             },
                             label: {
                                 color: "inherit",
+                                fontFamily: "OPPOSans",
                             }
                         };
                     }),

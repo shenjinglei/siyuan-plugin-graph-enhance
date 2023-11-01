@@ -51,7 +51,8 @@ export function settingInit() {
                     autoFollow: autoFollowElement.value,
                     sourceThreshold: sourceThresholdElement.value,
                     sinkThreshold: sinkThresholdElement.value,
-                    separation: separationElement.value
+                    separation: separationElement.value,
+                    nodesExclusion: nodesExclusionElement.value
                 });
 
 
@@ -173,6 +174,18 @@ export function settingInit() {
         createActionElement: () => {
             separationElement.value = plugin.data[STORAGE_NAME].separation;
             return separationElement;
+        },
+    });
+
+    const nodesExclusionElement = document.createElement("textarea");
+    nodesExclusionElement.id = "nodesExclusion";
+    nodesExclusionElement.placeholder = i18n.pleaseInput;
+    nodesExclusionElement.className = "b3-text-field fn__block";
+    plugin.setting.addItem({
+        title: i18n.nodesExclusionTitle,
+        createActionElement: () => {
+            nodesExclusionElement.value = plugin.data[STORAGE_NAME].nodesExclusion;
+            return nodesExclusionElement;
         },
     });
 }

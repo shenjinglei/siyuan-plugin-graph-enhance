@@ -39,5 +39,7 @@
   "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved",
 
   "separationTitle": "graph separation configuration",
-  "pleaseInput": "please input"
+  "pleaseInput": "please input",
+
+  "nodesExclusionTitle": "nodes exclusion"
 }

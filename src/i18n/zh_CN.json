@@ -39,5 +39,7 @@
   "checkSinkThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
 
   "separationTitle": "图分割配置",
-  "pleaseInput": "请输入"
+  "pleaseInput": "请输入",
+
+  "nodesExclusionTitle": "排除节点"
 }
