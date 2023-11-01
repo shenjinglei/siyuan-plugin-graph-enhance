@@ -1,5 +1,11 @@
 # CHANGE LOG
 
+## 0.3.1/2023-11-01
+
+- [v0.3.0 ... v0.3.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.0...v0.3.1)
+  - The maximum number of nodes limit applies to all graphs.
+  - dailynote applies as separating nodes.
+
 ## 0.3.0/2023-10-28
 
 - [v0.2.1 ... v0.3.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.2.1...v0.3.0)
