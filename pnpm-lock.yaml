@@ -44,8 +44,8 @@ devDependencies:
     specifier: ^12.6.0
     version: 12.6.0(sass@1.62.1)(webpack@5.76.0)
   siyuan:
-    specifier: 0.8.4
-    version: 0.8.4
+    specifier: 0.8.8
+    version: registry.npmmirror.com/siyuan@0.8.8
   tslib:
     specifier: 2.4.0
     version: 2.4.0
@@ -1776,10 +1776,6 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /siyuan@0.8.4:
-    resolution: {integrity: sha512-hkFqTxIiRiPAgS237YV54rhijgHyl/HqPbmcrxn3SJxet3+EOXtPwNKx9awJDHXsp+w/p+VKlkHP3UElrurE4Q==}
-    dev: true
-
   /slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
@@ -2388,6 +2384,12 @@ packages:
     name: lodash
     version: 4.17.21
     dev: false
+
+  registry.npmmirror.com/siyuan@0.8.8:
+    resolution: {integrity: sha512-hWADf2RsEhDVIZhGMVq1CdvI4r1gKOdoI8nSvNszF9ztK/cwKQo90EWDwz/V7uSyWoTgt2xVDZXsIk3ZAS3cvA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/siyuan/-/siyuan-0.8.8.tgz}
+    name: siyuan
+    version: 0.8.8
+    dev: true
 
   registry.npmmirror.com/tslib@2.3.0:
     resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/tslib/-/tslib-2.3.0.tgz}
