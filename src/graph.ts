@@ -651,6 +651,81 @@ class EnhancedGraph {
         });
     }
 
+    processTailGraph() {
+        const tailGraph: string[][] = graphlib.alg.components(this.rawGraph);
+
+        return tailGraph.filter(x => x.length <= 2);
+    }
+
+    createEdges(group: string[]) {
+        if (group.length === 1) return [];
+        if (group.length === 2)
+            return [[group[0], group[1]]];
+
+        const edges = [];
+        for (let i = 0; i < group.length; i++) {
+            edges.push([group[i], group[(i + 1) % group.length]]);
+        }
+        return edges;
+    }
+
+    TailDisplay() {
+        const result = this.processTailGraph();
+        console.log("result", result);
+
+        let edges: string[][] = [];
+        result.forEach(g => {
+            edges = edges.concat(this.createEdges(g));
+        });
+
+        const nodes = result.flatMap(x => x).map(x => {
+            return {
+                id: x,
+                name: this.rawGraph.node(x).label,
+                symbol: "circle",
+                symbolSize: 5,
+                itemStyle: {
+                    color: Color["normal"]
+                },
+                label: {
+                    color: "inherit",
+                }
+            };
+        });
+
+        console.log("nodes", nodes);
+
+        this.myChart.clear();
+        this.myChart.off("click");
+
+        const option: ECOption = {
+            tooltip: {},
+            animationDuration: 1500,
+            animationEasingUpdate: "quinticInOut",
+            series: [
+                {
+                    name: "graph",
+                    type: "graph",
+                    layout: "force",
+                    draggable: true,
+                    roam: true,
+                    label: {
+                        show: true,
+                        position: "bottom",
+                    },
+                    data: nodes,
+                    links: edges.map(x => { return { source: x[0], target: x[1] }; }),
+                },
+            ],
+        };
+
+        this.myChart.setOption(option);
+        this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
+            // @ts-ignore
+            openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
+        });
+    }
+
     public init() {
         this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
 
