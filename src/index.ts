@@ -20,7 +20,8 @@ export default class GraphEnhancePlugin extends Plugin {
                     sourceThreshold: "3",
                     sinkThreshold: "3",
                     separation: "",
-                    nodesExclusion: ""
+                    nodesExclusion: "",
+                    tailThreshold: "1,3"
                 }, this.data[STORAGE_NAME])
             );
 

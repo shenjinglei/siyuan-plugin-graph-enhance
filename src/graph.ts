@@ -401,17 +401,27 @@ class EnhancedGraph {
 
         if (curNodeValue?.dailynote && cur.count !== 0) return;
 
+        if (cur.count === 0)
+            this.rawGraph.outEdges(cur.id)
+                .filter(e => this.rawGraph.edge(e.v, e.w)?.state === "broken")
+                .forEach(e => {
+                    this.insertNode({ id: e.w, edge: e, level: 1, count: 1 });
+                    this.insertEdge(e);
+                });
+
         curNodeValue["state"] = curNodeValue?.state | 1;
 
         this.rawGraph.outEdges(cur.id)
             .filter(e => this.processedGraph.node(e.w)?.state !== 3)
-            .filter(e => cur.count === 0 || this.rawGraph.edge(e.v, e.w)?.state !== "broken")
+            .filter(e => this.rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(e => q.push({
                 id: e.w,
                 edge: e,
                 level: cur.level + 1 === 0 ? NaN : cur.level + 1,
                 count: cur.count + 1
             }));
+
+
     }
 
     searchUp(cur: QueueItem, q: QueueItem[]) {
@@ -423,11 +433,19 @@ class EnhancedGraph {
 
         if (curNodeValue?.dailynote && cur.count !== 0) return;
 
+        if (cur.count === 0)
+            this.rawGraph.inEdges(cur.id)
+                .filter(e => this.rawGraph.edge(e.v, e.w)?.state === "broken")
+                .forEach(e => {
+                    this.insertNode({ id: e.v, edge: e, level: -1, count: 1 });
+                    this.insertEdge(e);
+                });
+
         curNodeValue["state"] = curNodeValue?.state | 2;
 
         this.rawGraph.inEdges(cur.id)
             .filter(e => this.processedGraph.node(e.v)?.state !== 3)
-            .filter(e => cur.count === 0 || this.rawGraph.edge(e.v, e.w)?.state !== "broken")
+            .filter(e => this.rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(x => q.push({
                 id: x.v,
                 edge: x,
@@ -664,7 +682,16 @@ class EnhancedGraph {
     processTailGraph() {
         const tailGraph: string[][] = graphlib.alg.components(this.rawGraph);
 
-        return tailGraph.filter(x => x.length <= 2);
+        const tailThresholdSetting = getSetting("tailThreshold").split(",");
+
+        const lowerBound = +tailThresholdSetting[0];
+        const upperBound = +tailThresholdSetting[1];
+
+        if (Number.isNaN(upperBound) || Number.isNaN(lowerBound)) {
+            return;
+        }
+
+        return tailGraph.filter(x => x.length >= lowerBound && x.length <= upperBound);
     }
 
     createEdges(group: string[]) {
@@ -681,7 +708,6 @@ class EnhancedGraph {
 
     TailDisplay() {
         const result = this.processTailGraph();
-        console.log("result", result);
 
         let edges: string[][] = [];
         result.forEach(g => {
@@ -702,8 +728,6 @@ class EnhancedGraph {
                 }
             };
         });
-
-        console.log("nodes", nodes);
 
         this.myChart.clear();
         this.myChart.off("click");

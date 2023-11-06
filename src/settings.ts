@@ -52,7 +52,8 @@ export function settingInit() {
                     sourceThreshold: sourceThresholdElement.value,
                     sinkThreshold: sinkThresholdElement.value,
                     separation: separationElement.value,
-                    nodesExclusion: nodesExclusionElement.value
+                    nodesExclusion: nodesExclusionElement.value,
+                    tailThreshold: tailThresholdElement.value
                 });
 
 
@@ -165,12 +166,26 @@ export function settingInit() {
         },
     });
 
+    const tailThresholdElement = document.createElement("input");
+    tailThresholdElement.id = "tailThreshold";
+    tailThresholdElement.placeholder = i18n.pleaseInput;
+    tailThresholdElement.className = "b3-text-field";
+    plugin.setting.addItem({
+        title: i18n.tailThresholdTitle,
+        description: i18n.tailThresholdDescription,
+        createActionElement: () => {
+            tailThresholdElement.value = plugin.data[STORAGE_NAME].tailThreshold;
+            return tailThresholdElement;
+        },
+    });
+
     const separationElement = document.createElement("textarea");
     separationElement.id = "separation";
     separationElement.placeholder = i18n.pleaseInput;
     separationElement.className = "b3-text-field fn__block";
     plugin.setting.addItem({
         title: i18n.separationTitle,
+        description: i18n.separationDescription,
         createActionElement: () => {
             separationElement.value = plugin.data[STORAGE_NAME].separation;
             return separationElement;
@@ -183,6 +198,7 @@ export function settingInit() {
     nodesExclusionElement.className = "b3-text-field fn__block";
     plugin.setting.addItem({
         title: i18n.nodesExclusionTitle,
+        description: i18n.nodesExclusionDescription,
         createActionElement: () => {
             nodesExclusionElement.value = plugin.data[STORAGE_NAME].nodesExclusion;
             return nodesExclusionElement;

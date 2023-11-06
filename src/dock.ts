@@ -14,7 +14,7 @@ export function initDock() {
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
-        <span id="graph_enhance_tail" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="长尾图"><svg><use xlink:href="#iconAttr"></use></svg></span>
+        <span id="graph_enhance_tail" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnTail}"><svg><use xlink:href="#iconAttr"></use></svg></span>
         <span id="graph_enhance_source" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnSource}"><svg><use xlink:href="#iconLight"></use></svg></span>
         <span id="graph_enhance_sink" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnSink}"><svg><use xlink:href="#iconDark"></use></svg></span>
         <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg><use xlink:href="#iconLanguage"></use></svg></span>

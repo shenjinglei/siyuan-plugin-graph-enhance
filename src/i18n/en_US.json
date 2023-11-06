@@ -39,7 +39,13 @@
   "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved",
 
   "separationTitle": "graph separation configuration",
+  "separationDescription": "support for regular expression, for example: ^Tag$,-1.5",
   "pleaseInput": "please input",
 
-  "nodesExclusionTitle": "nodes exclusion"
+  "nodesExclusionTitle": "nodes exclusion",
+  "nodesExclusionDescription": "support for regular expression, for example：^[0-9]+$",
+
+  "dockBtnTail": "Long Tail Graph",
+  "tailThresholdTitle": "Long Tail Graph Threshold",
+  "tailThresholdDescription": "Comma separated, for example: 1,2"
 }
