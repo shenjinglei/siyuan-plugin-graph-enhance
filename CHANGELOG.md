@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## 0.3.3/2023-11-10
+
+- [v0.3.2 ... v0.3.3](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.2...v0.3.3)
+
+  - Added Long Tail Graph
+  - Added setting of node exclusion
+
 ## 0.3.2/2023-11-04
 
 - [v0.3.1 ... v0.3.2](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.1...v0.3.2)

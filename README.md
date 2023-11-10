@@ -12,6 +12,9 @@ For example, If you link note A with note B, C and D. The relation graph drawn b
 
 ## Changelog
 
+- v0.3.3
+  - Added Long Tail Graph
+  - Added setting of node exclusion
 - v0.3.2
   - Improved the feature of automatic following the current note. Need siyuan version 2.10.13.
 - v0.3.1
