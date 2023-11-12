@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { enhancedGraph } from "./graph";
 import { i18n, plugin, isMobile } from "./utils";
 import { adaptHotkey, fetchSyncPost } from "siyuan";
@@ -44,17 +45,17 @@ export function initDock() {
         init() {
             this.element.innerHTML = dockHtml;
 
-            document.getElementById("graph_enhance_refresh").onclick = async () => {
+            document.getElementById("graph_enhance_refresh")!.onclick = async () => {
                 await refreashGraph();
 
-                if (enhancedGraph.sourceNodeId) {
+                if (enhancedGraph.sourceNodeId !== "0") {
                     enhancedGraph.Display();
                 } else {
-                    enhancedGraph.sunbrushDisplay();
+                    enhancedGraph.diffuseDisplay();
                 }
             };
 
-            document.getElementById("graph_enhance_global").onclick = async () => {
+            document.getElementById("graph_enhance_global")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
@@ -63,11 +64,11 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "global";
+                enhancedGraph.focusGraphType = "global";
                 enhancedGraph.Display();
             };
 
-            document.getElementById("graph_enhance_ancestor").onclick = async () => {
+            document.getElementById("graph_enhance_ancestor")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
@@ -76,11 +77,11 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "ancestor";
+                enhancedGraph.focusGraphType = "ancestor";
                 enhancedGraph.Display();
             };
 
-            document.getElementById("graph_enhance_brother").onclick = async () => {
+            document.getElementById("graph_enhance_brother")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
@@ -89,11 +90,11 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "brother";
+                enhancedGraph.focusGraphType = "brother";
                 enhancedGraph.Display();
             };
 
-            document.getElementById("graph_enhance_cross").onclick = async () => {
+            document.getElementById("graph_enhance_cross")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
@@ -102,11 +103,11 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "cross";
+                enhancedGraph.focusGraphType = "cross";
                 enhancedGraph.Display();
             };
 
-            document.getElementById("graph_enhance_neighbor").onclick = async () => {
+            document.getElementById("graph_enhance_neighbor")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
@@ -115,44 +116,45 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                enhancedGraph.searchMethod = "neighbor";
+                enhancedGraph.focusGraphType = "neighbor";
                 enhancedGraph.Display();
             };
 
-            document.getElementById("graph_enhance_source").onclick = async () => {
+            document.getElementById("graph_enhance_source")!.onclick = async () => {
                 if (!enhancedGraph.rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.sourceNodeId = undefined;
-                enhancedGraph.sunburstMethod = "source";
-                enhancedGraph.sunbrushDisplay();
+                enhancedGraph.sourceNodeId = "0";
+                enhancedGraph.diffuseGraphType = "source";
+                enhancedGraph.diffuseDisplay();
             };
 
-            document.getElementById("graph_enhance_sink").onclick = async () => {
+            document.getElementById("graph_enhance_sink")!.onclick = async () => {
                 if (!enhancedGraph.rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.sourceNodeId = undefined;
-                enhancedGraph.sunburstMethod = "sink";
-                enhancedGraph.sunbrushDisplay();
+                enhancedGraph.sourceNodeId = "0";
+                enhancedGraph.diffuseGraphType = "sink";
+                enhancedGraph.diffuseDisplay();
             };
 
-            document.getElementById("graph_enhance_tail").onclick = async () => {
+            document.getElementById("graph_enhance_tail")!.onclick = async () => {
                 if (!enhancedGraph.rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.sourceNodeId = undefined;
-                enhancedGraph.TailDisplay();
+                enhancedGraph.sourceNodeId = "0";
+                enhancedGraph.diffuseGraphType = "tail";
+                enhancedGraph.diffuseDisplay();
             };
 
             enhancedGraph.init();
 
         },
         resize() {
-            const container = document.getElementById("graph_enhance_container");
+            const container = document.getElementById("graph_enhance_container")!;
             enhancedGraph.resize({
                 width: container.offsetWidth,
                 height: container.offsetHeight

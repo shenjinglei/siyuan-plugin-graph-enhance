@@ -58,10 +58,10 @@ interface DagreNodeValue {
     height: number,
     x?: number,
     y?: number,
-    color?: "start" | "normal" | "from" | "to" | "separate" | "group",
+    color?: "start" | "normal" | "from" | "to" | "separate",
     separate?: boolean
     dailynote?: boolean
-    state?: number
+    state: number
 }
 
 interface EChartNode {
@@ -88,7 +88,6 @@ let Color = {
     from: "#8c13aa",
     to: "#008600",
     separate: "#aaaa00",
-    group: "#FFF"
 };
 
 class EnhancedGraph {
@@ -97,9 +96,9 @@ class EnhancedGraph {
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceGraphData: any = undefined;
     sinkGraphData: any = undefined;
-    sourceNodeId: string;
-    searchMethod = "cross";
-    sunburstMethod = "source";
+    sourceNodeId = "0";
+    focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "cross";
+    diffuseGraphType: "source" | "sink" | "tail" = "source";
 
     resize(param: { width: number, height: number }) {
         this.myChart.resize(param);
@@ -108,10 +107,9 @@ class EnhancedGraph {
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
         this.rawGraph = new dagre.graphlib.Graph();
 
-        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30 }));
+        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0 }));
         edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
 
-        console.log("rawgraph", dagre.graphlib.json.write(this.rawGraph));
 
         const separationSetting = getSetting("separation").split("\n").map(x => {
             const index = x.lastIndexOf(",");
@@ -130,12 +128,12 @@ class EnhancedGraph {
 
                 if (i > 0) {
                     while (i > 0) {
-                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.outEdges(x)).map(x => x.w);
+                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.outEdges(x) ?? []).map(x => x.w);
                         i--;
                     }
                 } else {
                     while (i < 0) {
-                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.inEdges(x).map(x => x.v));
+                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.inEdges(x) ?? []).map(x => x.v);
                         i++;
                     }
                 }
@@ -147,16 +145,16 @@ class EnhancedGraph {
             } else {
                 let filteredEdges = nodes
                     .filter(x => RegExp(d.nodeReg).test(x.label))
-                    .flatMap(x => i > 0 ? this.rawGraph.outEdges(x.id) : this.rawGraph.inEdges(x.id));
+                    .flatMap(x => i > 0 ? this.rawGraph.outEdges(x.id) ?? [] : this.rawGraph.inEdges(x.id) ?? []);
 
                 if (i > 0) {
                     while (i > 1) {
-                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.outEdges(x.w));
+                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.outEdges(x.w) ?? []);
                         i--;
                     }
                 } else {
                     while (i < -1) {
-                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.inEdges(x.v));
+                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.inEdges(x.v) ?? []);
                         i++;
                     }
                 }
@@ -193,7 +191,6 @@ class EnhancedGraph {
                 from: "#e6b4e8",
                 to: "#6bff6b",
                 separate: "#8ea3e8",
-                group: "#FFF",
             };
         } else {
             Color = {
@@ -202,16 +199,17 @@ class EnhancedGraph {
                 from: "#8c13aa",
                 to: "#008600",
                 separate: "#aaaa00",
-                group: "#FFF",
             };
         }
+
+        console.log("rawgraph", dagre.graphlib.json.write(this.rawGraph));
 
         this.sourceGraphData = undefined;
         this.sinkGraphData = undefined;
     }
 
     processSunburst() {
-        switch (this.sunburstMethod) {
+        switch (this.diffuseGraphType) {
             case "source":
                 if (!this.sourceGraphData)
                     this.getSourceGraph();
@@ -223,8 +221,8 @@ class EnhancedGraph {
         }
     }
 
-    public processGraph() {
-        switch (this.searchMethod) {
+    processGraph() {
+        switch (this.focusGraphType) {
             case "ancestor":
                 this.getAncestorGraph();
                 break;
@@ -242,7 +240,6 @@ class EnhancedGraph {
                 break;
             default:
                 this.getCrossGraph();
-                break;
         }
     }
 
@@ -253,6 +250,9 @@ class EnhancedGraph {
         this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
 
         const q: QueueItem[] = [];
+
+
+
         q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         return q;
@@ -264,9 +264,10 @@ class EnhancedGraph {
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift();
-            this.insertNode(cur);
-            this.insertEdge(cur.edge);
+            const cur = q.shift()!;
+            if (!this.processCurrentItem(cur)) {
+                continue;
+            }
             if (cur.level >= 0) {
                 this.searchDown(cur, q);
             }
@@ -283,9 +284,10 @@ class EnhancedGraph {
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift();
-            this.insertNode(cur);
-            this.insertEdge(cur.edge);
+            const cur = q.shift()!;
+            if (!this.processCurrentItem(cur)) {
+                continue;
+            }
             if (cur.level >= 0) {
                 this.searchUp(cur, q);
             }
@@ -302,9 +304,10 @@ class EnhancedGraph {
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift();
-            this.insertNode(cur);
-            this.insertEdge(cur.edge);
+            const cur = q.shift()!;
+            if (!this.processCurrentItem(cur)) {
+                continue;
+            }
             if (cur.level >= -1) {
                 this.searchDown(cur, q);
             }
@@ -321,9 +324,10 @@ class EnhancedGraph {
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift();
-            this.insertNode(cur);
-            this.insertEdge(cur.edge);
+            const cur = q.shift()!;
+            if (!this.processCurrentItem(cur)) {
+                continue;
+            }
             this.searchDown(cur, q);
             this.searchUp(cur, q);
             count++;
@@ -337,16 +341,29 @@ class EnhancedGraph {
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift();
-            this.insertNode(cur);
-            this.insertEdge(cur.edge);
+            const cur = q.shift()!;
+            if (!this.processCurrentItem(cur)) {
+                continue;
+            }
             if (cur.count < neighborDepth) {
                 this.searchDown(cur, q);
                 this.searchUp(cur, q);
-            }
-            count++;
+            } count++;
         }
     }
+
+    processCurrentItem = (cur: QueueItem): boolean => {
+        const isBroken = cur.edge ? this.rawGraph.edge(cur.edge)?.state === "broken" : false;
+
+        if (cur.count > 1 && isBroken)
+            return false;
+        this.insertNode(cur);
+        if (cur.edge)
+            this.insertEdge(cur.edge);
+        if (isBroken)
+            return false;
+        return true;
+    };
 
     insertNode = (cur: QueueItem) => {
         if (this.processedGraph.hasNode(cur.id)) return;
@@ -360,32 +377,23 @@ class EnhancedGraph {
     };
 
     insertEdge = (edge: dagre.Edge) => {
-        if (!edge) return;
         this.processedGraph.setEdge(edge.v, edge.w);
     };
 
     searchDown(cur: QueueItem, q: QueueItem[]) {
+        console.log("searchDown", cur);
         const curNodeValue = this.processedGraph.node(cur.id);
 
-        if (curNodeValue?.state & 1) return; // search is already done
+        if (curNodeValue.state & 1) return; // search is already done
 
-        if (curNodeValue?.separate && cur.id === cur.edge?.w) return; // can't penetrate
+        if (curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
 
-        if (curNodeValue?.dailynote && cur.count !== 0) return;
+        if (curNodeValue.dailynote && cur.count !== 0) return;
 
-        if (cur.count === 0)
-            this.rawGraph.outEdges(cur.id)
-                .filter(e => this.rawGraph.edge(e.v, e.w)?.state === "broken")
-                .forEach(e => {
-                    this.insertNode({ id: e.w, edge: e, level: 1, count: 1 });
-                    this.insertEdge(e);
-                });
-
-        curNodeValue["state"] = curNodeValue?.state | 1;
+        curNodeValue.state = curNodeValue.state | 1;
 
         this.rawGraph.outEdges(cur.id)
-            .filter(e => this.processedGraph.node(e.w)?.state !== 3)
-            .filter(e => this.rawGraph.edge(e.v, e.w)?.state !== "broken")
+            ?.filter(e => this.processedGraph.node(e.w)?.state !== 3)
             .forEach(e => q.push({
                 id: e.w,
                 edge: e,
@@ -398,26 +406,16 @@ class EnhancedGraph {
 
     searchUp(cur: QueueItem, q: QueueItem[]) {
         const curNodeValue = this.processedGraph.node(cur.id);
-
-        if (curNodeValue?.state & 2) return; // search is already done
+        if (curNodeValue.state & 2) return; // search is already done
 
         if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
 
         if (curNodeValue?.dailynote && cur.count !== 0) return;
 
-        if (cur.count === 0)
-            this.rawGraph.inEdges(cur.id)
-                .filter(e => this.rawGraph.edge(e.v, e.w)?.state === "broken")
-                .forEach(e => {
-                    this.insertNode({ id: e.v, edge: e, level: -1, count: 1 });
-                    this.insertEdge(e);
-                });
-
-        curNodeValue["state"] = curNodeValue?.state | 2;
+        curNodeValue.state = curNodeValue.state | 2;
 
         this.rawGraph.inEdges(cur.id)
-            .filter(e => this.processedGraph.node(e.v)?.state !== 3)
-            .filter(e => this.rawGraph.edge(e.v, e.w)?.state !== "broken")
+            ?.filter(e => this.processedGraph.node(e.v)?.state !== 3)
             .forEach(x => q.push({
                 id: x.v,
                 edge: x,
@@ -456,7 +454,7 @@ class EnhancedGraph {
         const children = this.getNodes(cur).map((x: string) => this.getNodeData(x, level + 1));
 
         if (children.filter((x) => x.value === 0).length === children.length) {
-            return this.generteLeaf(cur, children.reduce((p, c) => p + c.amount, 0));
+            return this.generteLeaf(cur, children.reduce((p, c) => p + (c.amount ?? 0), 0));
         }
 
         return {
@@ -467,11 +465,11 @@ class EnhancedGraph {
         };
     }
 
-    getNodes(cur: string) {
-        if (this.sunburstMethod === "source")
-            return this.rawGraph.outEdges(cur).map(x => x.w);
+    getNodes(cur: string): string[] {
+        if (this.diffuseGraphType === "source")
+            return (this.rawGraph.outEdges(cur) ?? []).map(x => x.w);
         else
-            return this.rawGraph.inEdges(cur).map(x => x.v);
+            return (this.rawGraph.inEdges(cur) ?? []).map(x => x.v);
     }
 
     genSunburstData(param: SunburstNode[]) {
@@ -504,8 +502,6 @@ class EnhancedGraph {
         this.sourceGraphData = this.genSunburstData(result);
     }
 
-
-
     sunbrushDisplay() {
         this.processSunburst();
 
@@ -517,7 +513,7 @@ class EnhancedGraph {
                 type: "sunburst",
 
                 nodeClick: "link",
-                data: this.sunburstMethod === "source" ? this.sourceGraphData : this.sinkGraphData,
+                data: this.diffuseGraphType === "source" ? this.sourceGraphData : this.sinkGraphData,
                 radius: [0, "95%"],
                 sort: "desc",
 
@@ -576,8 +572,10 @@ class EnhancedGraph {
         });
     }
 
+
+
     public Display() {
-        if (!this.sourceNodeId || this.sourceNodeId == "") {
+        if (this.sourceNodeId === "0") {
             showMessage(
                 i18n.needStartPointMsg,
                 3000,
@@ -663,7 +661,7 @@ class EnhancedGraph {
         const upperBound = +tailThresholdSetting[1];
 
         if (Number.isNaN(upperBound) || Number.isNaN(lowerBound)) {
-            return;
+            return [[]];
         }
 
         return tailGraph.filter(x => x.length >= lowerBound && x.length <= upperBound);
@@ -681,7 +679,18 @@ class EnhancedGraph {
         return edges;
     }
 
+    diffuseDisplay() {
+        switch (this.diffuseGraphType) {
+            case "tail":
+                this.TailDisplay();
+                break;
+            default:
+                this.sunbrushDisplay();
+        }
+    }
+
     TailDisplay() {
+        console.log("taildisplay");
         const result = this.processTailGraph();
 
         let edges: string[][] = [];
