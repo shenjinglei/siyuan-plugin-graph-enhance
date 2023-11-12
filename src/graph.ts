@@ -14,8 +14,7 @@ import type {
     ComposeOption,
 } from "echarts/core";
 
-const dagre = require("dagre");
-const graphlib = dagre.graphlib;
+import * as dagre from "@dagrejs/dagre";
 
 echarts.use([
     GraphChart,
@@ -27,8 +26,6 @@ type ECOption = ComposeOption<
     SunburstSeriesOption | GraphSeriesOption
 >;
 
-
-
 interface SunburstNode {
     id: string,
     name: string,
@@ -36,22 +33,6 @@ interface SunburstNode {
     value?: number,
     amount?: number,
     height: number
-}
-
-interface Graph {
-    setDefaultEdgeLabel(arg0: () => any): void;
-    setGraph: (g: any) => void;
-    setNode: (v: string, label: DagreNodeValue) => Graph;
-    hasNode: (v: string) => boolean;
-    setEdge: (v: string, w: string, label?: any) => Graph;
-    outEdges: (v: string) => DagreEdge[];
-    inEdges: (w: string) => DagreEdge[];
-    sources: () => string[];
-    sinks: () => string[];
-    node: (v: string) => DagreNodeValue;
-    edge: (v: string, w: string) => any;
-    nodes: () => string[];
-    removeNode: (v: string) => void;
 }
 
 interface DagreOutput {
@@ -83,11 +64,6 @@ interface DagreNodeValue {
     state?: number
 }
 
-interface DagreEdge {
-    v: string,
-    w: string,
-}
-
 interface EChartNode {
     id: string;
     label: string;
@@ -100,7 +76,7 @@ interface EChartEdge {
 
 interface QueueItem {
     id: string,
-    edge?: DagreEdge,
+    edge?: dagre.Edge,
     level: number,
     count: number,
     active?: number,
@@ -117,8 +93,8 @@ let Color = {
 
 class EnhancedGraph {
     myChart: echarts.ECharts;
-    rawGraph: Graph;
-    processedGraph: Graph;
+    rawGraph: dagre.graphlib.Graph<DagreNodeValue>;
+    processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceGraphData: any = undefined;
     sinkGraphData: any = undefined;
     sourceNodeId: string;
@@ -130,7 +106,7 @@ class EnhancedGraph {
     }
 
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
-        this.rawGraph = new graphlib.Graph();
+        this.rawGraph = new dagre.graphlib.Graph();
 
         nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30 }));
         edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
@@ -272,7 +248,7 @@ class EnhancedGraph {
 
 
     private initProcessedGraph() {
-        this.processedGraph = new graphlib.Graph();
+        this.processedGraph = new dagre.graphlib.Graph();
         this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
         this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
 
@@ -383,7 +359,7 @@ class EnhancedGraph {
 
     };
 
-    insertEdge = (edge: DagreEdge) => {
+    insertEdge = (edge: dagre.Edge) => {
         if (!edge) return;
         this.processedGraph.setEdge(edge.v, edge.w);
     };
@@ -679,7 +655,7 @@ class EnhancedGraph {
     }
 
     processTailGraph() {
-        const tailGraph: string[][] = graphlib.alg.components(this.rawGraph);
+        const tailGraph: string[][] = dagre.graphlib.alg.components(this.rawGraph);
 
         const tailThresholdSetting = getSetting("tailThreshold").split(",");
 

@@ -30,7 +30,7 @@
     "zip-webpack-plugin": "^4.0.1"
   },
   "dependencies": {
-    "dagre": "^0.8.5",
+    "@dagrejs/dagre": "^1.0.4",
     "echarts": "^5.4.3"
   }
 }
