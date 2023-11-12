@@ -97,7 +97,7 @@ class EnhancedGraph {
     sourceGraphData: any = undefined;
     sinkGraphData: any = undefined;
     sourceNodeId = "0";
-    focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "cross";
+    focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
     diffuseGraphType: "source" | "sink" | "tail" = "source";
 
     resize(param: { width: number, height: number }) {
@@ -239,7 +239,7 @@ class EnhancedGraph {
                 this.getNeighborGraph();
                 break;
             default:
-                this.getCrossGraph();
+                this.getAncestorGraph();
         }
     }
 
@@ -358,8 +358,7 @@ class EnhancedGraph {
         if (cur.count > 1 && isBroken)
             return false;
         this.insertNode(cur);
-        if (cur.edge)
-            this.insertEdge(cur.edge);
+        this.insertEdge(cur);
         if (isBroken)
             return false;
         return true;
@@ -376,12 +375,13 @@ class EnhancedGraph {
 
     };
 
-    insertEdge = (edge: dagre.Edge) => {
-        this.processedGraph.setEdge(edge.v, edge.w);
+    insertEdge = (cur: QueueItem) => {
+        if (!cur.edge) return;
+        const weight = 4 - cur.count < 3 ? cur.count : 3;
+        this.processedGraph.setEdge(cur.edge, { weight });
     };
 
     searchDown(cur: QueueItem, q: QueueItem[]) {
-        console.log("searchDown", cur);
         const curNodeValue = this.processedGraph.node(cur.id);
 
         if (curNodeValue.state & 1) return; // search is already done
