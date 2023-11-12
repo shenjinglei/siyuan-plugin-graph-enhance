@@ -77,7 +77,7 @@ interface DagreNodeValue {
     height: number,
     x?: number,
     y?: number,
-    color?: "start" | "normal" | "from" | "to" | "separate",
+    color?: "start" | "normal" | "from" | "to" | "separate" | "group",
     separate?: boolean
     dailynote?: boolean
     state?: number
@@ -102,7 +102,8 @@ interface QueueItem {
     id: string,
     edge?: DagreEdge,
     level: number,
-    count: number
+    count: number,
+    active?: number,
 }
 
 let Color = {
@@ -111,6 +112,7 @@ let Color = {
     from: "#8c13aa",
     to: "#008600",
     separate: "#aaaa00",
+    group: "#FFF"
 };
 
 class EnhancedGraph {
@@ -130,8 +132,10 @@ class EnhancedGraph {
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
         this.rawGraph = new graphlib.Graph();
 
-        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, width: 200, height: 30 }));
+        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30 }));
         edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
+
+        console.log("rawgraph", dagre.graphlib.json.write(this.rawGraph));
 
         const separationSetting = getSetting("separation").split("\n").map(x => {
             const index = x.lastIndexOf(",");
@@ -213,6 +217,7 @@ class EnhancedGraph {
                 from: "#e6b4e8",
                 to: "#6bff6b",
                 separate: "#8ea3e8",
+                group: "#FFF",
             };
         } else {
             Color = {
@@ -221,6 +226,7 @@ class EnhancedGraph {
                 from: "#8c13aa",
                 to: "#008600",
                 separate: "#aaaa00",
+                group: "#FFF",
             };
         }
 
@@ -264,19 +270,21 @@ class EnhancedGraph {
         }
     }
 
+
     private initProcessedGraph() {
         this.processedGraph = new graphlib.Graph();
         this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
         this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
 
+        const q: QueueItem[] = [];
+        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
+
+        return q;
     }
 
     public getAncestorGraph() {
-        this.initProcessedGraph();
+        const q = this.initProcessedGraph();
         const nodesMaximum = +getSetting("nodesMaximum");
-
-        const q: QueueItem[] = [];
-        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
@@ -294,11 +302,8 @@ class EnhancedGraph {
     }
 
     public getBrotherGraph() {
-        this.initProcessedGraph();
+        const q = this.initProcessedGraph();
         const nodesMaximum = +getSetting("nodesMaximum");
-
-        const q: QueueItem[] = [];
-        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
@@ -316,11 +321,8 @@ class EnhancedGraph {
     }
 
     getCrossGraph() {
-        this.initProcessedGraph();
+        const q = this.initProcessedGraph();
         const nodesMaximum = +getSetting("nodesMaximum");
-
-        const q: QueueItem[] = [];
-        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
@@ -338,11 +340,8 @@ class EnhancedGraph {
     }
 
     getGlobalGraph() {
-        this.initProcessedGraph();
+        const q = this.initProcessedGraph();
         const nodesMaximum = +getSetting("nodesMaximum");
-
-        const q: QueueItem[] = [];
-        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
@@ -356,12 +355,9 @@ class EnhancedGraph {
     }
 
     getNeighborGraph() {
-        const neighborDepth = +getSetting("neighborDepth");
+        const q = this.initProcessedGraph();
         const nodesMaximum = +getSetting("nodesMaximum");
-        this.initProcessedGraph();
-
-        const q: QueueItem[] = [];
-        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
+        const neighborDepth = +getSetting("neighborDepth");
 
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
@@ -626,8 +622,11 @@ class EnhancedGraph {
         this.processGraph();
 
         dagre.layout(this.processedGraph);
+        console.log("processedGraph", this.processedGraph);
 
         const dagreLayout: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
+
+        console.log("dagreLayout", dagreLayout);
 
         this.myChart.clear();
         this.myChart.off("click");
