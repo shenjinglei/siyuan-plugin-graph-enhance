@@ -62,6 +62,7 @@ interface DagreNodeValue {
     separate?: boolean
     dailynote?: boolean
     state: number
+    branch: number
 }
 
 interface EChartNode {
@@ -91,6 +92,12 @@ let Color = {
     brother: "#ff00ff"
 };
 
+const primaryColours = [[0xee, 0x11, 0], [0, 0xff, 0], [0, 0, 0xff]];
+
+interface Palette {
+    [key: string]: string;
+}
+
 class EnhancedGraph {
     myChart: echarts.ECharts;
     rawGraph: dagre.graphlib.Graph<DagreNodeValue>;
@@ -100,6 +107,45 @@ class EnhancedGraph {
     sourceNodeId = "0";
     focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
     diffuseGraphType: "source" | "sink" | "tail" = "source";
+    palette: Palette = {};
+
+    getColor(flag: number): string {
+        const result = this.palette[flag];
+        if (result !== undefined)
+            return result;
+
+        const colors: number[] = [];
+        let mask = 1;
+        for (let index = 0; index < 32; index++) {
+            if ((flag & mask) !== 0) {
+                colors.push(index);
+            }
+            mask <<= 1;
+        }
+
+        const colorResult = [0, 0, 0];
+
+        console.log("colors", colors);
+
+        for (const item of colors) {
+            for (const i of [0, 1, 2]) {
+                //console.log(primaryColours[Math.floor(item / 3)][i]);
+                colorResult[i] += primaryColours[item % 3][i];
+            }
+        }
+
+        colorResult.forEach(x => x = Math.floor(x / colors.length));
+
+        const first = colorResult[0].toString(16).padStart(2, "0");
+        const second = colorResult[1].toString(16).padStart(2, "0");
+        const third = colorResult[2].toString(16).padStart(2, "0");
+
+        this.palette[flag] = `#${first}${second}${third}`;
+
+        console.log("palette", this.palette);
+
+        return this.palette[flag];
+    }
 
     resize(param: { width: number, height: number }) {
         this.myChart.resize(param);
@@ -108,7 +154,7 @@ class EnhancedGraph {
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
         this.rawGraph = new dagre.graphlib.Graph();
 
-        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0 }));
+        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
         edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
 
 
@@ -251,11 +297,9 @@ class EnhancedGraph {
         this.processedGraph = new dagre.graphlib.Graph();
         this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
         this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
+        this.branchFlag = 1;
 
         const q: QueueItem[] = [];
-
-
-
         q.push({ id: this.sourceNodeId, level: 0, count: 0 });
 
         return q;
@@ -355,6 +399,8 @@ class EnhancedGraph {
         }
     }
 
+    branchFlag = 1;
+
     processCurrentItem = (cur: QueueItem): boolean => {
         const isBroken = cur.edge ? this.rawGraph.edge(cur.edge)?.state === "broken" : false;
 
@@ -386,6 +432,16 @@ class EnhancedGraph {
         if (!cur.edge) return;
         const weight = neighborDepth - (cur.count < neighborDepth ? cur.count : neighborDepth) + 1;
         this.processedGraph.setEdge(cur.edge, { weight });
+
+        if (cur.count === 1) {
+            this.processedGraph.node(cur.id).branch = this.branchFlag;
+            this.branchFlag = this.branchFlag << 1;
+        }
+        else {
+            console.log("setparent3", this.rawGraph.node(cur.id).label, this.processedGraph.parent(cur.edge.w));
+
+            this.processedGraph.node(cur.id).branch = this.processedGraph.node(cur.edge.v).branch | this.processedGraph.node(cur.edge.w).branch;
+        }
     };
 
     searchDown(cur: QueueItem, q: QueueItem[]) {
@@ -631,13 +687,14 @@ class EnhancedGraph {
                     data: dagreLayout.nodes.filter(x => x.value).map(x => {
                         return {
                             id: x.v,
-                            name: x.value.label,
+                            name: x.value.branch + x.value.label,
                             x: x.value.x,
                             y: x.value.y,
                             symbol: "circle",
                             symbolSize: 5,
                             itemStyle: {
-                                color: Color[x.value.color ?? "normal"]
+                                //color: Color[x.value.color ?? "normal"]
+                                color: this.getColor(x.value.branch)
                             },
                             label: {
                                 color: "inherit",
@@ -656,6 +713,8 @@ class EnhancedGraph {
                 },
             ],
         };
+
+        console.log("option", option);
 
         this.myChart.setOption(option);
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
