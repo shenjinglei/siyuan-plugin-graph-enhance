@@ -58,7 +58,7 @@ interface DagreNodeValue {
     height: number,
     x?: number,
     y?: number,
-    color?: "start" | "normal" | "from" | "to" | "separate",
+    color?: "start" | "normal" | "from" | "to" | "separate" | "brother",
     separate?: boolean
     dailynote?: boolean
     state: number
@@ -88,6 +88,7 @@ let Color = {
     from: "#8c13aa",
     to: "#008600",
     separate: "#aaaa00",
+    brother: "#ff00ff"
 };
 
 class EnhancedGraph {
@@ -191,6 +192,7 @@ class EnhancedGraph {
                 from: "#e6b4e8",
                 to: "#6bff6b",
                 separate: "#8ea3e8",
+                brother: "#b33cb3"
             };
         } else {
             Color = {
@@ -199,6 +201,7 @@ class EnhancedGraph {
                 from: "#8c13aa",
                 to: "#008600",
                 separate: "#aaaa00",
+                brother: "#b33cb3"
             };
         }
 
@@ -369,15 +372,19 @@ class EnhancedGraph {
 
         const rawNodeValue = this.rawGraph.node(cur.id);
         if (cur.count === 0)
-            this.processedGraph.setNode(cur.id, { ...rawNodeValue, color: "start" });
+            this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "start" });
+        else if (Number.isNaN(cur.level))
+            this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "brother" });
         else
-            this.processedGraph.setNode(cur.id, { ...rawNodeValue });
+            this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level });
 
     };
 
     insertEdge = (cur: QueueItem) => {
+        const neighborDepth = +getSetting("neighborDepth");
+
         if (!cur.edge) return;
-        const weight = 4 - cur.count < 3 ? cur.count : 3;
+        const weight = neighborDepth - (cur.count < neighborDepth ? cur.count : neighborDepth) + 1;
         this.processedGraph.setEdge(cur.edge, { weight });
     };
 
@@ -397,7 +404,7 @@ class EnhancedGraph {
             .forEach(e => q.push({
                 id: e.w,
                 edge: e,
-                level: cur.level + 1 === 0 ? NaN : cur.level + 1,
+                level: cur.level + 1 === 0 ? NaN : (Number.isNaN(cur.level) ? 1 : cur.level + 1),
                 count: cur.count + 1
             }));
 
@@ -419,7 +426,7 @@ class EnhancedGraph {
             .forEach(x => q.push({
                 id: x.v,
                 edge: x,
-                level: cur.level - 1 === 0 ? NaN : cur.level - 1,
+                level: cur.level - 1 === 0 ? NaN : (Number.isNaN(cur.level) ? -1 : cur.level - 1),
                 count: cur.count + 1
             }));
     }
@@ -639,7 +646,10 @@ class EnhancedGraph {
                         };
                     }),
                     links: dagreLayout.edges.map((x: any) => {
-                        return { source: x.v, target: x.w };
+                        return {
+                            source: x.v, target: x.w, value: x.value.weight,
+                            label: { show: false, formatter: "{c}" }
+                        };
                     }),
                 },
             ],

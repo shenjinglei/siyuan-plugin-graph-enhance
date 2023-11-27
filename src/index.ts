@@ -16,7 +16,7 @@ export default class GraphEnhancePlugin extends Plugin {
                     dailynoteExcluded: "false",
                     nodesMaximum: "200",
                     neighborDepth: "2",
-                    autoFollow: "false",
+                    autoFollow: "true",
                     sourceThreshold: "3",
                     sinkThreshold: "3",
                     separation: "",
