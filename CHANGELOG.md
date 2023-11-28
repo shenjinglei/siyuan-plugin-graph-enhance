@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## 0.3.4/2023-11-28
+
+- [v0.3.3 ... v0.3.4](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.3...v0.3.4)
+
+  - Improved the layout by adding weight of edge.
+  - Upgrade dagre to 1.0.4.
+  - Added nodes color of same level.
+
 ## 0.3.3/2023-11-10
 
 - [v0.3.2 ... v0.3.3](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.2...v0.3.3)

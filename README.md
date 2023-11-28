@@ -12,6 +12,8 @@ For example, If you link note A with note B, C and D. The relation graph drawn b
 
 ## Changelog
 
+- v0.3.4
+  - Added nodes color of same level.
 - v0.3.3
   - Added Long Tail Graph
   - Added setting of node exclusion
