@@ -642,6 +642,8 @@ class EnhancedGraph {
                             label: {
                                 color: "inherit",
                                 fontFamily: "OPPOSans",
+                                width: x.value.label.length > 20 ? 180 : undefined,
+                                overflow: "break",
                             }
                         };
                     }),
