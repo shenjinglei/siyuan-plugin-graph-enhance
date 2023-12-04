@@ -11,7 +11,7 @@ export function initDock() {
     const dockHtml = `<div class="fn__flex-1 fn__flex-column">
     <div class="block__icons">
         <div class="block__logo">
-            <svg><use xlink:href="#iconM"></use></svg>
+            <svg><use xlink:href="#iconGraphEnhance"></use></svg>
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
@@ -35,7 +35,7 @@ export function initDock() {
         config: {
             position: "RightTop",
             size: { width: 300, height: 500 },
-            icon: "iconM",
+            icon: "iconGraphEnhance",
             title: i18n.pluginName,
         },
         data: {
