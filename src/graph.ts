@@ -198,7 +198,7 @@ class EnhancedGraph {
             Color = {
                 start: "#aa0000",
                 normal: "#003cb4",
-                from: "#8c13aa",
+                from: "#aa5500",
                 to: "#008600",
                 separate: "#aaaa00",
                 brother: "#b33cb3"

@@ -12,6 +12,9 @@ For example, If you link note A with note B, C and D. The relation graph drawn b
 
 ## Changelog
 
+- v0.3.5
+  - [#10](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/10) Changed the icon.
+  - Adjusted label width.
 - v0.3.4
   - Added nodes color of same level.
 - v0.3.3

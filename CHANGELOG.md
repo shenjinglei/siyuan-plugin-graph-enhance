@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## 0.3.5/2023-12-05
+
+- [v0.3.4 ... v0.3.5](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.4...v0.3.5)
+
+  - [#10](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/10) Changed the icon.
+  - Adjusted label width.
+  - Adjusted color.
+
 ## 0.3.4/2023-11-28
 
 - [v0.3.3 ... v0.3.4](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.3...v0.3.4)

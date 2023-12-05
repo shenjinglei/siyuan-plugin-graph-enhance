@@ -14,6 +14,9 @@
 
 ## 更新日志
 
+- v0.3.5
+  - [#10](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/10) 更新侧栏图标。
+  - 调整 label 宽度。
 - v0.3.4
   - 增加了与起始点处于同一水平的节点的颜色。
 - v0.3.3
