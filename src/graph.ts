@@ -533,8 +533,8 @@ class EnhancedGraph {
                 levels: [
                     {},
                     {
-                        r0: "15%",
-                        r: "40%",
+                        r0: "10%",
+                        r: "33%",
                         itemStyle: {
                             borderWidth: 2,
                         },
@@ -544,7 +544,7 @@ class EnhancedGraph {
                         },
                     },
                     {
-                        r0: "40%",
+                        r0: "33%",
                         r: "70%",
                         label: {
                             align: "center",
