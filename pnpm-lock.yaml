@@ -8,6 +8,9 @@ dependencies:
   '@dagrejs/dagre':
     specifier: ^1.0.4
     version: registry.npmmirror.com/@dagrejs/dagre@1.0.4
+  colorjs.io:
+    specifier: ^0.4.5
+    version: registry.npmmirror.com/colorjs.io@0.4.5
   echarts:
     specifier: ^5.4.3
     version: registry.npmmirror.com/echarts@5.4.3
@@ -2357,6 +2360,12 @@ packages:
     name: '@types/node'
     version: 20.8.2
     dev: true
+
+  registry.npmmirror.com/colorjs.io@0.4.5:
+    resolution: {integrity: sha512-yCtUNCmge7llyfd/Wou19PMAcf5yC3XXhgFoAh6zsO2pGswhUPBaaUh8jzgHnXtXuZyFKzXZNAnyF5i+apICow==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/colorjs.io/-/colorjs.io-0.4.5.tgz}
+    name: colorjs.io
+    version: 0.4.5
+    dev: false
 
   registry.npmmirror.com/echarts@5.4.3:
     resolution: {integrity: sha512-mYKxLxhzy6zyTi/FaEbJMOZU1ULGEQHaeIeuMR5L+JnJTpz+YR03mnnpBhbR4+UYJAgiXgpyTVLffPAjOTLkZA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/echarts/-/echarts-5.4.3.tgz}

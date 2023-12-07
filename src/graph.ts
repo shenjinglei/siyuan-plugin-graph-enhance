@@ -16,6 +16,8 @@ import type {
 
 import * as dagre from "@dagrejs/dagre";
 
+const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
+
 echarts.use([
     GraphChart,
     SunburstChart,
@@ -92,7 +94,7 @@ let Color = {
     brother: "#ff00ff"
 };
 
-const primaryColours = [[0xee, 0x11, 0], [0, 0xff, 0], [0, 0, 0xff]];
+const primaryColours = ["Tomato", "GoldenRod", "LimeGreen", "DarkTurquoise", "RoyalBlue", "Violet", "Crimson"];
 
 interface Palette {
     [key: string]: string;
@@ -114,35 +116,21 @@ class EnhancedGraph {
         if (result !== undefined)
             return result;
 
-        const colors: number[] = [];
+        const colors: string[] = [];
         let mask = 1;
         for (let index = 0; index < 32; index++) {
             if ((flag & mask) !== 0) {
-                colors.push(index);
+                colors.push(primaryColours[index % primaryColours.length]);
             }
             mask <<= 1;
         }
 
-        const colorResult = [0, 0, 0];
-
-        console.log("colors", colors);
-
-        for (const item of colors) {
-            for (const i of [0, 1, 2]) {
-                //console.log(primaryColours[Math.floor(item / 3)][i]);
-                colorResult[i] += primaryColours[item % 3][i];
-            }
+        let newColor = new ColorJs(colors[0] ?? "Violet");
+        for (let i = 1; i < colors.length; i++) {
+            newColor = newColor.mix(colors[i], 1 / (i + 1), { space: "srgb" });
         }
 
-        colorResult.forEach(x => x = Math.floor(x / colors.length));
-
-        const first = colorResult[0].toString(16).padStart(2, "0");
-        const second = colorResult[1].toString(16).padStart(2, "0");
-        const third = colorResult[2].toString(16).padStart(2, "0");
-
-        this.palette[flag] = `#${first}${second}${third}`;
-
-        console.log("palette", this.palette);
+        this.palette[flag] = newColor.toString({ format: "hex" });
 
         return this.palette[flag];
     }
@@ -250,8 +238,6 @@ class EnhancedGraph {
                 brother: "#b33cb3"
             };
         }
-
-        console.log("rawgraph", dagre.graphlib.json.write(this.rawGraph));
 
         this.sourceGraphData = undefined;
         this.sinkGraphData = undefined;
@@ -431,15 +417,19 @@ class EnhancedGraph {
 
         if (!cur.edge) return;
         const weight = neighborDepth - (cur.count < neighborDepth ? cur.count : neighborDepth) + 1;
-        this.processedGraph.setEdge(cur.edge, { weight });
+        //this.processedGraph.setEdge(cur.edge, { weight });
 
         if (cur.count === 1) {
             this.processedGraph.node(cur.id).branch = this.branchFlag;
+            this.processedGraph.setEdge(cur.edge, { weight, branch: this.branchFlag });
             this.branchFlag = this.branchFlag << 1;
         }
         else {
-            console.log("setparent3", this.rawGraph.node(cur.id).label, this.processedGraph.parent(cur.edge.w));
-
+            if (cur.id === cur.edge.v) {
+                this.processedGraph.setEdge(cur.edge, { weight, branch: this.processedGraph.node(cur.edge.w).branch });
+            } else {
+                this.processedGraph.setEdge(cur.edge, { weight, branch: this.processedGraph.node(cur.edge.v).branch });
+            }
             this.processedGraph.node(cur.id).branch = this.processedGraph.node(cur.edge.v).branch | this.processedGraph.node(cur.edge.w).branch;
         }
     };
@@ -659,11 +649,8 @@ class EnhancedGraph {
         this.processGraph();
 
         dagre.layout(this.processedGraph);
-        console.log("processedGraph", this.processedGraph);
 
         const dagreLayout: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
-
-        console.log("dagreLayout", dagreLayout);
 
         this.myChart.clear();
         this.myChart.off("click");
@@ -687,14 +674,14 @@ class EnhancedGraph {
                     data: dagreLayout.nodes.filter(x => x.value).map(x => {
                         return {
                             id: x.v,
-                            name: x.value.branch + x.value.label,
+                            name: x.value.label,
                             x: x.value.x,
                             y: x.value.y,
                             symbol: "circle",
                             symbolSize: 5,
                             itemStyle: {
-                                //color: Color[x.value.color ?? "normal"]
-                                color: this.getColor(x.value.branch)
+                                color: Color[x.value.color ?? "normal"]
+                                //color: this.getColor(x.value.branch)
                             },
                             label: {
                                 color: "inherit",
@@ -706,15 +693,14 @@ class EnhancedGraph {
                     }),
                     links: dagreLayout.edges.map((x: any) => {
                         return {
-                            source: x.v, target: x.w, value: x.value.weight,
-                            label: { show: false, formatter: "{c}" }
+                            source: x.v, target: x.w, value: x.value.branch,
+                            label: { show: false, formatter: "{c}" },
+                            lineStyle: { color: this.getColor(x.value.branch) }
                         };
                     }),
                 },
             ],
         };
-
-        console.log("option", option);
 
         this.myChart.setOption(option);
         this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
@@ -761,7 +747,6 @@ class EnhancedGraph {
     }
 
     TailDisplay() {
-        console.log("taildisplay");
         const result = this.processTailGraph();
 
         let edges: string[][] = [];

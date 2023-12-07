@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.0.4",
+    "colorjs.io": "^0.4.5",
     "echarts": "^5.4.3"
   }
 }
