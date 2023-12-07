@@ -14,6 +14,10 @@
 
 ## 更新日志
 
+- v0.3.6
+  - 增加了连接线的颜色
+    - 颜色连接线从起始点开始，直到该分支的尽头，类似思维导图。
+      ![](https://z1.ax1x.com/2023/12/07/pig5hc9.png)
 - v0.3.5
   - [#10](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/10) 更新侧栏图标。
   - 调整 label 宽度。
@@ -138,7 +142,7 @@
 ## 未来计划
 
 - [ ] 布局优化
-- [ ] 颜色区分
+- [x] 颜色区分
 
 ## 反馈
 
@@ -152,6 +156,7 @@
 
 ## 感谢
 
-- 本插件使用了[Dagre](https://github.com/dagrejs/dagre)进行有向图布局计算
-- 本插件使用了[Apache ECharts](https://echarts.apache.org/en/index.html)绘制图形
+- 本项目使用了[Dagre](https://github.com/dagrejs/dagre)进行有向图布局计算
+- 本项目使用了[Apache ECharts](https://echarts.apache.org/en/index.html)绘制图形
+- 本项目使用了[Color.js](https://github.com/color-js/color.js)进行混合颜色计算
 - 本项目为[siyuan](https://github.com/siyuan-note/siyuan)插件，已在思源集市上架。

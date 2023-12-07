@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## 0.3.6/2023-12-07
+
+- [v0.3.5 ... v0.3.6](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.5...v0.3.6)
+
+  - add color to lines
+  - add color.js to mix color
+  - adjust sunburst graph
+
 ## 0.3.5/2023-12-05
 
 - [v0.3.4 ... v0.3.5](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.4...v0.3.5)

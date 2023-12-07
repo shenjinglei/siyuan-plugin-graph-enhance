@@ -12,6 +12,10 @@ For example, If you link note A with note B, C and D. The relation graph drawn b
 
 ## Changelog
 
+- v0.3.6
+  - add color to lines
+    - The color lines start at the starting point and ends at the end of the branch, Like a mind map.
+      ![](https://z1.ax1x.com/2023/12/07/pig5hc9.png)
 - v0.3.5
   - [#10](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/10) Changed the icon.
   - Adjusted label width.
