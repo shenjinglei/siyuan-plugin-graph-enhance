@@ -281,7 +281,7 @@ class EnhancedGraph {
 
     private initProcessedGraph() {
         this.processedGraph = new dagre.graphlib.Graph();
-        this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
+        //this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
         this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
         this.branchFlag = 1;
 
@@ -648,17 +648,26 @@ class EnhancedGraph {
 
         this.processGraph();
 
-        dagre.layout(this.processedGraph);
+        const processedJson: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
 
-        const dagreLayout: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
+        processedJson.nodes.sort((x, y) => x.v.localeCompare(y.v));
+        processedJson.edges.sort((x, y) => Math.min(x.v.localeCompare(y.v), x.w.localeCompare(y.w)));
+
+        const layoutGraph = dagre.graphlib.json.read(JSON.parse(JSON.stringify(processedJson)));
+
+        layoutGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
+        layoutGraph.setDefaultEdgeLabel(() => { return {}; });
+
+        dagre.layout(layoutGraph);
+
+        const dagreLayout: DagreOutput = dagre.graphlib.json.write(layoutGraph);
 
         this.myChart.clear();
         this.myChart.off("click");
 
         const option: ECOption = {
             tooltip: {},
-            animationDuration: 1500,
-            animationEasingUpdate: "quinticInOut",
+            animation: false,
             series: [
                 {
                     name: "graph",
