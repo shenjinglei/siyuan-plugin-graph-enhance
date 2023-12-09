@@ -1,17 +1,12 @@
 import GraphEnhancePlugin from ".";
-import { getFrontend } from "siyuan";
+import { I18N } from "siyuan";
 
-export let i18n: any;
-export function setI18n(_i18n: any) {
-    i18n = _i18n;
-}
+export let i18n: I18N;
 
 export let plugin: GraphEnhancePlugin;
 export function setPlugin(_plugin: any) {
     plugin = _plugin;
+    i18n = plugin.i18n;
 }
 
 export const STORAGE_NAME = "graph-enhance-config";
-
-const frontEnd = getFrontend();
-export const isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
