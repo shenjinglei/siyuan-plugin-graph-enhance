@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { enhancedGraph } from "./graph";
-import { i18n, plugin, isMobile } from "./utils";
-import { adaptHotkey, fetchSyncPost } from "siyuan";
+import { i18n, plugin } from "./utils";
+import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
 import "./index.scss";
 import { getSetting } from "./settings";
@@ -56,6 +56,7 @@ export function initDock() {
             };
 
             document.getElementById("graph_enhance_global")!.onclick = async () => {
+
                 const curDocId = getDocid();
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
@@ -171,7 +172,7 @@ export function initDock() {
 
 //获取当前文档id
 function getDocid() {
-    if (isMobile)
+    if (getFrontend() === "mobile" || getFrontend() === "browser-mobile")
         return document.querySelector("#editor .protyle-content .protyle-background")?.getAttribute("data-node-id");
     else
         return document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background")?.getAttribute("data-node-id");
