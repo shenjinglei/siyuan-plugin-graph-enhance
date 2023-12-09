@@ -104,6 +104,8 @@ class EnhancedGraph {
     myChart: echarts.ECharts;
     rawGraph: dagre.graphlib.Graph<DagreNodeValue>;
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
+    sourceNodes: string[];
+    sinkNodes: string[];
     sourceGraphData: any = undefined;
     sinkGraphData: any = undefined;
     sourceNodeId = "0";
@@ -210,7 +212,11 @@ class EnhancedGraph {
                 .forEach(x => this.rawGraph.node(x.id).dailynote = true);
         }
 
+        this.sourceNodes = nodes.filter(x => /^ge-moc$/.test(x.label)).flatMap(x => this.rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+        this.sinkNodes = nodes.filter(x => /^ge-tag$/.test(x.label)).flatMap(x => this.rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+
         const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
+        nodesExclusionSetting.push("^ge-moc|ge-tag$");
 
         for (const item of nodesExclusionSetting) {
             if (/^\s*$/.test(item)) continue;
@@ -538,7 +544,12 @@ class EnhancedGraph {
     getSinkGraph() {
         this.Threshold = Number(getSetting("sinkThreshold"));
 
-        const result = this.rawGraph.sinks()
+        if (this.sinkNodes.length === 0) {
+            //@ts-ignore
+            this.sinkNodes = this.rawGraph.sinks();
+        }
+
+        const result = this.sinkNodes
             .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
             .map((x: any) => this.getNodeData(x, 1));
 
@@ -548,7 +559,12 @@ class EnhancedGraph {
     getSourceGraph() {
         this.Threshold = Number(getSetting("sourceThreshold"));
 
-        const result = this.rawGraph.sources()
+        if (this.sourceNodes.length === 0) {
+            //@ts-ignore
+            this.sourceNodes = this.rawGraph.sources();
+        }
+
+        const result = this.sourceNodes
             .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
             .map((x: any) => this.getNodeData(x, 1));
 
