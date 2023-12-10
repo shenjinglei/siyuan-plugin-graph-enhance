@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { enhancedGraph } from "./graph";
-import { i18n, plugin, setEChart } from "./utils";
+import { i18n, plugin, rawGraph, setEChart } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
 import "./index.scss";
@@ -61,7 +61,7 @@ export function initDock() {
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
 
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -74,7 +74,7 @@ export function initDock() {
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
 
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -87,7 +87,7 @@ export function initDock() {
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
 
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -100,7 +100,7 @@ export function initDock() {
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
 
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -113,7 +113,7 @@ export function initDock() {
                 if (curDocId)
                     enhancedGraph.sourceNodeId = curDocId;
 
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -122,7 +122,7 @@ export function initDock() {
             };
 
             document.getElementById("graph_enhance_source")!.onclick = async () => {
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -132,7 +132,7 @@ export function initDock() {
             };
 
             document.getElementById("graph_enhance_sink")!.onclick = async () => {
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -142,7 +142,7 @@ export function initDock() {
             };
 
             document.getElementById("graph_enhance_tail")!.onclick = async () => {
-                if (!enhancedGraph.rawGraph) {
+                if (!rawGraph) {
                     await refreashGraph();
                 }
 
@@ -184,7 +184,7 @@ export async function autoFollow({ detail }: any) {
 
     enhancedGraph.sourceNodeId = detail.protyle.block.rootID;
 
-    if (!enhancedGraph.rawGraph) {
+    if (!rawGraph) {
         await refreashGraph();
     }
 

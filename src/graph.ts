@@ -1,4 +1,4 @@
-import { aEChart, i18n, plugin } from "./utils";
+import { aEChart, i18n, plugin, rawGraph, setRawGraph } from "./utils";
 
 import { openTab, showMessage } from "siyuan";
 import { getSetting } from "./settings";
@@ -15,6 +15,8 @@ import type {
 } from "echarts/core";
 
 import * as dagre from "@dagrejs/dagre";
+import { DagreNodeValue, DagreOutput } from "./types";
+import { TailGraph } from "./tail-graph";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
 
@@ -35,36 +37,6 @@ interface SunburstNode {
     value?: number,
     amount?: number,
     height: number
-}
-
-interface DagreOutput {
-    options: {
-        directed: boolean,
-        multigraph: boolean,
-        compound: boolean
-    };
-    nodes: {
-        v: string,
-        value: DagreNodeValue
-    }[];
-    edges: {
-        v: string,
-        w: string,
-        value: any
-    }[];
-}
-
-interface DagreNodeValue {
-    label: string,
-    width: number,
-    height: number,
-    x?: number,
-    y?: number,
-    color?: "start" | "normal" | "from" | "to" | "separate" | "brother",
-    separate?: boolean
-    dailynote?: boolean
-    state: number
-    branch: number
 }
 
 interface EChartNode {
@@ -101,7 +73,6 @@ interface Palette {
 }
 
 class EnhancedGraph {
-    rawGraph: dagre.graphlib.Graph<DagreNodeValue>;
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceNodes: string[];
     sinkNodes: string[];
@@ -141,10 +112,10 @@ class EnhancedGraph {
     }
 
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
-        this.rawGraph = new dagre.graphlib.Graph();
+        setRawGraph(new dagre.graphlib.Graph());
 
-        nodes.forEach((x) => this.rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
-        edges.forEach((x) => this.rawGraph.setEdge(x.from, x.to));
+        nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
+        edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
 
 
         const separationSetting = getSetting("separation").split("\n").map(x => {
@@ -164,55 +135,55 @@ class EnhancedGraph {
 
                 if (i > 0) {
                     while (i > 0) {
-                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.outEdges(x) ?? []).map(x => x.w);
+                        filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
                         i--;
                     }
                 } else {
                     while (i < 0) {
-                        filteredNodes = filteredNodes.flatMap(x => this.rawGraph.inEdges(x) ?? []).map(x => x.v);
+                        filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
                         i++;
                     }
                 }
 
                 filteredNodes.forEach(s => {
-                    this.rawGraph.setNode(s, { ...this.rawGraph.node(s), separate: true, color: "separate" });
+                    rawGraph.setNode(s, { ...rawGraph.node(s), separate: true, color: "separate" });
                 });
 
             } else {
                 let filteredEdges = nodes
                     .filter(x => RegExp(d.nodeReg).test(x.label))
-                    .flatMap(x => i > 0 ? this.rawGraph.outEdges(x.id) ?? [] : this.rawGraph.inEdges(x.id) ?? []);
+                    .flatMap(x => i > 0 ? rawGraph.outEdges(x.id) ?? [] : rawGraph.inEdges(x.id) ?? []);
 
                 if (i > 0) {
                     while (i > 1) {
-                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.outEdges(x.w) ?? []);
+                        filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
                         i--;
                     }
                 } else {
                     while (i < -1) {
-                        filteredEdges = filteredEdges.flatMap(x => this.rawGraph.inEdges(x.v) ?? []);
+                        filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
                         i++;
                     }
                 }
 
                 filteredEdges.forEach(e => {
-                    this.rawGraph.setEdge(e.v, e.w, { state: "broken" });
-                    this.rawGraph.setNode(e.v, { ...this.rawGraph.node(e.v), color: "from" });
-                    this.rawGraph.setNode(e.w, { ...this.rawGraph.node(e.w), color: "to" });
+                    rawGraph.setEdge(e.v, e.w, { state: "broken" });
+                    rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
+                    rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
                 });
             }
         }
 
         if (getSetting("dailynoteExcluded") === "true") {
             nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => this.rawGraph.removeNode(x.id));
+                .forEach(x => rawGraph.removeNode(x.id));
         } else {
             nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => this.rawGraph.node(x.id).dailynote = true);
+                .forEach(x => rawGraph.node(x.id).dailynote = true);
         }
 
-        this.sourceNodes = nodes.filter(x => /^ge-moc$/.test(x.label)).flatMap(x => this.rawGraph.inEdges(x.id) ?? []).map(x => x.v);
-        this.sinkNodes = nodes.filter(x => /^ge-tag$/.test(x.label)).flatMap(x => this.rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+        this.sourceNodes = nodes.filter(x => /^ge-moc$/.test(x.label)).flatMap(x => rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+        this.sinkNodes = nodes.filter(x => /^ge-tag$/.test(x.label)).flatMap(x => rawGraph.inEdges(x.id) ?? []).map(x => x.v);
 
         const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
         nodesExclusionSetting.push("^ge-moc|ge-tag$");
@@ -221,7 +192,7 @@ class EnhancedGraph {
             if (/^\s*$/.test(item)) continue;
 
             nodes.filter(x => RegExp(item).test(x.label))
-                .forEach(x => this.rawGraph.removeNode(x.id));
+                .forEach(x => rawGraph.removeNode(x.id));
         }
 
         if (getThemeMode() === "dark") {
@@ -393,7 +364,7 @@ class EnhancedGraph {
     branchFlag = 1;
 
     processCurrentItem = (cur: QueueItem): boolean => {
-        const isBroken = cur.edge ? this.rawGraph.edge(cur.edge)?.state === "broken" : false;
+        const isBroken = cur.edge ? rawGraph.edge(cur.edge)?.state === "broken" : false;
 
         if (cur.count > 1 && isBroken)
             return false;
@@ -407,7 +378,7 @@ class EnhancedGraph {
     insertNode = (cur: QueueItem) => {
         if (this.processedGraph.hasNode(cur.id)) return;
 
-        const rawNodeValue = this.rawGraph.node(cur.id);
+        const rawNodeValue = rawGraph.node(cur.id);
         if (cur.count === 0)
             this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "start" });
         else if (Number.isNaN(cur.level))
@@ -450,7 +421,7 @@ class EnhancedGraph {
 
         curNodeValue.state = curNodeValue.state | 1;
 
-        this.rawGraph.outEdges(cur.id)
+        rawGraph.outEdges(cur.id)
             ?.filter(e => this.processedGraph.node(e.w)?.state !== 3)
             .forEach(e => q.push({
                 id: e.w,
@@ -472,7 +443,7 @@ class EnhancedGraph {
 
         curNodeValue.state = curNodeValue.state | 2;
 
-        this.rawGraph.inEdges(cur.id)
+        rawGraph.inEdges(cur.id)
             ?.filter(e => this.processedGraph.node(e.v)?.state !== 3)
             .forEach(x => q.push({
                 id: x.v,
@@ -489,14 +460,14 @@ class EnhancedGraph {
         if (childrenNum >= this.Threshold) {
             return {
                 id: cur,
-                name: this.rawGraph.node(cur).label,
+                name: rawGraph.node(cur).label,
                 value: 1,
                 height: 1,
             };
         } else {
             return {
                 id: cur,
-                name: this.rawGraph.node(cur).label,
+                name: rawGraph.node(cur).label,
                 value: 0,
                 amount: childrenNum,
                 height: 0,
@@ -517,7 +488,7 @@ class EnhancedGraph {
 
         return {
             id: cur,
-            name: this.rawGraph.node(cur).label,
+            name: rawGraph.node(cur).label,
             children: children,
             height: children.map(x => x.height).reduce((p, c) => p > c ? p : c, 0) + 1,
         };
@@ -525,9 +496,9 @@ class EnhancedGraph {
 
     getNodes(cur: string): string[] {
         if (this.diffuseGraphType === "source")
-            return (this.rawGraph.outEdges(cur) ?? []).map(x => x.w);
+            return (rawGraph.outEdges(cur) ?? []).map(x => x.w);
         else
-            return (this.rawGraph.inEdges(cur) ?? []).map(x => x.v);
+            return (rawGraph.inEdges(cur) ?? []).map(x => x.v);
     }
 
     genSunburstData(param: SunburstNode[]) {
@@ -545,11 +516,11 @@ class EnhancedGraph {
 
         if (this.sinkNodes.length === 0) {
             //@ts-ignore
-            this.sinkNodes = this.rawGraph.sinks();
+            this.sinkNodes = rawGraph.sinks();
         }
 
         const result = this.sinkNodes
-            .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
+            .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(rawGraph.node(x).label))
             .map((x: any) => this.getNodeData(x, 1));
 
         this.sinkGraphData = this.genSunburstData(result);
@@ -560,11 +531,11 @@ class EnhancedGraph {
 
         if (this.sourceNodes.length === 0) {
             //@ts-ignore
-            this.sourceNodes = this.rawGraph.sources();
+            this.sourceNodes = rawGraph.sources();
         }
 
         const result = this.sourceNodes
-            .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(this.rawGraph.node(x).label))
+            .filter(x => !/^\d{4}-\d{2}-\d{2}$/.test(rawGraph.node(x).label))
             .map((x: any) => this.getNodeData(x, 1));
 
         this.sourceGraphData = this.genSunburstData(result);
@@ -652,7 +623,7 @@ class EnhancedGraph {
             return;
         }
 
-        if (!this.rawGraph.hasNode(this.sourceNodeId)) {
+        if (!rawGraph.hasNode(this.sourceNodeId)) {
             // showMessage(
             //     i18n.needRefreshMsg,
             //     3000,
@@ -734,7 +705,7 @@ class EnhancedGraph {
     }
 
     processTailGraph() {
-        const tailGraph: string[][] = dagre.graphlib.alg.components(this.rawGraph);
+        const tailGraph: string[][] = dagre.graphlib.alg.components(rawGraph);
 
         const tailThresholdSetting = getSetting("tailThreshold").split(",");
 
@@ -771,57 +742,8 @@ class EnhancedGraph {
     }
 
     TailDisplay() {
-        const result = this.processTailGraph();
-
-        let edges: string[][] = [];
-        result.forEach(g => {
-            edges = edges.concat(this.createEdges(g));
-        });
-
-        const nodes = result.flatMap(x => x).map(x => {
-            return {
-                id: x,
-                name: this.rawGraph.node(x).label,
-                symbol: "circle",
-                symbolSize: 5,
-                itemStyle: {
-                    color: Color["normal"]
-                },
-                label: {
-                    color: "inherit",
-                }
-            };
-        });
-
-        aEChart.clear();
-        aEChart.off("click");
-
-        const option: ECOption = {
-            tooltip: {},
-            animationDuration: 1500,
-            animationEasingUpdate: "quinticInOut",
-            series: [
-                {
-                    name: "graph",
-                    type: "graph",
-                    layout: "force",
-                    draggable: true,
-                    roam: true,
-                    label: {
-                        show: true,
-                        position: "bottom",
-                    },
-                    data: nodes,
-                    links: edges.map(x => { return { source: x[0], target: x[1] }; }),
-                },
-            ],
-        };
-
-        aEChart.setOption(option);
-        aEChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
-            // @ts-ignore
-            openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
-        });
+        const a = new TailGraph();
+        a.draw();
     }
 
 }
