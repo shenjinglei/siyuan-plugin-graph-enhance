@@ -1,3 +1,4 @@
+import * as echarts from "echarts/core";
 import GraphEnhancePlugin from ".";
 import { I18N } from "siyuan";
 
@@ -10,3 +11,8 @@ export function setPlugin(_plugin: any) {
 }
 
 export const STORAGE_NAME = "graph-enhance-config";
+
+export let aEChart: echarts.ECharts;
+export function setEChart() {
+    aEChart = echarts.init(document.getElementById("graph_enhance_container"));
+}

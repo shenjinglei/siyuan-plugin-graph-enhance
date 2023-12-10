@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { enhancedGraph } from "./graph";
-import { i18n, plugin } from "./utils";
+import { i18n, plugin, setEChart } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
 import "./index.scss";
@@ -151,8 +151,8 @@ export function initDock() {
                 enhancedGraph.diffuseDisplay();
             };
 
-            enhancedGraph.init();
-
+            //enhancedGraph.init();
+            setEChart();
         },
         resize() {
             const container = document.getElementById("graph_enhance_container")!;

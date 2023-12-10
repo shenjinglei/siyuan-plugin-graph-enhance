@@ -1,4 +1,4 @@
-import { i18n, plugin } from "./utils";
+import { aEChart, i18n, plugin } from "./utils";
 
 import { openTab, showMessage } from "siyuan";
 import { getSetting } from "./settings";
@@ -101,7 +101,6 @@ interface Palette {
 }
 
 class EnhancedGraph {
-    myChart: echarts.ECharts;
     rawGraph: dagre.graphlib.Graph<DagreNodeValue>;
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceNodes: string[];
@@ -138,7 +137,7 @@ class EnhancedGraph {
     }
 
     resize(param: { width: number, height: number }) {
-        this.myChart.resize(param);
+        aEChart.resize(param);
     }
 
     initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
@@ -574,8 +573,8 @@ class EnhancedGraph {
     sunbrushDisplay() {
         this.processSunburst();
 
-        this.myChart.clear();
-        this.myChart.off("click");
+        aEChart.clear();
+        aEChart.off("click");
 
         const option: ECOption = {
             series: {
@@ -630,9 +629,9 @@ class EnhancedGraph {
             },
         };
 
-        option && this.myChart.setOption(option);
+        option && aEChart.setOption(option);
 
-        this.myChart.on("click", function (params: echarts.ECElementEvent) {
+        aEChart.on("click", function (params: echarts.ECElementEvent) {
             // @ts-ignore
             const objId: string = params.data.id;
             if (objId) {
@@ -678,8 +677,8 @@ class EnhancedGraph {
 
         const dagreLayout: DagreOutput = dagre.graphlib.json.write(layoutGraph);
 
-        this.myChart.clear();
-        this.myChart.off("click");
+        aEChart.clear();
+        aEChart.off("click");
 
         const option: ECOption = {
             tooltip: {},
@@ -727,8 +726,8 @@ class EnhancedGraph {
             ],
         };
 
-        this.myChart.setOption(option);
-        this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
+        aEChart.setOption(option);
+        aEChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
             // @ts-ignore
             openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
         });
@@ -794,8 +793,8 @@ class EnhancedGraph {
             };
         });
 
-        this.myChart.clear();
-        this.myChart.off("click");
+        aEChart.clear();
+        aEChart.off("click");
 
         const option: ECOption = {
             tooltip: {},
@@ -818,18 +817,13 @@ class EnhancedGraph {
             ],
         };
 
-        this.myChart.setOption(option);
-        this.myChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
+        aEChart.setOption(option);
+        aEChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
             // @ts-ignore
             openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
         });
     }
 
-    public init() {
-        this.myChart = echarts.init(document.getElementById("graph_enhance_container"));
-
-
-    }
 }
 
 function getThemeMode() {
