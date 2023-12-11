@@ -704,47 +704,16 @@ class EnhancedGraph {
         });
     }
 
-    processTailGraph() {
-        const tailGraph: string[][] = dagre.graphlib.alg.components(rawGraph);
-
-        const tailThresholdSetting = getSetting("tailThreshold").split(",");
-
-        const lowerBound = +tailThresholdSetting[0];
-        const upperBound = +tailThresholdSetting[1];
-
-        if (Number.isNaN(upperBound) || Number.isNaN(lowerBound)) {
-            return [[]];
-        }
-
-        return tailGraph.filter(x => x.length >= lowerBound && x.length <= upperBound);
-    }
-
-    createEdges(group: string[]) {
-        if (group.length === 1) return [];
-        if (group.length === 2)
-            return [[group[0], group[1]]];
-
-        const edges = [];
-        for (let i = 0; i < group.length; i++) {
-            edges.push([group[i], group[(i + 1) % group.length]]);
-        }
-        return edges;
-    }
-
     diffuseDisplay() {
         switch (this.diffuseGraphType) {
             case "tail":
-                this.TailDisplay();
+                (new TailGraph()).draw();
                 break;
             default:
                 this.sunbrushDisplay();
         }
     }
 
-    TailDisplay() {
-        const a = new TailGraph();
-        a.draw();
-    }
 
 }
 
