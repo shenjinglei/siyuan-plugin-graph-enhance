@@ -131,6 +131,7 @@ class SunburstGraph {
 
 
     draw() {
+        console.log("sunburst draw");
 
         this.processSunburst();
 
@@ -202,4 +203,4 @@ class SunburstGraph {
     }
 }
 
-export const sunburstGraph: SunburstGraph = new SunburstGraph();
+export const sunburstGraph = new SunburstGraph();

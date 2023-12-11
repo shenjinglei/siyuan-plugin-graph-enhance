@@ -15,7 +15,7 @@ type ECOption = ComposeOption<
     GraphSeriesOption
 >;
 
-export class TailGraph {
+class TailGraph {
     processTailGraph() {
         const tailGraph: string[][] = graphlib.alg.components(rawGraph);
 
@@ -97,3 +97,5 @@ export class TailGraph {
         });
     }
 }
+
+export const tailGraph = new TailGraph();

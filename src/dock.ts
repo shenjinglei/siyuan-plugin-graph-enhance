@@ -151,7 +151,6 @@ export function initDock() {
                 enhancedGraph.diffuseDisplay();
             };
 
-            //enhancedGraph.init();
             setEChart();
         },
         resize() {
@@ -170,7 +169,6 @@ export function initDock() {
     });
 }
 
-//获取当前文档id
 function getDocid() {
     if (getFrontend() === "mobile" || getFrontend() === "browser-mobile")
         return document.querySelector("#editor .protyle-content .protyle-background")?.getAttribute("data-node-id");

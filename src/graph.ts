@@ -15,7 +15,7 @@ import type {
 
 import * as dagre from "@dagrejs/dagre";
 import { DagreNodeValue, DagreOutput } from "./types";
-import { TailGraph } from "./tail-graph";
+import { tailGraph } from "./tail-graph";
 import { sunburstGraph } from "./sunburst-graph";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
@@ -521,7 +521,7 @@ class EnhancedGraph {
     diffuseDisplay() {
         switch (this.diffuseGraphType) {
             case "tail":
-                (new TailGraph()).draw();
+                tailGraph.draw();
                 break;
             default:
                 sunburstGraph.draw();
