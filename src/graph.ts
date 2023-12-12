@@ -15,8 +15,6 @@ import type {
 
 import * as dagre from "@dagrejs/dagre";
 import { DagreNodeValue, DagreOutput } from "./types";
-import { tailGraph } from "./tail-graph";
-import { sunburstGraph } from "./sunburst-graph";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
 
@@ -63,7 +61,7 @@ interface Palette {
 
 class EnhancedGraph {
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
-    sourceNodeId = "0";
+    sourceNodeId: string;
     focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
     diffuseGraphType: "source" | "sink" | "tail" = "source";
     palette: Palette = {};
@@ -167,8 +165,6 @@ class EnhancedGraph {
                 .forEach(x => rawGraph.node(x.id).dailynote = true);
         }
 
-        sunburstGraph.sourceNodes = nodes.filter(x => /^ge-moc$/.test(x.label)).flatMap(x => rawGraph.inEdges(x.id) ?? []).map(x => x.v);
-        sunburstGraph.sinkNodes = nodes.filter(x => /^ge-tag$/.test(x.label)).flatMap(x => rawGraph.inEdges(x.id) ?? []).map(x => x.v);
 
         const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
         nodesExclusionSetting.push("^ge-moc|ge-tag$");
@@ -200,8 +196,6 @@ class EnhancedGraph {
             };
         }
 
-        sunburstGraph.sourceGraphData = undefined;
-        sunburstGraph.sinkGraphData = undefined;
     }
 
 
@@ -516,16 +510,6 @@ class EnhancedGraph {
             // @ts-ignore
             openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
         });
-    }
-
-    diffuseDisplay() {
-        switch (this.diffuseGraphType) {
-            case "tail":
-                tailGraph.draw();
-                break;
-            default:
-                sunburstGraph.draw();
-        }
     }
 
 
