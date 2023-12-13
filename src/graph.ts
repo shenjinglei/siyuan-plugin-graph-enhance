@@ -36,16 +36,17 @@ class EnhancedGraph {
         nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
         edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
 
-        dailynoteNodeInit();
-        ExclusionNodeInit();
         cutVertexInit();
         cutEdgeInit();
+        dailynoteNodeInit();
+        ExclusionNodeInit();
 
-        console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
+        //console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
 
         function ExclusionNodeInit() {
             const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
-            nodesExclusionSetting.push("^ge-moc|ge-tag$");
+            nodesExclusionSetting.push("^ge-moc$|^ge-tag$");
+            nodesExclusionSetting.push("^ge-cv-?\\d+$|^ge-ce-?\\d+$");
 
             for (const item of nodesExclusionSetting) {
                 if (/^\s*$/.test(item)) continue;
@@ -65,8 +66,6 @@ class EnhancedGraph {
             }
         }
 
-
-
         function cutEdgeInit() {
             nodes.filter(x => /^ge-ce-?\d+$/.test(x.label)).forEach(x => {
                 let pos = Number(/^ge-ce(-?\d+)$/.exec(x.label)?.[1]);
@@ -78,7 +77,7 @@ class EnhancedGraph {
                     filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
                     pos--;
                 }
-                while (pos < 1) {
+                while (pos < -1) {
                     filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
                     pos++;
                 }
