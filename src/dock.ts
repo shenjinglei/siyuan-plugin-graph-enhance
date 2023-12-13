@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { enhancedGraph } from "./graph";
-import { i18n, plugin, rawGraph, setEChart } from "./utils";
+import { i18n, plugin, rawGraph } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
 import "./index.scss";
 import { getSetting } from "./settings";
+import { initEChart, resize } from "./renderer";
 const DOCK_TYPE = "dock_tab";
 
 export function initDock() {
@@ -114,11 +115,11 @@ export function initDock() {
                 enhancedGraph.Display();
             };
 
-            setEChart();
+            initEChart();
         },
         resize() {
             const container = document.getElementById("graph_enhance_container")!;
-            enhancedGraph.resize({
+            resize({
                 width: container.offsetWidth,
                 height: container.offsetHeight
             });

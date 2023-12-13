@@ -1,35 +1,18 @@
-import { aEChart, i18n, plugin, rawGraph, setRawGraph } from "./utils";
+import { i18n, rawGraph, setRawGraph } from "./utils";
 
-import { openTab, showMessage } from "siyuan";
+import { showMessage } from "siyuan";
 import { getSetting } from "./settings";
-import { CanvasRenderer } from "echarts/renderers";
-import * as echarts from "echarts/core";
-import {
-    GraphChart,
-    GraphSeriesOption,
-} from "echarts/charts";
-import type {
-    ComposeOption,
-} from "echarts/core";
 
 import * as dagre from "@dagrejs/dagre";
 import { DagreNodeValue, DagreOutput } from "./types";
+import { draw } from "./renderer";
 
-const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
-
-echarts.use([
-    GraphChart,
-    CanvasRenderer
-]);
-
-type ECOption = ComposeOption<GraphSeriesOption>;
-
-interface EChartNode {
+interface SiyuanNode {
     id: string;
     label: string;
 }
 
-interface EChartEdge {
+interface SiyuanEdge {
     from: string;
     to: string;
 }
@@ -42,56 +25,12 @@ interface QueueItem {
     active?: number,
 }
 
-let Color = {
-    start: "#aa0000",
-    normal: "#003cb4",
-    from: "#8c13aa",
-    to: "#008600",
-    separate: "#aaaa00",
-    brother: "#ff00ff"
-};
-
-const primaryColours = ["Tomato", "GoldenRod", "LimeGreen", "DarkTurquoise", "RoyalBlue", "Violet", "Crimson"];
-
-interface Palette {
-    [key: string]: string;
-}
-
 class EnhancedGraph {
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceNodeId: string;
     focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
-    palette: Palette = {};
 
-    getColor(flag: number): string {
-        const result = this.palette[flag];
-        if (result !== undefined)
-            return result;
-
-        const colors: string[] = [];
-        let mask = 1;
-        for (let index = 0; index < 32; index++) {
-            if ((flag & mask) !== 0) {
-                colors.push(primaryColours[index % primaryColours.length]);
-            }
-            mask <<= 1;
-        }
-
-        let newColor = new ColorJs(colors[0] ?? "Violet");
-        for (let i = 1; i < colors.length; i++) {
-            newColor = newColor.mix(colors[i], 1 / (i + 1), { space: "srgb" });
-        }
-
-        this.palette[flag] = newColor.toString({ format: "hex" });
-
-        return this.palette[flag];
-    }
-
-    resize(param: { width: number, height: number }) {
-        aEChart.resize(param);
-    }
-
-    initRawGraph(nodes: EChartNode[], edges: EChartEdge[]) {
+    initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
         setRawGraph(new dagre.graphlib.Graph());
 
         nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
@@ -99,7 +38,6 @@ class EnhancedGraph {
 
         dailynoteNodeInit();
         ExclusionNodeInit();
-        themeColorInit();
         cutVertexInit();
         cutEdgeInit();
 
@@ -127,27 +65,7 @@ class EnhancedGraph {
             }
         }
 
-        function themeColorInit() {
-            if (getThemeMode() === "dark") {
-                Color = {
-                    start: "#ffa87c",
-                    normal: "#ffff7f",
-                    from: "#e6b4e8",
-                    to: "#6bff6b",
-                    separate: "#8ea3e8",
-                    brother: "#b33cb3"
-                };
-            } else {
-                Color = {
-                    start: "#aa0000",
-                    normal: "#003cb4",
-                    from: "#16a7a7",
-                    to: "#008600",
-                    separate: "#aaaa00",
-                    brother: "#b33cb3"
-                };
-            }
-        }
+
 
         function cutEdgeInit() {
             nodes.filter(x => /^ge-ce-?\d+$/.test(x.label)).forEach(x => {
@@ -416,20 +334,12 @@ class EnhancedGraph {
 
     public Display() {
         if (this.sourceNodeId === "0") {
-            showMessage(
-                i18n.needStartPointMsg,
-                3000,
-                "info"
-            );
+            showMessage(i18n.needStartPointMsg, 3000, "info");
             return;
         }
 
         if (!rawGraph.hasNode(this.sourceNodeId)) {
-            // showMessage(
-            //     i18n.needRefreshMsg,
-            //     3000,
-            //     "info"
-            // );
+            // showMessage(i18n.needRefreshMsg, 3000, "info");
             return;
         }
 
@@ -449,67 +359,8 @@ class EnhancedGraph {
 
         const dagreLayout: DagreOutput = dagre.graphlib.json.write(layoutGraph);
 
-        aEChart.clear();
-        aEChart.off("click");
-
-        const option: ECOption = {
-            tooltip: {},
-            animation: false,
-            series: [
-                {
-                    name: "graph",
-                    type: "graph",
-                    layout: "none",
-                    edgeSymbol: ["none", "arrow"],
-                    draggable: true,
-                    roam: true,
-                    label: {
-                        show: true,
-                        position: "bottom",
-                    },
-                    data: dagreLayout.nodes.filter(x => x.value).map(x => {
-                        return {
-                            id: x.v,
-                            name: x.value.label,
-                            x: x.value.x,
-                            y: x.value.y,
-                            symbol: "circle",
-                            symbolSize: 5,
-                            itemStyle: {
-                                color: Color[x.value.color ?? "normal"]
-                                //color: this.getColor(x.value.branch)
-                            },
-                            label: {
-                                color: "inherit",
-                                fontFamily: "OPPOSans",
-                                width: x.value.label.length > 16 ? 160 : undefined,
-                                overflow: "break",
-                            }
-                        };
-                    }),
-                    links: dagreLayout.edges.map((x: any) => {
-                        return {
-                            source: x.v, target: x.w, value: x.value.branch,
-                            label: { show: false, formatter: "{c}" },
-                            lineStyle: { color: this.getColor(x.value.branch) }
-                        };
-                    }),
-                },
-            ],
-        };
-
-        aEChart.setOption(option);
-        aEChart.on("click", { dataType: "node" }, function (params: echarts.ECElementEvent) {
-            // @ts-ignore
-            openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
-        });
+        draw(dagreLayout);
     }
-
-
-}
-
-function getThemeMode() {
-    return document.querySelector("html")?.getAttribute("data-theme-mode");
 }
 
 export const enhancedGraph: EnhancedGraph = new EnhancedGraph();
