@@ -97,10 +97,13 @@ class EnhancedGraph {
         nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
         edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
 
-        splitNodeInit();
         dailynoteNodeInit();
         ExclusionNodeInit();
         themeColorInit();
+        cutVertexInit();
+        cutEdgeInit();
+
+        console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
 
         function ExclusionNodeInit() {
             const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
@@ -138,7 +141,7 @@ class EnhancedGraph {
                 Color = {
                     start: "#aa0000",
                     normal: "#003cb4",
-                    from: "#aa5500",
+                    from: "#16a7a7",
                     to: "#008600",
                     separate: "#aaaa00",
                     brother: "#b33cb3"
@@ -146,64 +149,45 @@ class EnhancedGraph {
             }
         }
 
-        function splitNodeInit() {
-            for (const d of getSeparationSetting()) {
-                if (/^\s*$/.test(d.nodeReg) || Number.isNaN(d.pos)) continue;
+        function cutEdgeInit() {
+            nodes.filter(x => /^ge-ce-?\d+$/.test(x.label)).forEach(x => {
+                let pos = Number(/^ge-ce(-?\d+)$/.exec(x.label)?.[1]);
+                const filteredNodes = (rawGraph.inEdges(x.id) ?? []).map(x => x.v);
 
-                let i = d.pos;
-                if (Number.isInteger(i)) {
-                    let filteredNodes = nodes.filter(x => RegExp(d.nodeReg).test(x.label)).map(x => x.id);
-
-                    if (i > 0) {
-                        while (i > 0) {
-                            filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
-                            i--;
-                        }
-                    } else {
-                        while (i < 0) {
-                            filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
-                            i++;
-                        }
-                    }
-
-                    filteredNodes.forEach(s => {
-                        rawGraph.setNode(s, { ...rawGraph.node(s), separate: true, color: "separate" });
-                    });
-
-                } else {
-                    let filteredEdges = nodes
-                        .filter(x => RegExp(d.nodeReg).test(x.label))
-                        .flatMap(x => i > 0 ? rawGraph.outEdges(x.id) ?? [] : rawGraph.inEdges(x.id) ?? []);
-
-                    if (i > 0) {
-                        while (i > 1) {
-                            filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
-                            i--;
-                        }
-                    } else {
-                        while (i < -1) {
-                            filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
-                            i++;
-                        }
-                    }
-
-                    filteredEdges.forEach(e => {
-                        rawGraph.setEdge(e.v, e.w, { state: "broken" });
-                        rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
-                        rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
-                    });
+                if (pos === 0) return;
+                let filteredEdges = filteredNodes.flatMap(x => pos > 0 ? rawGraph.outEdges(x) ?? [] : rawGraph.inEdges(x) ?? []);
+                while (pos > 1) {
+                    filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
+                    pos--;
                 }
-            }
-
-            function getSeparationSetting() {
-                return getSetting("separation").split("\n").map(x => {
-                    const index = x.lastIndexOf(",");
-                    return {
-                        nodeReg: x.slice(0, index),
-                        pos: Number(x.slice(index + 1))
-                    };
+                while (pos < 1) {
+                    filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
+                    pos++;
+                }
+                filteredEdges.forEach(e => {
+                    rawGraph.setEdge(e.v, e.w, { state: "broken" });
+                    rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
+                    rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
                 });
-            }
+            });
+        }
+
+        function cutVertexInit() {
+            nodes.filter(x => /^ge-cv-?\d+$/.test(x.label)).forEach(x => {
+                let pos = Number(/^ge-cv(-?\d+)$/.exec(x.label)?.[1]);
+                let filteredNodes = (rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+
+                while (pos > 0) {
+                    filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
+                    pos--;
+                }
+                while (pos < 0) {
+                    filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
+                    pos++;
+                }
+
+                filteredNodes.forEach(x => rawGraph.setNode(x, { ...rawGraph.node(x), separate: true, color: "separate" }));
+            });
         }
     }
 
