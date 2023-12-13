@@ -25,22 +25,6 @@ export function settingInit() {
                 );
                 return;
             }
-            if (!/^[0-9]+$/.test(sourceThresholdElement.value)) {
-                showMessage(
-                    i18n.checkSourceThresholdErrorMsg,
-                    3000,
-                    "error"
-                );
-                return;
-            }
-            if (!/^[0-9]+$/.test(sinkThresholdElement.value)) {
-                showMessage(
-                    i18n.checkSinkThresholdErrorMsg,
-                    3000,
-                    "error"
-                );
-                return;
-            }
             plugin.saveData(STORAGE_NAME,
                 {
                     rankdir: directionElement.value,
@@ -49,11 +33,8 @@ export function settingInit() {
                     nodesMaximum: nodesMaximumElement.value,
                     neighborDepth: neighborDepthElement.value,
                     autoFollow: autoFollowElement.value,
-                    sourceThreshold: sourceThresholdElement.value,
-                    sinkThreshold: sinkThresholdElement.value,
                     separation: separationElement.value,
                     nodesExclusion: nodesExclusionElement.value,
-                    tailThreshold: tailThresholdElement.value
                 });
 
 
@@ -139,43 +120,6 @@ export function settingInit() {
         createActionElement: () => {
             neighborDepthElement.value = plugin.data[STORAGE_NAME].neighborDepth;
             return neighborDepthElement;
-        },
-    });
-
-    const sourceThresholdElement = document.createElement("input");
-    sourceThresholdElement.id = "sourceThreshold";
-    sourceThresholdElement.placeholder = i18n.pleaseInputNumber;
-    sourceThresholdElement.className = "b3-text-field";
-    plugin.setting.addItem({
-        title: i18n.settingSourceThreshold,
-        createActionElement: () => {
-            sourceThresholdElement.value = plugin.data[STORAGE_NAME].sourceThreshold;
-            return sourceThresholdElement;
-        },
-    });
-
-    const sinkThresholdElement = document.createElement("input");
-    sinkThresholdElement.id = "sinkThreshold";
-    sinkThresholdElement.placeholder = i18n.pleaseInputNumber;
-    sinkThresholdElement.className = "b3-text-field";
-    plugin.setting.addItem({
-        title: i18n.settingSinkThreshold,
-        createActionElement: () => {
-            sinkThresholdElement.value = plugin.data[STORAGE_NAME].sinkThreshold;
-            return sinkThresholdElement;
-        },
-    });
-
-    const tailThresholdElement = document.createElement("input");
-    tailThresholdElement.id = "tailThreshold";
-    tailThresholdElement.placeholder = i18n.pleaseInput;
-    tailThresholdElement.className = "b3-text-field";
-    plugin.setting.addItem({
-        title: i18n.tailThresholdTitle,
-        description: i18n.tailThresholdDescription,
-        createActionElement: () => {
-            tailThresholdElement.value = plugin.data[STORAGE_NAME].tailThreshold;
-            return tailThresholdElement;
         },
     });
 

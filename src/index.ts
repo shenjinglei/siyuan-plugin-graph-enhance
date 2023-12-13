@@ -24,11 +24,8 @@ export default class GraphEnhancePlugin extends Plugin {
                     nodesMaximum: "200",
                     neighborDepth: "2",
                     autoFollow: "true",
-                    sourceThreshold: "3",
-                    sinkThreshold: "3",
                     separation: "",
                     nodesExclusion: "",
-                    tailThreshold: "1,3"
                 }, this.data[STORAGE_NAME])
             );
 

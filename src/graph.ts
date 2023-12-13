@@ -7,7 +7,6 @@ import * as echarts from "echarts/core";
 import {
     GraphChart,
     GraphSeriesOption,
-    SunburstChart,
 } from "echarts/charts";
 import type {
     ComposeOption,
@@ -20,7 +19,6 @@ const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
 
 echarts.use([
     GraphChart,
-    SunburstChart,
     CanvasRenderer
 ]);
 
@@ -63,7 +61,6 @@ class EnhancedGraph {
     processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceNodeId: string;
     focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
-    diffuseGraphType: "source" | "sink" | "tail" = "source";
     palette: Palette = {};
 
     getColor(flag: number): string {
@@ -100,102 +97,114 @@ class EnhancedGraph {
         nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
         edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
 
+        splitNodeInit();
+        dailynoteNodeInit();
+        ExclusionNodeInit();
+        themeColorInit();
 
-        const separationSetting = getSetting("separation").split("\n").map(x => {
-            const index = x.lastIndexOf(",");
-            return {
-                nodeReg: x.slice(0, index),
-                pos: Number(x.slice(index + 1))
-            };
-        });
+        function ExclusionNodeInit() {
+            const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
+            nodesExclusionSetting.push("^ge-moc|ge-tag$");
 
-        for (const d of separationSetting) {
-            if (/^\s*$/.test(d.nodeReg) || Number.isNaN(d.pos)) continue;
+            for (const item of nodesExclusionSetting) {
+                if (/^\s*$/.test(item)) continue;
 
-            let i = d.pos;
-            if (Number.isInteger(i)) {
-                let filteredNodes = nodes.filter(x => RegExp(d.nodeReg).test(x.label)).map(x => x.id);
-
-                if (i > 0) {
-                    while (i > 0) {
-                        filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
-                        i--;
-                    }
-                } else {
-                    while (i < 0) {
-                        filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
-                        i++;
-                    }
-                }
-
-                filteredNodes.forEach(s => {
-                    rawGraph.setNode(s, { ...rawGraph.node(s), separate: true, color: "separate" });
-                });
-
-            } else {
-                let filteredEdges = nodes
-                    .filter(x => RegExp(d.nodeReg).test(x.label))
-                    .flatMap(x => i > 0 ? rawGraph.outEdges(x.id) ?? [] : rawGraph.inEdges(x.id) ?? []);
-
-                if (i > 0) {
-                    while (i > 1) {
-                        filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
-                        i--;
-                    }
-                } else {
-                    while (i < -1) {
-                        filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
-                        i++;
-                    }
-                }
-
-                filteredEdges.forEach(e => {
-                    rawGraph.setEdge(e.v, e.w, { state: "broken" });
-                    rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
-                    rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
-                });
+                nodes.filter(x => RegExp(item).test(x.label))
+                    .forEach(x => rawGraph.removeNode(x.id));
             }
         }
 
-        if (getSetting("dailynoteExcluded") === "true") {
-            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => rawGraph.removeNode(x.id));
-        } else {
-            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => rawGraph.node(x.id).dailynote = true);
+        function dailynoteNodeInit() {
+            if (getSetting("dailynoteExcluded") === "true") {
+                nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                    .forEach(x => rawGraph.removeNode(x.id));
+            } else {
+                nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                    .forEach(x => rawGraph.node(x.id).dailynote = true);
+            }
         }
 
-
-        const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
-        nodesExclusionSetting.push("^ge-moc|ge-tag$");
-
-        for (const item of nodesExclusionSetting) {
-            if (/^\s*$/.test(item)) continue;
-
-            nodes.filter(x => RegExp(item).test(x.label))
-                .forEach(x => rawGraph.removeNode(x.id));
+        function themeColorInit() {
+            if (getThemeMode() === "dark") {
+                Color = {
+                    start: "#ffa87c",
+                    normal: "#ffff7f",
+                    from: "#e6b4e8",
+                    to: "#6bff6b",
+                    separate: "#8ea3e8",
+                    brother: "#b33cb3"
+                };
+            } else {
+                Color = {
+                    start: "#aa0000",
+                    normal: "#003cb4",
+                    from: "#aa5500",
+                    to: "#008600",
+                    separate: "#aaaa00",
+                    brother: "#b33cb3"
+                };
+            }
         }
 
-        if (getThemeMode() === "dark") {
-            Color = {
-                start: "#ffa87c",
-                normal: "#ffff7f",
-                from: "#e6b4e8",
-                to: "#6bff6b",
-                separate: "#8ea3e8",
-                brother: "#b33cb3"
-            };
-        } else {
-            Color = {
-                start: "#aa0000",
-                normal: "#003cb4",
-                from: "#aa5500",
-                to: "#008600",
-                separate: "#aaaa00",
-                brother: "#b33cb3"
-            };
-        }
+        function splitNodeInit() {
+            for (const d of getSeparationSetting()) {
+                if (/^\s*$/.test(d.nodeReg) || Number.isNaN(d.pos)) continue;
 
+                let i = d.pos;
+                if (Number.isInteger(i)) {
+                    let filteredNodes = nodes.filter(x => RegExp(d.nodeReg).test(x.label)).map(x => x.id);
+
+                    if (i > 0) {
+                        while (i > 0) {
+                            filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
+                            i--;
+                        }
+                    } else {
+                        while (i < 0) {
+                            filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
+                            i++;
+                        }
+                    }
+
+                    filteredNodes.forEach(s => {
+                        rawGraph.setNode(s, { ...rawGraph.node(s), separate: true, color: "separate" });
+                    });
+
+                } else {
+                    let filteredEdges = nodes
+                        .filter(x => RegExp(d.nodeReg).test(x.label))
+                        .flatMap(x => i > 0 ? rawGraph.outEdges(x.id) ?? [] : rawGraph.inEdges(x.id) ?? []);
+
+                    if (i > 0) {
+                        while (i > 1) {
+                            filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
+                            i--;
+                        }
+                    } else {
+                        while (i < -1) {
+                            filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
+                            i++;
+                        }
+                    }
+
+                    filteredEdges.forEach(e => {
+                        rawGraph.setEdge(e.v, e.w, { state: "broken" });
+                        rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
+                        rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
+                    });
+                }
+            }
+
+            function getSeparationSetting() {
+                return getSetting("separation").split("\n").map(x => {
+                    const index = x.lastIndexOf(",");
+                    return {
+                        nodeReg: x.slice(0, index),
+                        pos: Number(x.slice(index + 1))
+                    };
+                });
+            }
+        }
     }
 
 
