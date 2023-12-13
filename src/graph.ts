@@ -151,9 +151,8 @@ class EnhancedGraph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            if (!this.processCurrentItem(cur)) {
-                continue;
-            }
+            this.insertNode(cur);
+            this.insertEdge(cur);
             if (cur.level >= 0) {
                 this.searchDown(cur, q);
             }
@@ -171,9 +170,8 @@ class EnhancedGraph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            if (!this.processCurrentItem(cur)) {
-                continue;
-            }
+            this.insertNode(cur);
+            this.insertEdge(cur);
             if (cur.level >= 0) {
                 this.searchUp(cur, q);
             }
@@ -191,9 +189,8 @@ class EnhancedGraph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            if (!this.processCurrentItem(cur)) {
-                continue;
-            }
+            this.insertNode(cur);
+            this.insertEdge(cur);
             if (cur.level >= -1) {
                 this.searchDown(cur, q);
             }
@@ -211,9 +208,8 @@ class EnhancedGraph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            if (!this.processCurrentItem(cur)) {
-                continue;
-            }
+            this.insertNode(cur);
+            this.insertEdge(cur);
             this.searchDown(cur, q);
             this.searchUp(cur, q);
             count++;
@@ -228,9 +224,8 @@ class EnhancedGraph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            if (!this.processCurrentItem(cur)) {
-                continue;
-            }
+            this.insertNode(cur);
+            this.insertEdge(cur);
             if (cur.count < neighborDepth) {
                 this.searchDown(cur, q);
                 this.searchUp(cur, q);
@@ -240,17 +235,6 @@ class EnhancedGraph {
 
     branchFlag = 1;
 
-    processCurrentItem = (cur: QueueItem): boolean => {
-        const isBroken = cur.edge ? rawGraph.edge(cur.edge)?.state === "broken" : false;
-
-        if (cur.count > 1 && isBroken)
-            return false;
-        this.insertNode(cur);
-        this.insertEdge(cur);
-        if (isBroken)
-            return false;
-        return true;
-    };
 
     insertNode = (cur: QueueItem) => {
         if (this.processedGraph.hasNode(cur.id)) return;
@@ -300,6 +284,7 @@ class EnhancedGraph {
 
         rawGraph.outEdges(cur.id)
             ?.filter(e => this.processedGraph.node(e.w)?.state !== 3)
+            .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(e => q.push({
                 id: e.w,
                 edge: e,
@@ -322,6 +307,7 @@ class EnhancedGraph {
 
         rawGraph.inEdges(cur.id)
             ?.filter(e => this.processedGraph.node(e.v)?.state !== 3)
+            .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
             .forEach(x => q.push({
                 id: x.v,
                 edge: x,
