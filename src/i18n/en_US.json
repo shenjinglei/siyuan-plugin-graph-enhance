@@ -38,7 +38,7 @@
   "checkSourceThresholdErrorMsg": "Source Graph Threshold is not a number! Setting hasn't saved",
   "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved",
 
-  "separationTitle": "graph separation configuration",
+  "separationTitle": "graph separation configuration (invalid)",
   "separationDescription": "support for regular expression, for example: ^Tag$,-1.5",
   "pleaseInput": "please input",
 

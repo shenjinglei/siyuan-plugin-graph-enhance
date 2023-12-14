@@ -38,8 +38,8 @@
   "checkSourceThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
   "checkSinkThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
 
-  "separationTitle": "图分割配置",
-  "separationDescription": "支持正则表达式，例如：^Tag$,-1.5",
+  "separationTitle": "图分割配置（无效）",
+  "separationDescription": "支持正则表达式，例如：^Tag$,-1.5。目前该配置已无效，新的配置方式见使用说明",
   "pleaseInput": "请输入",
 
   "nodesExclusionTitle": "排除节点",

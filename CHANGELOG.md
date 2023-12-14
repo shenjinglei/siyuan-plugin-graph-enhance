@@ -1,5 +1,13 @@
 # CHANGE LOG
 
+## 0.4.0/2023-12-14
+
+- [v0.3.6 ... v0.4.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.6...v0.4.0)
+
+  - refactoring
+  - remove sunburst and tail graph
+  - adjust edge sparation
+
 ## 0.3.6/2023-12-07
 
 - [v0.3.5 ... v0.3.6](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.5...v0.3.6)

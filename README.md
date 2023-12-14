@@ -12,6 +12,9 @@ For example, If you link note A with note B, C and D. The relation graph drawn b
 
 ## Changelog
 
+- v0.4.0
+  - remove sunburst and tail graph
+  - adjust edge sparation
 - v0.3.6
   - add color to lines
     - The color lines start at the starting point and ends at the end of the branch, Like a mind map.
