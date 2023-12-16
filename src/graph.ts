@@ -318,7 +318,7 @@ class EnhancedGraph {
 
 
     public Display() {
-        if (this.sourceNodeId === "0") {
+        if (!this.sourceNodeId) {
             showMessage(i18n.needStartPointMsg, 3000, "info");
             return;
         }
