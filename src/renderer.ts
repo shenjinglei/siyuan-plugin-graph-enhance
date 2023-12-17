@@ -105,7 +105,7 @@ export function draw(dagreLayout: DagreOutput) {
                     show: true,
                     position: "bottom",
                 },
-                data: dagreLayout.nodes.filter(x => x.value).map(x => {
+                data: dagreLayout.nodes.filter(x => x.value.label).map(x => {
                     return {
                         id: x.v,
                         name: x.value.label,
