@@ -25,8 +25,9 @@ interface QueueItem {
     active?: number,
 }
 
+
+
 class EnhancedGraph {
-    processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
     sourceNodeId: string;
     focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
 
@@ -36,8 +37,8 @@ class EnhancedGraph {
         nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
         edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
 
-        cutVertexInit();
         cutEdgeInit();
+        cutVertexInit();
         dailynoteNodeInit();
         ExclusionNodeInit();
 
@@ -108,215 +109,6 @@ class EnhancedGraph {
         }
     }
 
-
-    processGraph() {
-        switch (this.focusGraphType) {
-            case "ancestor":
-                this.getAncestorGraph();
-                break;
-            case "brother":
-                this.getBrotherGraph();
-                break;
-            case "cross":
-                this.getCrossGraph();
-                break;
-            case "global":
-                this.getGlobalGraph();
-                break;
-            case "neighbor":
-                this.getNeighborGraph();
-                break;
-            default:
-                this.getAncestorGraph();
-        }
-    }
-
-
-    private initProcessedGraph() {
-        this.processedGraph = new dagre.graphlib.Graph();
-        //this.processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
-        this.processedGraph.setDefaultEdgeLabel(() => { return {}; });
-        this.branchFlag = 1;
-
-        const q: QueueItem[] = [];
-        q.push({ id: this.sourceNodeId, level: 0, count: 0 });
-
-        return q;
-    }
-
-    public getAncestorGraph() {
-        const q = this.initProcessedGraph();
-        const nodesMaximum = +getSetting("nodesMaximum");
-
-        let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
-            this.insertNode(cur);
-            this.insertEdge(cur);
-            if (cur.level >= 0) {
-                this.searchDown(cur, q);
-            }
-            if (cur.level <= 0) {
-                this.searchUp(cur, q);
-            }
-            count++;
-        }
-    }
-
-    public getBrotherGraph() {
-        const q = this.initProcessedGraph();
-        const nodesMaximum = +getSetting("nodesMaximum");
-
-        let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
-            this.insertNode(cur);
-            this.insertEdge(cur);
-            if (cur.level >= 0) {
-                this.searchUp(cur, q);
-            }
-            if (cur.level <= 0) {
-                this.searchDown(cur, q);
-            }
-            count++;
-        }
-    }
-
-    getCrossGraph() {
-        const q = this.initProcessedGraph();
-        const nodesMaximum = +getSetting("nodesMaximum");
-
-        let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
-            this.insertNode(cur);
-            this.insertEdge(cur);
-            if (cur.level >= -1) {
-                this.searchDown(cur, q);
-            }
-            if (cur.level <= 1) {
-                this.searchUp(cur, q);
-            }
-            count++;
-        }
-    }
-
-    getGlobalGraph() {
-        const q = this.initProcessedGraph();
-        const nodesMaximum = +getSetting("nodesMaximum");
-
-        let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
-            this.insertNode(cur);
-            this.insertEdge(cur);
-            this.searchDown(cur, q);
-            this.searchUp(cur, q);
-            count++;
-        }
-    }
-
-    getNeighborGraph() {
-        const q = this.initProcessedGraph();
-        const nodesMaximum = +getSetting("nodesMaximum");
-        const neighborDepth = +getSetting("neighborDepth");
-
-        let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
-            this.insertNode(cur);
-            this.insertEdge(cur);
-            if (cur.count < neighborDepth) {
-                this.searchDown(cur, q);
-                this.searchUp(cur, q);
-            } count++;
-        }
-    }
-
-    branchFlag = 1;
-
-
-    insertNode = (cur: QueueItem) => {
-        if (this.processedGraph.hasNode(cur.id)) return;
-
-        const rawNodeValue = rawGraph.node(cur.id);
-        if (cur.count === 0)
-            this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "start" });
-        else if (Number.isNaN(cur.level))
-            this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "brother" });
-        else
-            this.processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level });
-
-    };
-
-    insertEdge = (cur: QueueItem) => {
-        const neighborDepth = +getSetting("neighborDepth");
-
-        if (!cur.edge) return;
-        const weight = neighborDepth - (cur.count < neighborDepth ? cur.count : neighborDepth) + 1;
-        //this.processedGraph.setEdge(cur.edge, { weight });
-
-        if (cur.count === 1) {
-            this.processedGraph.node(cur.id).branch = this.branchFlag;
-            this.processedGraph.setEdge(cur.edge, { weight, branch: this.branchFlag });
-            this.branchFlag = this.branchFlag << 1;
-        }
-        else {
-            if (cur.id === cur.edge.v) {
-                this.processedGraph.setEdge(cur.edge, { weight, branch: this.processedGraph.node(cur.edge.w).branch });
-            } else {
-                this.processedGraph.setEdge(cur.edge, { weight, branch: this.processedGraph.node(cur.edge.v).branch });
-            }
-            this.processedGraph.node(cur.id).branch = this.processedGraph.node(cur.edge.v).branch | this.processedGraph.node(cur.edge.w).branch;
-        }
-    };
-
-    searchDown(cur: QueueItem, q: QueueItem[]) {
-        const curNodeValue = this.processedGraph.node(cur.id);
-
-        if (curNodeValue.state & 1) return; // search is already done
-
-        if (curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
-
-        if (curNodeValue.dailynote && cur.count !== 0) return;
-
-        curNodeValue.state = curNodeValue.state | 1;
-
-        rawGraph.outEdges(cur.id)
-            ?.filter(e => this.processedGraph.node(e.w)?.state !== 3)
-            .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
-            .forEach(e => q.push({
-                id: e.w,
-                edge: e,
-                level: cur.level + 1 === 0 ? NaN : (Number.isNaN(cur.level) ? 1 : cur.level + 1),
-                count: cur.count + 1
-            }));
-
-
-    }
-
-    searchUp(cur: QueueItem, q: QueueItem[]) {
-        const curNodeValue = this.processedGraph.node(cur.id);
-        if (curNodeValue.state & 2) return; // search is already done
-
-        if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
-
-        if (curNodeValue?.dailynote && cur.count !== 0) return;
-
-        curNodeValue.state = curNodeValue.state | 2;
-
-        rawGraph.inEdges(cur.id)
-            ?.filter(e => this.processedGraph.node(e.v)?.state !== 3)
-            .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
-            .forEach(x => q.push({
-                id: x.v,
-                edge: x,
-                level: cur.level - 1 === 0 ? NaN : (Number.isNaN(cur.level) ? -1 : cur.level - 1),
-                count: cur.count + 1
-            }));
-    }
-
-
     public Display() {
         if (!this.sourceNodeId) {
             showMessage(i18n.needStartPointMsg, 3000, "info");
@@ -328,9 +120,9 @@ class EnhancedGraph {
             return;
         }
 
-        this.processGraph();
+        createGraph(this.focusGraphType).exec();
 
-        const processedJson: DagreOutput = dagre.graphlib.json.write(this.processedGraph);
+        const processedJson: DagreOutput = dagre.graphlib.json.write(processedGraph);
 
         processedJson.nodes.sort((x, y) => x.v.localeCompare(y.v));
         processedJson.edges.sort((x, y) => Math.min(x.v.localeCompare(y.v), x.w.localeCompare(y.w)));
@@ -349,3 +141,222 @@ class EnhancedGraph {
 }
 
 export const enhancedGraph: EnhancedGraph = new EnhancedGraph();
+
+
+let processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
+let branchFlag = 1;
+
+function insertNode(cur: QueueItem) {
+    if (processedGraph.hasNode(cur.id)) return;
+
+    const rawNodeValue = rawGraph.node(cur.id);
+    if (cur.count === 0)
+        processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "start" });
+    else if (Number.isNaN(cur.level))
+        processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "brother" });
+    else
+        processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level });
+
+}
+
+function insertEdge(cur: QueueItem) {
+    const neighborDepth = +getSetting("neighborDepth");
+
+    if (!cur.edge) return;
+    const weight = neighborDepth - (cur.count < neighborDepth ? cur.count : neighborDepth) + 1;
+    //processedGraph.setEdge(cur.edge, { weight });
+
+    if (cur.count === 1) {
+        processedGraph.node(cur.id).branch = branchFlag;
+        processedGraph.setEdge(cur.edge, { weight, branch: branchFlag });
+        branchFlag = branchFlag << 1;
+    }
+    else {
+        if (cur.id === cur.edge.v) {
+            processedGraph.setEdge(cur.edge, { weight, branch: processedGraph.node(cur.edge.w).branch });
+        } else {
+            processedGraph.setEdge(cur.edge, { weight, branch: processedGraph.node(cur.edge.v).branch });
+        }
+        processedGraph.node(cur.id).branch = processedGraph.node(cur.edge.v).branch | processedGraph.node(cur.edge.w).branch;
+    }
+}
+
+function searchDown(cur: QueueItem, q: QueueItem[]) {
+    const curNodeValue = processedGraph.node(cur.id);
+
+    if (curNodeValue.state & 1) return; // search is already done
+
+    if (curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
+
+    if (curNodeValue.dailynote && cur.count !== 0) return;
+
+    curNodeValue.state = curNodeValue.state | 1;
+
+    rawGraph.outEdges(cur.id)
+        ?.filter(e => processedGraph.node(e.w)?.state !== 3)
+        .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
+        .forEach(e => q.push({
+            id: e.w,
+            edge: e,
+            level: cur.level + 1 === 0 ? NaN : (Number.isNaN(cur.level) ? 1 : cur.level + 1),
+            count: cur.count + 1
+        }));
+
+
+}
+
+function searchUp(cur: QueueItem, q: QueueItem[]) {
+    const curNodeValue = processedGraph.node(cur.id);
+    if (curNodeValue.state & 2) return; // search is already done
+
+    if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
+
+    if (curNodeValue?.dailynote && cur.count !== 0) return;
+
+    curNodeValue.state = curNodeValue.state | 2;
+
+    rawGraph.inEdges(cur.id)
+        ?.filter(e => processedGraph.node(e.v)?.state !== 3)
+        .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
+        .forEach(x => q.push({
+            id: x.v,
+            edge: x,
+            level: cur.level - 1 === 0 ? NaN : (Number.isNaN(cur.level) ? -1 : cur.level - 1),
+            count: cur.count + 1
+        }));
+}
+
+class Graph {
+
+
+    initProcessedGraph() {
+        processedGraph = new dagre.graphlib.Graph();
+        //processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
+        processedGraph.setDefaultEdgeLabel(() => { return {}; });
+        branchFlag = 1;
+
+        const q: QueueItem[] = [];
+        q.push({ id: enhancedGraph.sourceNodeId, level: 0, count: 0 });
+
+        return q;
+    }
+
+    exec() { throw "oops"; }
+
+}
+
+class AncestorGraph extends Graph {
+    public exec() {
+        const q = this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
+
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
+            const cur = q.shift()!;
+            insertNode(cur);
+            insertEdge(cur);
+            if (cur.level >= 0) {
+                searchDown(cur, q);
+            }
+            if (cur.level <= 0) {
+                searchUp(cur, q);
+            }
+            count++;
+        }
+    }
+}
+
+class BrotherGraph extends Graph {
+    public exec() {
+        const q = this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
+
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
+            const cur = q.shift()!;
+            insertNode(cur);
+            insertEdge(cur);
+            if (cur.level >= 0) {
+                searchUp(cur, q);
+            }
+            if (cur.level <= 0) {
+                searchDown(cur, q);
+            }
+            count++;
+        }
+    }
+}
+
+class CrossGraph extends Graph {
+    exec() {
+        const q = this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
+
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
+            const cur = q.shift()!;
+            insertNode(cur);
+            insertEdge(cur);
+            if (cur.level >= -1) {
+                searchDown(cur, q);
+            }
+            if (cur.level <= 1) {
+                searchUp(cur, q);
+            }
+            count++;
+        }
+    }
+}
+
+class GlobalGraph extends Graph {
+    exec() {
+        const q = this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
+
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
+            const cur = q.shift()!;
+            insertNode(cur);
+            insertEdge(cur);
+            searchDown(cur, q);
+            searchUp(cur, q);
+            count++;
+        }
+    }
+}
+
+class NeighborGraph extends Graph {
+    exec() {
+        const q = this.initProcessedGraph();
+        const nodesMaximum = +getSetting("nodesMaximum");
+        const neighborDepth = +getSetting("neighborDepth");
+
+        let count = 0;
+        while (q.length > 0 && count < nodesMaximum) {
+            const cur = q.shift()!;
+            insertNode(cur);
+            insertEdge(cur);
+            if (cur.count < neighborDepth) {
+                searchDown(cur, q);
+                searchUp(cur, q);
+            } count++;
+        }
+    }
+}
+
+function createGraph(type: string) {
+    switch (type) {
+        case "ancestor":
+            return new AncestorGraph();
+        case "brother":
+            return new BrotherGraph();
+        case "cross":
+            return new CrossGraph();
+        case "global":
+            return new GlobalGraph();
+        case "neighbor":
+            return new NeighborGraph();
+        default:
+            return new Graph();
+    }
+}
