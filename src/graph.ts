@@ -25,122 +25,129 @@ interface QueueItem {
     active?: number,
 }
 
-
-
-class EnhancedGraph {
-    sourceNodeId: string;
-    focusGraphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
-
-    initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
-        setRawGraph(new dagre.graphlib.Graph());
-
-        nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
-        edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
-
-        cutEdgeInit();
-        cutVertexInit();
-        dailynoteNodeInit();
-        ExclusionNodeInit();
-
-        //console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
-
-        function ExclusionNodeInit() {
-            const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
-            nodesExclusionSetting.push("^ge-moc$|^ge-tag$");
-            nodesExclusionSetting.push("^ge-cv-?\\d+$|^ge-ce-?\\d+$");
-
-            for (const item of nodesExclusionSetting) {
-                if (/^\s*$/.test(item)) continue;
-
-                nodes.filter(x => RegExp(item).test(x.label))
-                    .forEach(x => rawGraph.removeNode(x.id));
-            }
-        }
-
-        function dailynoteNodeInit() {
-            if (getSetting("dailynoteExcluded") === "true") {
-                nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                    .forEach(x => rawGraph.removeNode(x.id));
-            } else {
-                nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                    .forEach(x => rawGraph.node(x.id).dailynote = true);
-            }
-        }
-
-        function cutEdgeInit() {
-            nodes.filter(x => /^ge-ce-?\d+$/.test(x.label)).forEach(x => {
-                let pos = Number(/^ge-ce(-?\d+)$/.exec(x.label)?.[1]);
-                const filteredNodes = (rawGraph.inEdges(x.id) ?? []).map(x => x.v);
-
-                if (pos === 0) return;
-                let filteredEdges = filteredNodes.flatMap(x => pos > 0 ? rawGraph.outEdges(x) ?? [] : rawGraph.inEdges(x) ?? []);
-                while (pos > 1) {
-                    filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
-                    pos--;
-                }
-                while (pos < -1) {
-                    filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
-                    pos++;
-                }
-                filteredEdges.forEach(e => {
-                    rawGraph.setEdge(e.v, e.w, { state: "broken" });
-                    rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
-                    rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
-                });
-            });
-        }
-
-        function cutVertexInit() {
-            nodes.filter(x => /^ge-cv-?\d+$/.test(x.label)).forEach(x => {
-                let pos = Number(/^ge-cv(-?\d+)$/.exec(x.label)?.[1]);
-                let filteredNodes = (rawGraph.inEdges(x.id) ?? []).map(x => x.v);
-
-                while (pos > 0) {
-                    filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
-                    pos--;
-                }
-                while (pos < 0) {
-                    filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
-                    pos++;
-                }
-
-                filteredNodes.forEach(x => rawGraph.setNode(x, { ...rawGraph.node(x), separate: true, color: "separate" }));
-            });
-        }
-    }
-
-    public Display() {
-        if (!this.sourceNodeId) {
-            showMessage(i18n.needStartPointMsg, 3000, "info");
-            return;
-        }
-
-        if (!rawGraph.hasNode(this.sourceNodeId)) {
-            // showMessage(i18n.needRefreshMsg, 3000, "info");
-            return;
-        }
-
-        createGraph(this.focusGraphType).exec();
-
-        const processedJson: DagreOutput = dagre.graphlib.json.write(processedGraph);
-
-        processedJson.nodes.sort((x, y) => x.v.localeCompare(y.v));
-        processedJson.edges.sort((x, y) => Math.min(x.v.localeCompare(y.v), x.w.localeCompare(y.w)));
-
-        const layoutGraph = dagre.graphlib.json.read(JSON.parse(JSON.stringify(processedJson)));
-
-        layoutGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
-        layoutGraph.setDefaultEdgeLabel(() => { return {}; });
-
-        dagre.layout(layoutGraph);
-
-        const dagreLayout: DagreOutput = dagre.graphlib.json.write(layoutGraph);
-
-        draw(dagreLayout);
-    }
+let lastNodeId: string;
+let sourceNodeId: string;
+export function setSourceNode(_id: string) {
+    lastNodeId = sourceNodeId;
+    sourceNodeId = _id;
 }
 
-export const enhancedGraph: EnhancedGraph = new EnhancedGraph();
+export function sourceNode() {
+    return sourceNodeId;
+}
+
+let graphType: "global" | "ancestor" | "brother" | "cross" | "neighbor" = "ancestor";
+export function setGraphType(_type: "global" | "ancestor" | "brother" | "cross" | "neighbor") {
+    graphType = _type;
+}
+
+export function Display() {
+    if (!sourceNodeId) {
+        showMessage(i18n.needStartPointMsg, 3000, "info");
+        return;
+    }
+
+    if (!rawGraph.hasNode(sourceNodeId)) {
+        // showMessage(i18n.needRefreshMsg, 3000, "info");
+        return;
+    }
+
+    createGraph(graphType).exec();
+
+    const processedJson: DagreOutput = dagre.graphlib.json.write(processedGraph);
+
+    processedJson.nodes.sort((x, y) => x.v.localeCompare(y.v));
+    processedJson.edges.sort((x, y) => Math.min(x.v.localeCompare(y.v), x.w.localeCompare(y.w)));
+
+    const layoutGraph = dagre.graphlib.json.read(JSON.parse(JSON.stringify(processedJson)));
+
+    layoutGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
+    layoutGraph.setDefaultEdgeLabel(() => { return {}; });
+
+    dagre.layout(layoutGraph);
+
+    const dagreLayout: DagreOutput = dagre.graphlib.json.write(layoutGraph);
+
+    draw(dagreLayout);
+}
+
+export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
+    setRawGraph(new dagre.graphlib.Graph());
+
+    nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
+    edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
+
+    cutEdgeInit();
+    cutVertexInit();
+    dailynoteNodeInit();
+    ExclusionNodeInit();
+
+    //console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
+
+    function ExclusionNodeInit() {
+        const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
+        nodesExclusionSetting.push("^ge-moc$|^ge-tag$");
+        nodesExclusionSetting.push("^ge-cv-?\\d+$|^ge-ce-?\\d+$");
+
+        for (const item of nodesExclusionSetting) {
+            if (/^\s*$/.test(item)) continue;
+
+            nodes.filter(x => RegExp(item).test(x.label))
+                .forEach(x => rawGraph.removeNode(x.id));
+        }
+    }
+
+    function dailynoteNodeInit() {
+        if (getSetting("dailynoteExcluded") === "true") {
+            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                .forEach(x => rawGraph.removeNode(x.id));
+        } else {
+            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+                .forEach(x => rawGraph.node(x.id).dailynote = true);
+        }
+    }
+
+    function cutEdgeInit() {
+        nodes.filter(x => /^ge-ce-?\d+$/.test(x.label)).forEach(x => {
+            let pos = Number(/^ge-ce(-?\d+)$/.exec(x.label)?.[1]);
+            const filteredNodes = (rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+
+            if (pos === 0) return;
+            let filteredEdges = filteredNodes.flatMap(x => pos > 0 ? rawGraph.outEdges(x) ?? [] : rawGraph.inEdges(x) ?? []);
+            while (pos > 1) {
+                filteredEdges = filteredEdges.flatMap(x => rawGraph.outEdges(x.w) ?? []);
+                pos--;
+            }
+            while (pos < -1) {
+                filteredEdges = filteredEdges.flatMap(x => rawGraph.inEdges(x.v) ?? []);
+                pos++;
+            }
+            filteredEdges.forEach(e => {
+                rawGraph.setEdge(e.v, e.w, { state: "broken" });
+                rawGraph.setNode(e.v, { ...rawGraph.node(e.v), color: "from" });
+                rawGraph.setNode(e.w, { ...rawGraph.node(e.w), color: "to" });
+            });
+        });
+    }
+
+    function cutVertexInit() {
+        nodes.filter(x => /^ge-cv-?\d+$/.test(x.label)).forEach(x => {
+            let pos = Number(/^ge-cv(-?\d+)$/.exec(x.label)?.[1]);
+            let filteredNodes = (rawGraph.inEdges(x.id) ?? []).map(x => x.v);
+
+            while (pos > 0) {
+                filteredNodes = filteredNodes.flatMap(x => rawGraph.outEdges(x) ?? []).map(x => x.w);
+                pos--;
+            }
+            while (pos < 0) {
+                filteredNodes = filteredNodes.flatMap(x => rawGraph.inEdges(x) ?? []).map(x => x.v);
+                pos++;
+            }
+
+            filteredNodes.forEach(x => rawGraph.setNode(x, { ...rawGraph.node(x), separate: true, color: "separate" }));
+        });
+    }
+}
 
 
 let processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
@@ -226,22 +233,20 @@ function searchUp(cur: QueueItem, q: QueueItem[]) {
         }));
 }
 
-function initProcessedGraph() {
-    processedGraph = new dagre.graphlib.Graph();
-    //processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
-    processedGraph.setDefaultEdgeLabel(() => { return {}; });
+function createProcessedGraph() {
+    return new dagre.graphlib.Graph<DagreNodeValue>().setDefaultEdgeLabel(() => { return {}; });
 }
 
 function initQueue() {
     const q: QueueItem[] = [];
-    q.push({ id: enhancedGraph.sourceNodeId, level: 0, count: 0 });
+    q.push({ id: sourceNodeId, level: 0, count: 0 });
 
     return q;
 }
 
 class Graph {
     constructor() {
-        initProcessedGraph();
+        processedGraph = createProcessedGraph();
         branchFlag = 1;
     }
 

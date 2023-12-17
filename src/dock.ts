@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { enhancedGraph } from "./graph";
+import { Display, initRawGraph, setGraphType, setSourceNode, sourceNode } from "./graph";
 import { i18n, plugin, rawGraph } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
@@ -46,73 +46,76 @@ export function initDock() {
             document.getElementById("graph_enhance_refresh")!.onclick = async () => {
                 await refreashGraph();
 
-                enhancedGraph.Display();
+                Display();
             };
 
             document.getElementById("graph_enhance_global")!.onclick = async () => {
 
                 const curDocId = getDocid();
                 if (curDocId)
-                    enhancedGraph.sourceNodeId = curDocId;
+                    setSourceNode(curDocId);
 
                 if (!rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.focusGraphType = "global";
-                enhancedGraph.Display();
+                setGraphType("global");
+
+                Display();
             };
 
             document.getElementById("graph_enhance_ancestor")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
-                    enhancedGraph.sourceNodeId = curDocId;
+                    setSourceNode(curDocId);
 
                 if (!rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.focusGraphType = "ancestor";
-                enhancedGraph.Display();
+                setGraphType("ancestor");
+
+                Display();
             };
 
             document.getElementById("graph_enhance_brother")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
-                    enhancedGraph.sourceNodeId = curDocId;
+                    setSourceNode(curDocId);
 
                 if (!rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.focusGraphType = "brother";
-                enhancedGraph.Display();
+                setGraphType("brother");
+
+                Display();
             };
 
             document.getElementById("graph_enhance_cross")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
-                    enhancedGraph.sourceNodeId = curDocId;
+                    setSourceNode(curDocId);
 
                 if (!rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.focusGraphType = "cross";
-                enhancedGraph.Display();
+                setGraphType("cross");
+                Display();
             };
 
             document.getElementById("graph_enhance_neighbor")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
-                    enhancedGraph.sourceNodeId = curDocId;
+                    setSourceNode(curDocId);
 
                 if (!rawGraph) {
                     await refreashGraph();
                 }
 
-                enhancedGraph.focusGraphType = "neighbor";
-                enhancedGraph.Display();
+                setGraphType("neighbor");
+                Display();
             };
 
             initEChart();
@@ -142,15 +145,15 @@ function getDocid() {
 
 export async function autoFollow({ detail }: any) {
 
-    if (enhancedGraph.sourceNodeId === detail.protyle.block.rootID) return;
+    if (sourceNode() === detail.protyle.block.rootID) return;
 
-    enhancedGraph.sourceNodeId = detail.protyle.block.rootID;
+    setSourceNode(detail.protyle.block.rootID);
 
     if (!rawGraph) {
         await refreashGraph();
     }
 
-    enhancedGraph.Display();
+    Display();
 }
 
 function refreashGraph() {
@@ -175,7 +178,7 @@ function refreashGraph() {
             "k": ""
         }).then(
             result => {
-                enhancedGraph.initRawGraph(result.data.nodes, result.data.links);
+                initRawGraph(result.data.nodes, result.data.links);
                 resolve();
             }
         );
