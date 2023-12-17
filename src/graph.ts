@@ -226,28 +226,33 @@ function searchUp(cur: QueueItem, q: QueueItem[]) {
         }));
 }
 
+function initProcessedGraph() {
+    processedGraph = new dagre.graphlib.Graph();
+    //processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
+    processedGraph.setDefaultEdgeLabel(() => { return {}; });
+}
+
+function initQueue() {
+    const q: QueueItem[] = [];
+    q.push({ id: enhancedGraph.sourceNodeId, level: 0, count: 0 });
+
+    return q;
+}
+
 class Graph {
-
-
-    initProcessedGraph() {
-        processedGraph = new dagre.graphlib.Graph();
-        //processedGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
-        processedGraph.setDefaultEdgeLabel(() => { return {}; });
+    constructor() {
+        initProcessedGraph();
         branchFlag = 1;
-
-        const q: QueueItem[] = [];
-        q.push({ id: enhancedGraph.sourceNodeId, level: 0, count: 0 });
-
-        return q;
     }
 
-    exec() { throw "oops"; }
-
+    exec() {
+        throw "oops";
+    }
 }
 
 class AncestorGraph extends Graph {
-    public exec() {
-        const q = this.initProcessedGraph();
+    exec() {
+        const q = initQueue();
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
@@ -267,8 +272,8 @@ class AncestorGraph extends Graph {
 }
 
 class BrotherGraph extends Graph {
-    public exec() {
-        const q = this.initProcessedGraph();
+    exec() {
+        const q = initQueue();
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
@@ -289,7 +294,7 @@ class BrotherGraph extends Graph {
 
 class CrossGraph extends Graph {
     exec() {
-        const q = this.initProcessedGraph();
+        const q = initQueue();
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
@@ -310,7 +315,7 @@ class CrossGraph extends Graph {
 
 class GlobalGraph extends Graph {
     exec() {
-        const q = this.initProcessedGraph();
+        const q = initQueue();
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
@@ -327,7 +332,7 @@ class GlobalGraph extends Graph {
 
 class NeighborGraph extends Graph {
     exec() {
-        const q = this.initProcessedGraph();
+        const q = initQueue();
         const nodesMaximum = +getSetting("nodesMaximum");
         const neighborDepth = +getSetting("neighborDepth");
 
