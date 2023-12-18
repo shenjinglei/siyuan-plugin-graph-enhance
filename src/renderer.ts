@@ -7,16 +7,19 @@ import {
 import type {
     ComposeOption,
 } from "echarts/core";
+import { TitleComponent, TitleComponentOption } from "echarts/components";
 
 echarts.use([
     GraphChart,
-    CanvasRenderer
+    CanvasRenderer,
+    TitleComponent
 ]);
-type ECOption = ComposeOption<GraphSeriesOption>;
+type ECOption = ComposeOption<GraphSeriesOption | TitleComponentOption>;
 
 import { DagreOutput } from "./types";
 import { openTab } from "siyuan";
 import { plugin } from "./utils";
+import { title } from "./graph";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
 
@@ -91,8 +94,15 @@ export function draw(dagreLayout: DagreOutput) {
     const color = getNodeColor();
 
     const option: ECOption = {
+        title: {
+            text: title(),
+            textStyle: {
+                fontSize: 16,
+                fontWeight: "normal"
+            }
+        },
         tooltip: {},
-        animation: false,
+        animation: dagreLayout.nodes.length > 100 ? false : true,
         series: [
             {
                 name: "graph",

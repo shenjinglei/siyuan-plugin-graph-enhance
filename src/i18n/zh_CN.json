@@ -47,5 +47,7 @@
 
   "dockBtnTail": "长尾图",
   "tailThresholdTitle": "长尾图阈值",
-  "tailThresholdDescription": "最小值与最大值用英文逗号隔开，如：1,2"
+  "tailThresholdDescription": "最小值与最大值用英文逗号隔开，如：1,2",
+
+  "dockBtnPath": "路径图"
 }

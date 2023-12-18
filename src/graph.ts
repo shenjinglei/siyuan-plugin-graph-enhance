@@ -26,23 +26,12 @@ interface QueueItem {
 }
 
 let lastNodeId: string;
-export function setlastNode(_id: string) {
-    if (!_id || lastNodeId === _id) return false;
-    lastNodeId = _id;
-    return true;
-}
-
 let sourceNodeId: string;
 export function setSourceNode(_id: string) {
     if (!_id || sourceNodeId === _id) return false;
+    lastNodeId = sourceNodeId;
     sourceNodeId = _id;
     return true;
-}
-
-export function setNodeId(_id: string) {
-    if (graphType === "path-start")
-        return setlastNode(_id);
-    return setSourceNode(_id);
 }
 
 export function sourceNode() {
@@ -52,6 +41,13 @@ export function sourceNode() {
 let graphType = "ancestor";
 export function setGraphType(_type: string) {
     graphType = _type;
+}
+
+export function title() {
+    console.log("label", rawGraph.node(sourceNodeId)?.label);
+    if (graphType === "path")
+        return rawGraph.node(lastNodeId)?.label + " → " + rawGraph.node(sourceNodeId)?.label;
+    return rawGraph.node(sourceNodeId)?.label;
 }
 
 export function Display() {
@@ -276,13 +272,13 @@ class AncestorGraph extends Graph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            insertNode(cur);
-            insertEdge(cur);
+            insertNode2(cur, rawGraph, processedGraph);
+            insertEdge2(cur, rawGraph, processedGraph);
             if (cur.level >= 0) {
-                searchDown(cur, q);
+                searchDown2(cur, q, rawGraph, processedGraph);
             }
             if (cur.level <= 0) {
-                searchUp(cur, q);
+                searchUp2(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -298,13 +294,13 @@ class BrotherGraph extends Graph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            insertNode(cur);
-            insertEdge(cur);
+            insertNode2(cur, rawGraph, processedGraph);
+            insertEdge2(cur, rawGraph, processedGraph);
             if (cur.level >= 0) {
-                searchUp(cur, q);
+                searchUp2(cur, q, rawGraph, processedGraph);
             }
             if (cur.level <= 0) {
-                searchDown(cur, q);
+                searchDown2(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -320,13 +316,13 @@ class CrossGraph extends Graph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            insertNode(cur);
-            insertEdge(cur);
+            insertNode2(cur, rawGraph, processedGraph);
+            insertEdge2(cur, rawGraph, processedGraph);
             if (cur.level >= -1) {
-                searchDown(cur, q);
+                searchDown2(cur, q, rawGraph, processedGraph);
             }
             if (cur.level <= 1) {
-                searchUp(cur, q);
+                searchUp2(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -342,10 +338,10 @@ class GlobalGraph extends Graph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            insertNode(cur);
-            insertEdge(cur);
-            searchDown(cur, q);
-            searchUp(cur, q);
+            insertNode2(cur, rawGraph, processedGraph);
+            insertEdge2(cur, rawGraph, processedGraph);
+            searchDown2(cur, q, rawGraph, processedGraph);
+            searchUp2(cur, q, rawGraph, processedGraph);
             count++;
         }
     }
@@ -361,11 +357,11 @@ class NeighborGraph extends Graph {
         let count = 0;
         while (q.length > 0 && count < nodesMaximum) {
             const cur = q.shift()!;
-            insertNode(cur);
-            insertEdge(cur);
+            insertNode2(cur, rawGraph, processedGraph);
+            insertEdge2(cur, rawGraph, processedGraph);
             if (cur.count < neighborDepth) {
-                searchDown(cur, q);
-                searchUp(cur, q);
+                searchDown2(cur, q, rawGraph, processedGraph);
+                searchUp2(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -377,11 +373,11 @@ function insertNode2(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _proc
 
     const rawNodeValue = _rawGraph.node(cur.id);
     if (cur.count === 0)
-        _processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "start" });
+        _processedGraph.setNode(cur.id, { ...rawNodeValue, branch: 0, level: cur.level, color: "start" });
     else if (Number.isNaN(cur.level))
-        _processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "brother" });
+        _processedGraph.setNode(cur.id, { ...rawNodeValue, branch: 0, level: cur.level, color: "brother" });
     else
-        _processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level });
+        _processedGraph.setNode(cur.id, { ...rawNodeValue, branch: 0, level: cur.level });
 
 }
 
@@ -464,6 +460,7 @@ class PathGraph extends Graph {
         console.log("sourceNode", rawGraph.node(sourceNodeId));
         console.log("lastNodeId", rawGraph.node(lastNodeId));
         q.push({ id: lastNodeId, level: 0, count: 0 });
+        branchFlag = 1;
         while (q.length > 0) {
             const cur = q.shift()!;
             insertNode2(cur, middleGraph, processedGraph);
@@ -487,8 +484,7 @@ function createGraph(type: string) {
             return new GlobalGraph();
         case "neighbor":
             return new NeighborGraph();
-        case "path-start":
-        case "path-end":
+        case "path":
             return new PathGraph();
         default:
             return new Graph();

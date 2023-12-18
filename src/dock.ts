@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Display, initRawGraph, setGraphType, setNodeId, setSourceNode, setlastNode, sourceNode } from "./graph";
+import { Display, initRawGraph, setGraphType, setSourceNode, } from "./graph";
 import { i18n, plugin, rawGraph } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
@@ -16,8 +16,7 @@ export function initDock() {
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
-        <span id="graph_enhance_path_start" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="路径起始"><svg><use xlink:href="#iconLight"></use></svg></span>
-        <span id="graph_enhance_path_end" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="路径结束"><svg><use xlink:href="#iconDark"></use></svg></span>
+        <span id="graph_enhance_path" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnPath}"><svg><use xlink:href="#iconCode"></use></svg></span>
         <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg><use xlink:href="#iconLanguage"></use></svg></span>
         <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnNeighbor}"><svg><use xlink:href="#iconWorkspace"></use></svg></span>
         <span id="graph_enhance_cross" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnCross}"><svg><use xlink:href="#iconFocus"></use></svg></span>
@@ -120,20 +119,7 @@ export function initDock() {
                 Display();
             };
 
-            document.getElementById("graph_enhance_path_start")!.onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    setlastNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("path-start");
-                Display();
-            };
-
-            document.getElementById("graph_enhance_path_end")!.onclick = async () => {
+            document.getElementById("graph_enhance_path")!.onclick = async () => {
                 const curDocId = getDocid();
                 if (curDocId)
                     setSourceNode(curDocId);
@@ -142,9 +128,10 @@ export function initDock() {
                     await refreashGraph();
                 }
 
-                setGraphType("path-end");
+                setGraphType("path");
                 Display();
             };
+
 
             initEChart();
         },
@@ -173,7 +160,7 @@ function getDocid() {
 
 export async function autoFollow({ detail }: any) {
 
-    if (!setNodeId(detail.protyle.block.rootID))
+    if (!setSourceNode(detail.protyle.block.rootID))
         return;
 
     if (!rawGraph) {

@@ -47,5 +47,7 @@
 
   "dockBtnTail": "Long Tail Graph",
   "tailThresholdTitle": "Long Tail Graph Threshold",
-  "tailThresholdDescription": "Comma separated, for example: 1,2"
+  "tailThresholdDescription": "Comma separated, for example: 1,2",
+
+  "dockBtnPath": "Path Graph"
 }
