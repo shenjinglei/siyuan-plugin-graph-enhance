@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## 0.4.1/2023-12-19
+
+- [v0.4.0 ... v0.4.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.0...v0.4.1)
+
+  - Add path graph
+  - refactoring
+
 ## 0.4.0/2023-12-14
 
 - [v0.3.6 ... v0.4.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.3.6...v0.4.0)

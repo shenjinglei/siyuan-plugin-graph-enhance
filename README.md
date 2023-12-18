@@ -12,6 +12,8 @@ For example, If you link note A with note B, C and D. The relation graph drawn b
 
 ## Changelog
 
+- v0.4.1
+  - add path graph
 - v0.4.0
   - remove sunburst and tail graph
   - adjust edge sparation
