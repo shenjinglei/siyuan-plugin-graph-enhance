@@ -158,89 +158,8 @@ export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
     }
 }
 
-
 let processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
 let branchFlag = 1;
-
-function insertNode(cur: QueueItem) {
-    if (processedGraph.hasNode(cur.id)) return;
-
-    const rawNodeValue = rawGraph.node(cur.id);
-    if (cur.count === 0)
-        processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "start" });
-    else if (Number.isNaN(cur.level))
-        processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level, color: "brother" });
-    else
-        processedGraph.setNode(cur.id, { ...rawNodeValue, level: cur.level });
-
-}
-
-function insertEdge(cur: QueueItem) {
-    const neighborDepth = +getSetting("neighborDepth");
-
-    if (!cur.edge) return;
-    const weight = neighborDepth - (cur.count < neighborDepth ? cur.count : neighborDepth) + 1;
-    //processedGraph.setEdge(cur.edge, { weight });
-
-    if (cur.count === 1) {
-        processedGraph.node(cur.id).branch = branchFlag;
-        processedGraph.setEdge(cur.edge, { weight, branch: branchFlag });
-        branchFlag = branchFlag << 1;
-    }
-    else {
-        if (cur.id === cur.edge.v) {
-            processedGraph.setEdge(cur.edge, { weight, branch: processedGraph.node(cur.edge.w).branch });
-        } else {
-            processedGraph.setEdge(cur.edge, { weight, branch: processedGraph.node(cur.edge.v).branch });
-        }
-        processedGraph.node(cur.id).branch = processedGraph.node(cur.edge.v).branch | processedGraph.node(cur.edge.w).branch;
-    }
-}
-
-function searchDown(cur: QueueItem, q: QueueItem[]) {
-    const curNodeValue = processedGraph.node(cur.id);
-
-    if (curNodeValue.state & 1) return; // search is already done
-
-    if (curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
-
-    if (curNodeValue.dailynote && cur.count !== 0) return;
-
-    curNodeValue.state = curNodeValue.state | 1;
-
-    rawGraph.outEdges(cur.id)
-        ?.filter(e => processedGraph.node(e.w)?.state !== 3)
-        .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
-        .forEach(e => q.push({
-            id: e.w,
-            edge: e,
-            level: cur.level + 1 === 0 ? NaN : (Number.isNaN(cur.level) ? 1 : cur.level + 1),
-            count: cur.count + 1
-        }));
-
-
-}
-
-function searchUp(cur: QueueItem, q: QueueItem[]) {
-    const curNodeValue = processedGraph.node(cur.id);
-    if (curNodeValue.state & 2) return; // search is already done
-
-    if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
-
-    if (curNodeValue?.dailynote && cur.count !== 0) return;
-
-    curNodeValue.state = curNodeValue.state | 2;
-
-    rawGraph.inEdges(cur.id)
-        ?.filter(e => processedGraph.node(e.v)?.state !== 3)
-        .filter(e => cur.count === 0 || rawGraph.edge(e.v, e.w)?.state !== "broken")
-        .forEach(x => q.push({
-            id: x.v,
-            edge: x,
-            level: cur.level - 1 === 0 ? NaN : (Number.isNaN(cur.level) ? -1 : cur.level - 1),
-            count: cur.count + 1
-        }));
-}
 
 function createProcessedGraph() {
     return new dagre.graphlib.Graph<DagreNodeValue>().setDefaultEdgeLabel(() => { return {}; });
