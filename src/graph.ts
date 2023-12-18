@@ -44,7 +44,7 @@ export function setGraphType(_type: string) {
 }
 
 export function title() {
-    console.log("label", rawGraph.node(sourceNodeId)?.label);
+    //console.log("label", rawGraph.node(sourceNodeId)?.label);
     if (graphType === "path")
         return rawGraph.node(lastNodeId)?.label + " → " + rawGraph.node(sourceNodeId)?.label;
     return rawGraph.node(sourceNodeId)?.label;
@@ -292,11 +292,11 @@ function insertNode2(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _proc
 
     const rawNodeValue = _rawGraph.node(cur.id);
     if (cur.count === 0)
-        _processedGraph.setNode(cur.id, { ...rawNodeValue, branch: 0, level: cur.level, color: "start" });
+        _processedGraph.setNode(cur.id, { ...rawNodeValue, state: 0, branch: 0, level: cur.level, color: "start" });
     else if (Number.isNaN(cur.level))
-        _processedGraph.setNode(cur.id, { ...rawNodeValue, branch: 0, level: cur.level, color: "brother" });
+        _processedGraph.setNode(cur.id, { ...rawNodeValue, state: 0, branch: 0, level: cur.level, color: "brother" });
     else
-        _processedGraph.setNode(cur.id, { ...rawNodeValue, branch: 0, level: cur.level });
+        _processedGraph.setNode(cur.id, { ...rawNodeValue, state: 0, branch: 0, level: cur.level });
 
 }
 
@@ -319,11 +319,11 @@ function insertEdge2(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _proc
     }
 }
 
-function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
+function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
     const curNodeValue = _processedGraph.node(cur.id);
     if (curNodeValue.state & 2) return; // search is already done
 
-    if (curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
+    if (!penetrate && curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
 
     if (curNodeValue?.dailynote && cur.count !== 0) return;
 
@@ -331,7 +331,7 @@ function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gra
 
     _rawGraph.inEdges(cur.id)
         ?.filter(e => _processedGraph.node(e.v)?.state !== 3)
-        .filter(e => cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
+        .filter(e => penetrate || cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
         .forEach(x => q.push({
             id: x.v,
             edge: x,
@@ -340,12 +340,12 @@ function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gra
         }));
 }
 
-function searchDown2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
+function searchDown2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
     const curNodeValue = _processedGraph.node(cur.id);
 
     if (curNodeValue.state & 1) return; // search is already done
 
-    if (curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
+    if (!penetrate && curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
 
     if (curNodeValue.dailynote && cur.count !== 0) return;
 
@@ -353,7 +353,7 @@ function searchDown2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.G
 
     _rawGraph.outEdges(cur.id)
         ?.filter(e => _processedGraph.node(e.w)?.state !== 3)
-        .filter(e => cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
+        .filter(e => penetrate || cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
         .forEach(e => q.push({
             id: e.w,
             edge: e,
@@ -373,20 +373,20 @@ class PathGraph extends Graph {
             const cur = q.shift()!;
             insertNode2(cur, rawGraph, middleGraph);
             insertEdge2(cur, rawGraph, middleGraph);
-            searchUp2(cur, q, rawGraph, middleGraph);
+            searchUp2(cur, q, rawGraph, middleGraph, 1);
         }
-        console.log("middleGraph", dagre.graphlib.json.write(middleGraph));
-        console.log("sourceNode", rawGraph.node(sourceNodeId));
-        console.log("lastNodeId", rawGraph.node(lastNodeId));
+        //console.log("middleGraph", dagre.graphlib.json.write(middleGraph));
+        //console.log("sourceNode", rawGraph.node(sourceNodeId));
+        //console.log("lastNodeId", rawGraph.node(lastNodeId));
         q.push({ id: lastNodeId, level: 0, count: 0 });
         branchFlag = 1;
         while (q.length > 0) {
             const cur = q.shift()!;
             insertNode2(cur, middleGraph, processedGraph);
             insertEdge2(cur, middleGraph, processedGraph);
-            searchDown2(cur, q, middleGraph, processedGraph);
+            searchDown2(cur, q, middleGraph, processedGraph, 1);
         }
-        console.log("processedGraph", dagre.graphlib.json.write(processedGraph));
+        //console.log("processedGraph", dagre.graphlib.json.write(processedGraph));
 
     }
 }
