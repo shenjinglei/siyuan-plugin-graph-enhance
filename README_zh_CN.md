@@ -16,7 +16,7 @@
 
 - v0.4.1
   - 新功能：路径图
-    - 可以绘制两点间路径
+    - 绘制两点间路径
     - 如何选择起点终点
       - 当开启自动跟随时，依次点击`起点`,`终点`后，点击`路径图`按钮，即可绘制。
       - 当未开启自动跟随时，依次点击`起点`,`路径图`,`终点`,`路径图`，即可绘制。
@@ -138,6 +138,7 @@
 ### 一些实践
 
 - [笔记可视化 - 关系图增强插件的使用](https://ld246.com/article/1696579047798)
+- [关于关系图增强插件](https://ld246.com/article/1702042778713)
 
 ## 未来计划
 
@@ -156,7 +157,7 @@
 
 ## 感谢
 
-- 本项目使用了[Dagre](https://github.com/dagrejs/dagre)进行有向图布局计算
-- 本项目使用了[Apache ECharts](https://echarts.apache.org/en/index.html)绘制图形
-- 本项目使用了[Color.js](https://github.com/color-js/color.js)进行混合颜色计算
+- 本项目使用了[Dagre](https://github.com/dagrejs/dagre)进行有向图布局计算。
+- 本项目使用了[Apache ECharts](https://echarts.apache.org/en/index.html)绘制图形。
+- 本项目使用了[Color.js](https://github.com/color-js/color.js)进行颜色混合计算。
 - 本项目为[siyuan](https://github.com/siyuan-note/siyuan)插件，已在思源集市上架。
