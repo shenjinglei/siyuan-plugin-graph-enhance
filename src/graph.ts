@@ -323,9 +323,8 @@ function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gra
     const curNodeValue = _processedGraph.node(cur.id);
     if (curNodeValue.state & 2) return; // search is already done
 
-    if (!penetrate && curNodeValue?.separate && cur.id === cur.edge?.v) return; // can't penetrate
-
     if (curNodeValue?.dailynote && cur.count !== 0) return;
+    if (!penetrate && curNodeValue?.separate && cur.count !== 0) return;
 
     curNodeValue.state = curNodeValue.state | 2;
 
@@ -344,10 +343,8 @@ function searchDown2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.G
     const curNodeValue = _processedGraph.node(cur.id);
 
     if (curNodeValue.state & 1) return; // search is already done
-
-    if (!penetrate && curNodeValue.separate && cur.id === cur.edge?.w) return; // can't penetrate
-
     if (curNodeValue.dailynote && cur.count !== 0) return;
+    if (!penetrate && curNodeValue?.separate && cur.count !== 0) return;
 
     curNodeValue.state = curNodeValue.state | 1;
 
