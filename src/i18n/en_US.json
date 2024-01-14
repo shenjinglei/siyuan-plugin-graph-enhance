@@ -49,5 +49,7 @@
   "tailThresholdTitle": "Long Tail Graph Threshold",
   "tailThresholdDescription": "Comma separated, for example: 1,2",
 
-  "dockBtnPath": "Path Graph"
+  "dockBtnPath": "Path Graph",
+  "dockBtnShowDN": "Show DailyNote",
+  "dockBtnHideDN": "Hide DailyNote"
 }

@@ -49,5 +49,7 @@
   "tailThresholdTitle": "长尾图阈值",
   "tailThresholdDescription": "最小值与最大值用英文逗号隔开，如：1,2",
 
-  "dockBtnPath": "路径图"
+  "dockBtnPath": "路径图",
+  "dockBtnShowDN": "显示 DailyNote",
+  "dockBtnHideDN": "隐藏 DailyNote"
 }

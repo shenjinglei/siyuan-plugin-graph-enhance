@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Display, initRawGraph, setGraphType, setSourceNode, } from "./graph";
+import { Display, initRawGraph, isDailynote, setGraphType, setIsDailynote, setSourceNode, } from "./graph";
 import { i18n, plugin, rawGraph } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 
@@ -16,6 +16,7 @@ export function initDock() {
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
+        <span id="graph_enhance_dailynote" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnHideDN}"><svg id="graph_enhance_dailynote_icon"><use xlink:href="#iconCalendar"></use></svg></span>
         <span id="graph_enhance_path" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnPath}"><svg><use xlink:href="#iconCode"></use></svg></span>
         <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg><use xlink:href="#iconLanguage"></use></svg></span>
         <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnNeighbor}"><svg><use xlink:href="#iconWorkspace"></use></svg></span>
@@ -43,6 +44,20 @@ export function initDock() {
         type: DOCK_TYPE,
         init() {
             this.element.innerHTML = dockHtml;
+
+            document.getElementById("graph_enhance_dailynote")!.onclick = async () => {
+                if (isDailynote) {
+                    setIsDailynote(false);
+                    document.getElementById("graph_enhance_dailynote")?.setAttribute("aria-label", i18n.dockBtnShowDN);
+                    document.getElementById("graph_enhance_dailynote_icon")?.setAttribute("style", "fill: RoyalBlue;");
+                } else {
+                    setIsDailynote(true);
+                    document.getElementById("graph_enhance_dailynote")?.setAttribute("aria-label", i18n.dockBtnHideDN);
+                    document.getElementById("graph_enhance_dailynote_icon")?.setAttribute("style", "fill: #5f6368;");
+                }
+
+                Display();
+            };
 
             document.getElementById("graph_enhance_refresh")!.onclick = async () => {
                 await refreashGraph();
