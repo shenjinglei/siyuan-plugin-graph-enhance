@@ -20,7 +20,6 @@ export default class GraphEnhancePlugin extends Plugin {
                 Object.assign({
                     rankdir: "LR",
                     ranker: "network-simplex",
-                    dailynoteExcluded: "false",
                     nodesMaximum: "200",
                     neighborDepth: "2",
                     autoFollow: "true",

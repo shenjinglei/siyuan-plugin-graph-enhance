@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## 0.4.2/2024-02-27
+
+- [v0.4.0 ... v0.4.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.1...v0.4.2)
+
+  - adjust the icon
+  - add showing and hiding dailynote
+
 ## 0.4.1/2023-12-19
 
 - [v0.4.0 ... v0.4.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.0...v0.4.1)

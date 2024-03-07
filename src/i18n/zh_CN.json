@@ -9,7 +9,7 @@
   "settingAlgNS": "网络简单",
   "settingAlgTT": "紧密树",
   "settingAlgLP": "最长路径",
-  "settingDailynoteExcluded": "是否排除Dailynote",
+  "settingDailynoteExcluded": "是否排除daily note中的文档",
   "yes": "是",
   "no": "否",
 

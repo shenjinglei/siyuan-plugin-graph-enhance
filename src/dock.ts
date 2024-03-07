@@ -12,7 +12,7 @@ export function initDock() {
     const dockHtml = `<div class="fn__flex-1 fn__flex-column">
     <div class="block__icons">
         <div class="block__logo">
-            <svg><use xlink:href="#iconGraphEnhance"></use></svg>
+            <svg class="block__logoicon"><use xlink:href="#iconGraphEnhance"></use></svg>
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>

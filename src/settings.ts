@@ -29,7 +29,6 @@ export function settingInit() {
                 {
                     rankdir: directionElement.value,
                     ranker: algorithmElement.value,
-                    dailynoteExcluded: dailynoteExcludedElement.value,
                     nodesMaximum: nodesMaximumElement.value,
                     neighborDepth: neighborDepthElement.value,
                     autoFollow: autoFollowElement.value,
@@ -72,18 +71,6 @@ export function settingInit() {
         createActionElement: () => {
             algorithmElement.value = plugin.data[STORAGE_NAME].ranker;
             return algorithmElement;
-        },
-    });
-
-    const dailynoteExcludedElement = document.createElement("select");
-    dailynoteExcludedElement.id = "dailynoteExcluded";
-    dailynoteExcludedElement.add(new Option(i18n.yes, "true"));
-    dailynoteExcludedElement.add(new Option(i18n.no, "false"));
-    plugin.setting.addItem({
-        title: i18n.settingDailynoteExcluded,
-        createActionElement: () => {
-            dailynoteExcludedElement.value = plugin.data[STORAGE_NAME].dailynoteExcluded;
-            return dailynoteExcludedElement;
         },
     });
 

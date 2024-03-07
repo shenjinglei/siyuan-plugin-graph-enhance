@@ -9,7 +9,7 @@
   "settingAlgNS": "network-simplex",
   "settingAlgTT": "tight-tree",
   "settingAlgLP": "longest-path",
-  "settingDailynoteExcluded": "Exclude Dailynote",
+  "settingDailynoteExcluded": "Exclude note in daily note",
   "yes": "yes",
   "no": "no",
 

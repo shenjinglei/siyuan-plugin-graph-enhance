@@ -107,13 +107,8 @@ export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
     }
 
     function dailynoteNodeInit() {
-        if (getSetting("dailynoteExcluded") === "true") {
-            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => rawGraph.removeNode(x.id));
-        } else {
-            nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
-                .forEach(x => rawGraph.node(x.id).dailynote = true);
-        }
+        nodes.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.label))
+            .forEach(x => rawGraph.node(x.id).dailynote = true);
     }
 
     function cutEdgeInit() {
