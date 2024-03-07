@@ -2,7 +2,7 @@
 
 ## 0.4.2/2024-02-27
 
-- [v0.4.0 ... v0.4.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.1...v0.4.2)
+- [v0.4.1 ... v0.4.2](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.1...v0.4.2)
 
   - adjust the icon
   - add showing and hiding dailynote
