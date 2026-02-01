@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+## 0.4.3/2025-01-30
+
+- [v0.4.2 ... v0.4.3](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.2...v0.4.3)
+
+  - Documentation: rewrite Quick Start, add full feature description (basic graphs, neighbor, V&H, graph separation, guides) to README and README_zh_CN
+  - Fix sponsor URL (afdian.net → afdian.com)
+
 ## 0.4.2/2024-02-27
 
 - [v0.4.1 ... v0.4.2](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.1...v0.4.2)
