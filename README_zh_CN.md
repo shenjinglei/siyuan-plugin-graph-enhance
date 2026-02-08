@@ -1,5 +1,12 @@
 [English](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/blob/main/README.md)
 
+![GitHub release](https://img.shields.io/github/v/release/shenjinglei/siyuan-plugin-graph-enhance)
+![GitHub Release Date](https://img.shields.io/github/release-date/shenjinglei/siyuan-plugin-graph-enhance)
+![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
+![Last commit](https://img.shields.io/github/last-commit/shenjinglei/siyuan-plugin-graph-enhance)
+![Repo size](https://img.shields.io/github/repo-size/shenjinglei/siyuan-plugin-graph-enhance)
+![Downloads](https://img.shields.io/github/downloads/shenjinglei/siyuan-plugin-graph-enhance/total)
+
 # 关系图增强
 
 ## 快速开始
