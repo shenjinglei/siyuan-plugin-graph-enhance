@@ -1,29 +1,9 @@
 import { i18n, rawGraph, setRawGraph } from "./utils";
-
 import { showMessage } from "siyuan";
 import { getSetting } from "./settings";
-
 import * as dagre from "@dagrejs/dagre";
-import { DagreNodeValue, DagreOutput } from "./types";
+import type { DagreNodeValue, DagreOutput, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
 import { draw } from "./renderer";
-
-interface SiyuanNode {
-    id: string;
-    label: string;
-}
-
-interface SiyuanEdge {
-    from: string;
-    to: string;
-}
-
-interface QueueItem {
-    id: string,
-    edge?: dagre.Edge,
-    level: number,
-    count: number,
-    active?: number,
-}
 
 let lastNodeId: string;
 let sourceNodeId: string;
@@ -38,9 +18,9 @@ export function sourceNode() {
     return sourceNodeId;
 }
 
-let graphType = "ancestor";
-export function setGraphType(_type: string) {
-    graphType = _type;
+let graphType: GraphType = "ancestor";
+export function setGraphType(type: GraphType) {
+    graphType = type;
 }
 
 export function title() {
@@ -390,21 +370,14 @@ class PathGraph extends Graph {
     }
 }
 
-function createGraph(type: string) {
+function createGraph(type: GraphType): Graph {
     switch (type) {
-        case "ancestor":
-            return new AncestorGraph();
-        case "brother":
-            return new BrotherGraph();
-        case "cross":
-            return new CrossGraph();
-        case "global":
-            return new GlobalGraph();
-        case "neighbor":
-            return new NeighborGraph();
-        case "path":
-            return new PathGraph();
-        default:
-            return new Graph();
+        case "ancestor": return new AncestorGraph();
+        case "brother": return new BrotherGraph();
+        case "cross": return new CrossGraph();
+        case "global": return new GlobalGraph();
+        case "neighbor": return new NeighborGraph();
+        case "path": return new PathGraph();
+        default: return new Graph();
     }
 }

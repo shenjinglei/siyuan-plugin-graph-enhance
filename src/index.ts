@@ -3,7 +3,7 @@ import "./index.scss";
 
 import { STORAGE_NAME, setPlugin } from "./utils";
 import { initDock } from "./dock";
-import { settingInit } from "./settings";
+import { DEFAULT_SETTINGS, settingInit } from "./settings";
 
 export default class GraphEnhancePlugin extends Plugin {
     onload() {
@@ -15,20 +15,7 @@ export default class GraphEnhancePlugin extends Plugin {
         </symbol>`);
 
         this.loadData(STORAGE_NAME).then(() => {
-            this.saveData(
-                STORAGE_NAME,
-                Object.assign({
-                    rankdir: "LR",
-                    ranker: "network-simplex",
-                    nodesMaximum: "200",
-                    neighborDepth: "2",
-                    autoFollow: "true",
-                    separation: "",
-                    nodesExclusion: "",
-                }, this.data[STORAGE_NAME])
-            );
-
-
+            this.saveData(STORAGE_NAME, { ...DEFAULT_SETTINGS, ...this.data[STORAGE_NAME] });
         });
 
         setPlugin(this);

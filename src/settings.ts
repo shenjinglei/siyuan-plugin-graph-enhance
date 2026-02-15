@@ -1,9 +1,20 @@
 import { i18n, plugin, STORAGE_NAME } from "./utils";
 import { Setting, showMessage } from "siyuan";
 import { autoFollow } from "./dock";
+import type { SettingKey } from "./types";
 
-export function getSetting(settingName: string): string {
-    return plugin.data[STORAGE_NAME][settingName];
+export const DEFAULT_SETTINGS = {
+    rankdir: "LR",
+    ranker: "network-simplex",
+    nodesMaximum: "200",
+    neighborDepth: "2",
+    autoFollow: "true",
+    separation: "",
+    nodesExclusion: "",
+} as const satisfies Record<SettingKey, string>;
+
+export function getSetting(name: SettingKey): string {
+    return plugin.data[STORAGE_NAME][name] ?? DEFAULT_SETTINGS[name];
 }
 
 export function settingInit() {
@@ -25,16 +36,16 @@ export function settingInit() {
                 );
                 return;
             }
-            plugin.saveData(STORAGE_NAME,
-                {
-                    rankdir: directionElement.value,
-                    ranker: algorithmElement.value,
-                    nodesMaximum: nodesMaximumElement.value,
-                    neighborDepth: neighborDepthElement.value,
-                    autoFollow: autoFollowElement.value,
-                    separation: separationElement.value,
-                    nodesExclusion: nodesExclusionElement.value,
-                });
+            const payload: Record<SettingKey, string> = {
+                rankdir: directionElement.value,
+                ranker: algorithmElement.value,
+                nodesMaximum: nodesMaximumElement.value,
+                neighborDepth: neighborDepthElement.value,
+                autoFollow: autoFollowElement.value,
+                separation: separationElement.value,
+                nodesExclusion: nodesExclusionElement.value,
+            };
+            plugin.saveData(STORAGE_NAME, payload);
 
 
             if (autoFollowElement.value === "true") {

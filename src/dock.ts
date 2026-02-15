@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Display, initRawGraph, isDailynote, setGraphType, setIsDailynote, setSourceNode, } from "./graph";
+import { Display, initRawGraph, isDailynote, setGraphType, setIsDailynote, setSourceNode } from "./graph";
 import { i18n, plugin, rawGraph } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
-
 import "./index.scss";
 import { getSetting } from "./settings";
 import { initEChart, resize } from "./renderer";
+import { GRAPH_API_CONF } from "./constants";
+import type { GraphType } from "./types";
+
 const DOCK_TYPE = "dock_tab";
 
 export function initDock() {
@@ -60,92 +62,24 @@ export function initDock() {
             };
 
             document.getElementById("graph_enhance_refresh")!.onclick = async () => {
-                await refreashGraph();
-
+                await refreshGraph();
                 Display();
             };
 
-            document.getElementById("graph_enhance_global")!.onclick = async () => {
-
-                const curDocId = getDocid();
-                if (curDocId)
-                    setSourceNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("global");
-
+            const handleGraphButton = (graphType: GraphType) => async () => {
+                const curDocId = getDocId();
+                if (curDocId) setSourceNode(curDocId);
+                if (!rawGraph) await refreshGraph();
+                setGraphType(graphType);
                 Display();
             };
 
-            document.getElementById("graph_enhance_ancestor")!.onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    setSourceNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("ancestor");
-
-                Display();
-            };
-
-            document.getElementById("graph_enhance_brother")!.onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    setSourceNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("brother");
-
-                Display();
-            };
-
-            document.getElementById("graph_enhance_cross")!.onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    setSourceNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("cross");
-                Display();
-            };
-
-            document.getElementById("graph_enhance_neighbor")!.onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    setSourceNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("neighbor");
-                Display();
-            };
-
-            document.getElementById("graph_enhance_path")!.onclick = async () => {
-                const curDocId = getDocid();
-                if (curDocId)
-                    setSourceNode(curDocId);
-
-                if (!rawGraph) {
-                    await refreashGraph();
-                }
-
-                setGraphType("path");
-                Display();
-            };
+            document.getElementById("graph_enhance_global")!.onclick = handleGraphButton("global");
+            document.getElementById("graph_enhance_ancestor")!.onclick = handleGraphButton("ancestor");
+            document.getElementById("graph_enhance_brother")!.onclick = handleGraphButton("brother");
+            document.getElementById("graph_enhance_cross")!.onclick = handleGraphButton("cross");
+            document.getElementById("graph_enhance_neighbor")!.onclick = handleGraphButton("neighbor");
+            document.getElementById("graph_enhance_path")!.onclick = handleGraphButton("path");
 
 
             initEChart();
@@ -166,51 +100,24 @@ export function initDock() {
     });
 }
 
-function getDocid() {
-    if (getFrontend() === "mobile" || getFrontend() === "browser-mobile")
-        return document.querySelector("#editor .protyle-content .protyle-background")?.getAttribute("data-node-id");
-    else
-        return document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background")?.getAttribute("data-node-id");
-}
 
 export async function autoFollow({ detail }: any) {
 
     if (!setSourceNode(detail.protyle.block.rootID))
         return;
 
-    if (!rawGraph) {
-        await refreashGraph();
-    }
-
+    if (!rawGraph) await refreshGraph();
     Display();
 }
 
-function refreashGraph() {
-    return new Promise<void>((resolve) => {
-        fetchSyncPost("api/graph/getGraph", {
-            "conf": {
-                "dailyNote": true,
-                "minRefs": 0,
-                "type": {
-                    "blockquote": false,
-                    "code": false,
-                    "heading": false,
-                    "list": false,
-                    "listItem": false,
-                    "math": false,
-                    "paragraph": false,
-                    "super": false,
-                    "table": false,
-                    "tag": false
-                }
-            },
-            "k": ""
-        }).then(
-            result => {
-                initRawGraph(result.data.nodes, result.data.links);
-                resolve();
-            }
-        );
-    });
+async function refreshGraph(): Promise<void> {
+    const result = await fetchSyncPost("api/graph/getGraph", GRAPH_API_CONF);
+    initRawGraph(result.data.nodes, result.data.links);
+}
 
+function getDocId(): string | undefined {
+    if (getFrontend() === "mobile" || getFrontend() === "browser-mobile") {
+        return document.querySelector("#editor .protyle-content .protyle-background")?.getAttribute("data-node-id") ?? undefined;
+    }
+    return document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background")?.getAttribute("data-node-id") ?? undefined;
 }
