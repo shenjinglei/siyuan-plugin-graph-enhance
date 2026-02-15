@@ -18,7 +18,7 @@ type ECOption = ComposeOption<GraphSeriesOption | TitleComponentOption>;
 
 import { DagreOutput } from "./types";
 import { openTab } from "siyuan";
-import { plugin } from "./utils";
+import { getThemeMode, plugin } from "./utils";
 import { title } from "./graph";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
@@ -135,11 +135,14 @@ export function draw(dagreLayout: DagreOutput) {
                         }
                     };
                 }),
-                links: dagreLayout.edges.map((x: any) => {
+                links: dagreLayout.edges.map((edge) => {
+                    const branch = edge.value.branch ?? 0;
                     return {
-                        source: x.v, target: x.w, value: x.value.branch,
+                        source: edge.v,
+                        target: edge.w,
+                        value: branch,
                         label: { show: false, formatter: "{c}" },
-                        lineStyle: { color: getColor(x.value.branch) }
+                        lineStyle: { color: getColor(branch) },
                     };
                 }),
             },
@@ -151,8 +154,4 @@ export function draw(dagreLayout: DagreOutput) {
         // @ts-ignore
         openTab({ app: plugin.app, doc: { id: params.data.id, action: ["cb-get-focus"] } });
     });
-}
-
-function getThemeMode() {
-    return document.querySelector("html")?.getAttribute("data-theme-mode");
 }
