@@ -74,15 +74,20 @@ export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
     //console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
 
     function ExclusionNodeInit() {
-        const nodesExclusionSetting = getSetting("nodesExclusion").split("\n");
-        nodesExclusionSetting.push("^ge-moc$|^ge-tag$");
-        nodesExclusionSetting.push("^ge-cv-?\\d+$|^ge-ce-?\\d+$");
+        // Performance: avoid scanning `nodes` repeatedly for each pattern.
+        // Compile patterns once and do a single pass over nodes.
+        const patterns = getSetting("nodesExclusion")
+            .split("\n")
+            .map((s) => s.trim())
+            .filter(Boolean);
+        patterns.push("^ge-moc$|^ge-tag$");
+        patterns.push("^ge-cv-?\\d+$|^ge-ce-?\\d+$");
 
-        for (const item of nodesExclusionSetting) {
-            if (/^\s*$/.test(item)) continue;
-
-            nodes.filter(x => RegExp(item).test(x.label))
-                .forEach(x => rawGraph.removeNode(x.id));
+        const matchers = patterns.map((p) => new RegExp(p));
+        for (const n of nodes) {
+            if (matchers.some((re) => re.test(n.label))) {
+                rawGraph.removeNode(n.id);
+            }
         }
     }
 
@@ -141,8 +146,7 @@ function createProcessedGraph() {
 }
 
 function initQueue() {
-    const q: QueueItem[] = [];
-    return q;
+    return [] as QueueItem[];
 }
 
 class Graph {
@@ -164,8 +168,9 @@ class AncestorGraph extends Graph {
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
+        // Performance: avoid `shift()` (O(n) per op). Use an index as a queue head.
+        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
+            const cur = q[head]!;
             insertNode2(cur, rawGraph, processedGraph);
             insertEdge2(cur, rawGraph, processedGraph);
             if (cur.level >= 0) {
@@ -186,8 +191,8 @@ class BrotherGraph extends Graph {
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
+        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
+            const cur = q[head]!;
             insertNode2(cur, rawGraph, processedGraph);
             insertEdge2(cur, rawGraph, processedGraph);
             if (cur.level >= 0) {
@@ -208,8 +213,8 @@ class CrossGraph extends Graph {
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
+        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
+            const cur = q[head]!;
             insertNode2(cur, rawGraph, processedGraph);
             insertEdge2(cur, rawGraph, processedGraph);
             if (cur.level >= -1) {
@@ -230,8 +235,8 @@ class GlobalGraph extends Graph {
         const nodesMaximum = +getSetting("nodesMaximum");
 
         let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
+        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
+            const cur = q[head]!;
             insertNode2(cur, rawGraph, processedGraph);
             insertEdge2(cur, rawGraph, processedGraph);
             searchDown2(cur, q, rawGraph, processedGraph);
@@ -249,8 +254,8 @@ class NeighborGraph extends Graph {
         const neighborDepth = +getSetting("neighborDepth");
 
         let count = 0;
-        while (q.length > 0 && count < nodesMaximum) {
-            const cur = q.shift()!;
+        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
+            const cur = q[head]!;
             insertNode2(cur, rawGraph, processedGraph);
             insertEdge2(cur, rawGraph, processedGraph);
             if (cur.count < neighborDepth) {
@@ -310,7 +315,8 @@ function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gra
 
     _rawGraph.inEdges(cur.id)
         ?.filter(e => _processedGraph.node(e.v)?.state !== 3)
-        .filter(e => isDailynote || !/^\d{4}-\d{2}-\d{2}$/.test(_rawGraph.node(e.v).label))
+        // Performance: use precomputed `dailynote` flag instead of regex on every traversal.
+        .filter(e => isDailynote || !_rawGraph.node(e.v)?.dailynote)
         .filter(e => penetrate || cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
         .forEach(x => q.push({
             id: x.v,
@@ -331,7 +337,7 @@ function searchDown2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.G
 
     _rawGraph.outEdges(cur.id)
         ?.filter(e => _processedGraph.node(e.w)?.state !== 3)
-        .filter(e => isDailynote || !/^\d{4}-\d{2}-\d{2}$/.test(_rawGraph.node(e.w).label))
+        .filter(e => isDailynote || !_rawGraph.node(e.w)?.dailynote)
         .filter(e => penetrate || cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
         .forEach(e => q.push({
             id: e.w,
@@ -348,8 +354,8 @@ class PathGraph extends Graph {
         const q = initQueue();
         const middleGraph = new dagre.graphlib.Graph<DagreNodeValue>().setDefaultEdgeLabel(() => { return {}; });
         q.push({ id: sourceNodeId, level: 0, count: 0 });
-        while (q.length > 0) {
-            const cur = q.shift()!;
+        for (let head = 0; head < q.length; head++) {
+            const cur = q[head]!;
             insertNode2(cur, rawGraph, middleGraph);
             insertEdge2(cur, rawGraph, middleGraph);
             searchUp2(cur, q, rawGraph, middleGraph, 1);
@@ -359,8 +365,8 @@ class PathGraph extends Graph {
         //console.log("lastNodeId", rawGraph.node(lastNodeId));
         q.push({ id: lastNodeId, level: 0, count: 0 });
         branchFlag = 1;
-        while (q.length > 0) {
-            const cur = q.shift()!;
+        for (let head = 0; head < q.length; head++) {
+            const cur = q[head]!;
             insertNode2(cur, middleGraph, processedGraph);
             insertEdge2(cur, middleGraph, processedGraph);
             searchDown2(cur, q, middleGraph, processedGraph, 1);
