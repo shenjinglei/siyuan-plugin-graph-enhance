@@ -171,13 +171,13 @@ class AncestorGraph extends Graph {
         // Performance: avoid `shift()` (O(n) per op). Use an index as a queue head.
         for (let head = 0; head < q.length && count < nodesMaximum; head++) {
             const cur = q[head]!;
-            insertNode2(cur, rawGraph, processedGraph);
-            insertEdge2(cur, rawGraph, processedGraph);
+            insertNode(cur, rawGraph, processedGraph);
+            insertEdge(cur, rawGraph, processedGraph);
             if (cur.level >= 0) {
-                searchDown2(cur, q, rawGraph, processedGraph);
+                searchDown(cur, q, rawGraph, processedGraph);
             }
             if (cur.level <= 0) {
-                searchUp2(cur, q, rawGraph, processedGraph);
+                searchUp(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -193,13 +193,13 @@ class BrotherGraph extends Graph {
         let count = 0;
         for (let head = 0; head < q.length && count < nodesMaximum; head++) {
             const cur = q[head]!;
-            insertNode2(cur, rawGraph, processedGraph);
-            insertEdge2(cur, rawGraph, processedGraph);
+            insertNode(cur, rawGraph, processedGraph);
+            insertEdge(cur, rawGraph, processedGraph);
             if (cur.level >= 0) {
-                searchUp2(cur, q, rawGraph, processedGraph);
+                searchUp(cur, q, rawGraph, processedGraph);
             }
             if (cur.level <= 0) {
-                searchDown2(cur, q, rawGraph, processedGraph);
+                searchDown(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -215,13 +215,13 @@ class CrossGraph extends Graph {
         let count = 0;
         for (let head = 0; head < q.length && count < nodesMaximum; head++) {
             const cur = q[head]!;
-            insertNode2(cur, rawGraph, processedGraph);
-            insertEdge2(cur, rawGraph, processedGraph);
+            insertNode(cur, rawGraph, processedGraph);
+            insertEdge(cur, rawGraph, processedGraph);
             if (cur.level >= -1) {
-                searchDown2(cur, q, rawGraph, processedGraph);
+                searchDown(cur, q, rawGraph, processedGraph);
             }
             if (cur.level <= 1) {
-                searchUp2(cur, q, rawGraph, processedGraph);
+                searchUp(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
@@ -237,10 +237,10 @@ class GlobalGraph extends Graph {
         let count = 0;
         for (let head = 0; head < q.length && count < nodesMaximum; head++) {
             const cur = q[head]!;
-            insertNode2(cur, rawGraph, processedGraph);
-            insertEdge2(cur, rawGraph, processedGraph);
-            searchDown2(cur, q, rawGraph, processedGraph);
-            searchUp2(cur, q, rawGraph, processedGraph);
+            insertNode(cur, rawGraph, processedGraph);
+            insertEdge(cur, rawGraph, processedGraph);
+            searchDown(cur, q, rawGraph, processedGraph);
+            searchUp(cur, q, rawGraph, processedGraph);
             count++;
         }
     }
@@ -256,18 +256,18 @@ class NeighborGraph extends Graph {
         let count = 0;
         for (let head = 0; head < q.length && count < nodesMaximum; head++) {
             const cur = q[head]!;
-            insertNode2(cur, rawGraph, processedGraph);
-            insertEdge2(cur, rawGraph, processedGraph);
+            insertNode(cur, rawGraph, processedGraph);
+            insertEdge(cur, rawGraph, processedGraph);
             if (cur.count < neighborDepth) {
-                searchDown2(cur, q, rawGraph, processedGraph);
-                searchUp2(cur, q, rawGraph, processedGraph);
+                searchDown(cur, q, rawGraph, processedGraph);
+                searchUp(cur, q, rawGraph, processedGraph);
             }
             count++;
         }
     }
 }
 
-function insertNode2(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
+function insertNode(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
     if (_processedGraph.hasNode(cur.id)) return;
 
     const rawNodeValue = _rawGraph.node(cur.id);
@@ -280,7 +280,7 @@ function insertNode2(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _proc
 
 }
 
-function insertEdge2(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
+function insertEdge(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
 
     if (!cur.edge) return;
 
@@ -304,7 +304,7 @@ export function setIsDailynote(_isDailynote: boolean) {
     isDailynote = _isDailynote;
 }
 
-function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
+function searchUp(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
     const curNodeValue = _processedGraph.node(cur.id);
     if (curNodeValue.state & 2) return; // search is already done
 
@@ -326,7 +326,7 @@ function searchUp2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gra
         }));
 }
 
-function searchDown2(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
+function searchDown(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
     const curNodeValue = _processedGraph.node(cur.id);
 
     if (curNodeValue.state & 1) return; // search is already done
@@ -356,9 +356,9 @@ class PathGraph extends Graph {
         q.push({ id: sourceNodeId, level: 0, count: 0 });
         for (let head = 0; head < q.length; head++) {
             const cur = q[head]!;
-            insertNode2(cur, rawGraph, middleGraph);
-            insertEdge2(cur, rawGraph, middleGraph);
-            searchUp2(cur, q, rawGraph, middleGraph, 1);
+            insertNode(cur, rawGraph, middleGraph);
+            insertEdge(cur, rawGraph, middleGraph);
+            searchUp(cur, q, rawGraph, middleGraph, 1);
         }
         //console.log("middleGraph", dagre.graphlib.json.write(middleGraph));
         //console.log("sourceNode", rawGraph.node(sourceNodeId));
@@ -367,9 +367,9 @@ class PathGraph extends Graph {
         branchFlag = 1;
         for (let head = 0; head < q.length; head++) {
             const cur = q[head]!;
-            insertNode2(cur, middleGraph, processedGraph);
-            insertEdge2(cur, middleGraph, processedGraph);
-            searchDown2(cur, q, middleGraph, processedGraph, 1);
+            insertNode(cur, middleGraph, processedGraph);
+            insertEdge(cur, middleGraph, processedGraph);
+            searchDown(cur, q, middleGraph, processedGraph, 1);
         }
         //console.log("processedGraph", dagre.graphlib.json.write(processedGraph));
 
