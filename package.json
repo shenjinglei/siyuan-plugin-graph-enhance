@@ -6,7 +6,9 @@
   "scripts": {
     "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "Vanessa",
@@ -27,7 +29,8 @@
     "typescript": "4.7.4",
     "webpack": "^5.76.0",
     "webpack-cli": "^5.0.2",
-    "zip-webpack-plugin": "^4.0.1"
+    "zip-webpack-plugin": "^4.0.1",
+    "vitest": "^2.1.0"
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.0.4",
