@@ -6,6 +6,10 @@
 
 ## 开发记录
 
+### 2026-02-21 环境隔离 (jsdom) #31
+
+- 环境隔离 (jsdom)：在 Node 里测 DOM 代码。
+
 ### 2026-02-21 测试框架（Vitest） #31
 
 - Issue: https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/31
@@ -13,6 +17,7 @@
 - **选用 Vitest**：与 TypeScript 开箱即用、运行快、API 与 Jest 兼容、便于 mock；项目为 webpack/CommonJS，Vitest 单独跑测试不参与打包。
 - **配置**：`vitest.config.ts` 中 `environment: "node"`、`include: ["src/**/*.test.ts"]`；通过 `resolve.alias` 将 `siyuan` 指向 `src/__mocks__/siyuan.ts`，避免在测试环境解析思源包。
 - **graph 测试**：`src/__tests__/graph.test.ts` 覆盖 `setSourceNode`/`sourceNode`、`setGraphType`、`title`、`initRawGraph`（建图、dailynote 标记、排除节点）、`Display`（调用 `draw` / 源不在图内不调用）、`setIsDailynote`/`isDailynote`。对 `utils`、`settings`、`renderer` 使用 `vi.mock`，保证不依赖真实插件/DOM。
+- **utils 测试**: `src/__tests__/utils.test.ts` 覆盖 `getThemeMode`。
 
 ### 2026-02-16 代码结构重构 #21
 
