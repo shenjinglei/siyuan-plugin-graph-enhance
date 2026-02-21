@@ -6,7 +6,17 @@
 
 ## 开发记录
 
-### 2026-02-16 代码结构重构
+### 2026-02-21 测试框架（Vitest） #31
+
+- Issue: https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/31
+
+- **选用 Vitest**：与 TypeScript 开箱即用、运行快、API 与 Jest 兼容、便于 mock；项目为 webpack/CommonJS，Vitest 单独跑测试不参与打包。
+- **配置**：`vitest.config.ts` 中 `environment: "node"`、`include: ["src/**/*.test.ts"]`；通过 `resolve.alias` 将 `siyuan` 指向 `src/__mocks__/siyuan.ts`，避免在测试环境解析思源包。
+- **graph 测试**：`src/__tests__/graph.test.ts` 覆盖 `setSourceNode`/`sourceNode`、`setGraphType`、`title`、`initRawGraph`（建图、dailynote 标记、排除节点）、`Display`（调用 `draw` / 源不在图内不调用）、`setIsDailynote`/`isDailynote`。对 `utils`、`settings`、`renderer` 使用 `vi.mock`，保证不依赖真实插件/DOM。
+
+### 2026-02-16 代码结构重构 #21
+
+- Issue: https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/21
 
 - **类型集中**（`src/types.ts`）
   - 新增 `GraphType`、`SiyuanNode`、`SiyuanEdge`、`QueueItem`、`SettingKey`，图类型与设置键统一用类型约束。
@@ -21,9 +31,6 @@
 - **工具与渲染**
   - `getThemeMode()` 移至 `utils.ts`；renderer 中 `draw` 的 links 与 `DagreOutput` 的 edge value 类型一致。
 
-### [Refactor] 重构代码，提高效率 #21
-
-- Issue: https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/21
 
 ---
 
@@ -40,6 +47,8 @@
 | `src/constants.ts` | `GRAPH_TYPES`、`GRAPH_API_CONF` |
 | `src/utils.ts` | `plugin`/`i18n`/`rawGraph`、`getThemeMode`、`STORAGE_NAME` |
 | `src/i18n/*.json` | 多语言文案 |
+| `src/__tests__/*.test.ts` | Vitest 单测（当前主要为 graph） |
+| `src/__mocks__/siyuan.ts` | 测试用 siyuan 桩，供 `resolve.alias` 使用 |
 
 ---
 
@@ -63,6 +72,8 @@
 - `pnpm install`：安装依赖
 - `pnpm run dev`：开发构建（watch 模式，编译成功后会有 "Watching for file changes..."）
 - `pnpm run build`：生产构建并打包
+- `pnpm test`：运行 Vitest 单测（单次）
+- `pnpm run test:watch`：Vitest watch 模式
 
 ---
 
