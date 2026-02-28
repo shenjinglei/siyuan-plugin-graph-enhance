@@ -11,7 +11,9 @@ export const DEFAULT_SETTINGS = {
     autoFollow: "true",
     separation: "",
     nodesExclusion: "",
-} as const satisfies Record<SettingKey, string>;
+    font: "system-ui",
+    fontSize: "12",
+} as Record<SettingKey, string>;
 
 export function getSetting(name: SettingKey): string {
     return plugin.data[STORAGE_NAME][name] ?? DEFAULT_SETTINGS[name];
@@ -36,6 +38,21 @@ export function settingInit() {
                 );
                 return;
             }
+            if (!/^[0-9]+$/.test(fontSizeElement.value)) {
+                showMessage(
+                    i18n.checkFontSizeErrorMsg,
+                    3000,
+                    "error"
+                );
+                return;
+            }
+            const getFontValue = () => {
+                if (fontElement.value === "custom") {
+                    return customFontInput.value.trim() || "system-ui";
+                }
+                return fontElement.value;
+            };
+
             const payload: Record<SettingKey, string> = {
                 rankdir: directionElement.value,
                 ranker: algorithmElement.value,
@@ -44,6 +61,8 @@ export function settingInit() {
                 autoFollow: autoFollowElement.value,
                 separation: separationElement.value,
                 nodesExclusion: nodesExclusionElement.value,
+                font: getFontValue(),
+                fontSize: fontSizeElement.value,
             };
             plugin.saveData(STORAGE_NAME, payload);
 
@@ -144,6 +163,92 @@ export function settingInit() {
         createActionElement: () => {
             nodesExclusionElement.value = plugin.data[STORAGE_NAME].nodesExclusion;
             return nodesExclusionElement;
+        },
+    });
+
+    const fontElement = document.createElement("select");
+    fontElement.id = "font";
+
+    // Add common font options
+    const commonFonts = [
+        "system-ui", // System default font, cross-platform compatible
+        "Arial",
+        "Helvetica",
+        "Times New Roman",
+        "Georgia",
+        "Verdana",
+        "Courier New",
+        "Microsoft YaHei", // Microsoft YaHei
+        "SimSun", // SimSun
+        "SimHei", // SimHei
+        "PingFang SC", // PingFang SC
+        "Helvetica Neue",
+        "sans-serif",
+        "serif",
+        "monospace"
+    ];
+
+    // Add common fonts to dropdown
+    commonFonts.forEach(font => {
+        fontElement.add(new Option(font, font));
+    });
+
+    // Add custom option
+    const customOption = new Option(i18n.fontCustomOption, "custom");
+    fontElement.add(customOption);
+
+    // Create custom font input (initially hidden)
+    const customFontInput = document.createElement("input");
+    customFontInput.id = "customFont";
+    customFontInput.placeholder = i18n.pleaseInput;
+    customFontInput.className = "b3-text-field fn__block";
+    customFontInput.style.display = "none";
+    customFontInput.style.marginTop = "8px";
+
+    // Listen for dropdown changes
+    fontElement.addEventListener("change", () => {
+        if (fontElement.value === "custom") {
+            customFontInput.style.display = "block";
+            customFontInput.focus();
+        } else {
+            customFontInput.style.display = "none";
+        }
+    });
+
+    plugin.setting.addItem({
+        title: i18n.fontTitle,
+        description: i18n.fontDescription,
+        createActionElement: () => {
+            const savedFont = plugin.data[STORAGE_NAME].font;
+
+            // Check if saved font is in common fonts list
+            if (commonFonts.includes(savedFont)) {
+                fontElement.value = savedFont;
+                customFontInput.value = "";
+            } else {
+                fontElement.value = "custom";
+                customFontInput.value = savedFont;
+                customFontInput.style.display = "block";
+            }
+
+            // Create container to wrap multiple elements
+            const container = document.createElement("div");
+            container.appendChild(fontElement);
+            container.appendChild(customFontInput);
+            return container;
+        },
+    });
+
+    const fontSizeElement = document.createElement("input");
+    fontSizeElement.id = "fontSize";
+    fontSizeElement.placeholder = i18n.pleaseInputNumber;
+    fontSizeElement.className = "b3-text-field";
+    plugin.setting.addItem({
+        title: i18n.fontSizeTitle,
+        description: i18n.fontSizeDescription,
+        createActionElement: () => {
+            fontSizeElement.value = plugin.data[STORAGE_NAME].fontSize;
+            return fontSizeElement;
         },
     });
 }

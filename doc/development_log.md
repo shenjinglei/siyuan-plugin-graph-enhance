@@ -6,6 +6,20 @@
 
 ## 开发记录
 
+### 2026-02-28 字体和字号设置 #23
+
+- **新增字体设置**：在设置面板中添加字体和字号配置选项
+  - 在 `types.ts` 中添加 `font` 和 `fontSize` 到 `SettingKey` 类型
+  - 在 `settings.ts` 中添加默认值（system-ui, 12px）和设置表单项
+  - 在 `renderer.ts` 中应用字体设置到节点标签
+  - 添加中英文翻译支持
+  - 添加字号数字验证
+- **字体选择优化**：
+  - 改用下拉框选择常用字体，包含跨平台字体选项
+  - 支持自定义字体输入，当选择"自定义字体"时显示输入框
+  - 使用 `system-ui` 作为默认字体，确保跨平台兼容性
+  - 包含中文字体选项（微软雅黑、宋体、黑体、苹方等）
+
 ### 2026-02-21 环境隔离 (jsdom) #31
 
 - 环境隔离 (jsdom)：在 Node 里测 DOM 代码。
@@ -36,24 +50,23 @@
 - **工具与渲染**
   - `getThemeMode()` 移至 `utils.ts`；renderer 中 `draw` 的 links 与 `DagreOutput` 的 edge value 类型一致。
 
-
 ---
 
 ## 项目结构（简要）
 
-| 文件 | 职责 |
-|------|------|
-| `src/index.ts` | 插件入口；加载/合并默认设置；`setPlugin`、`initDock`、`settingInit` |
-| `src/dock.ts` | 侧栏 UI、图类型按钮、刷新、日记开关、`autoFollow`、`getDocId`、`refreshGraph` |
-| `src/graph.ts` | 图状态与遍历；`Display`、`initRawGraph`、各图类型类、`createGraph(GraphType)` |
-| `src/renderer.ts` | ECharts 初始化与 `draw(DagreOutput)`、节点/边颜色与主题 |
-| `src/settings.ts` | `DEFAULT_SETTINGS`、`getSetting(SettingKey)`、设置面板表单项 |
-| `src/types.ts` | `GraphType`、`SiyuanNode`/`SiyuanEdge`、`QueueItem`、`DagreOutput`、`DagreNodeValue`、`SettingKey` |
-| `src/constants.ts` | `GRAPH_TYPES`、`GRAPH_API_CONF` |
-| `src/utils.ts` | `plugin`/`i18n`/`rawGraph`、`getThemeMode`、`STORAGE_NAME` |
-| `src/i18n/*.json` | 多语言文案 |
-| `src/__tests__/*.test.ts` | Vitest 单测（当前主要为 graph） |
-| `src/__mocks__/siyuan.ts` | 测试用 siyuan 桩，供 `resolve.alias` 使用 |
+| 文件                      | 职责                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/index.ts`            | 插件入口；加载/合并默认设置；`setPlugin`、`initDock`、`settingInit`                                |
+| `src/dock.ts`             | 侧栏 UI、图类型按钮、刷新、日记开关、`autoFollow`、`getDocId`、`refreshGraph`                      |
+| `src/graph.ts`            | 图状态与遍历；`Display`、`initRawGraph`、各图类型类、`createGraph(GraphType)`                      |
+| `src/renderer.ts`         | ECharts 初始化与 `draw(DagreOutput)`、节点/边颜色与主题                                            |
+| `src/settings.ts`         | `DEFAULT_SETTINGS`、`getSetting(SettingKey)`、设置面板表单项（包含字体、字号配置）                 |
+| `src/types.ts`            | `GraphType`、`SiyuanNode`/`SiyuanEdge`、`QueueItem`、`DagreOutput`、`DagreNodeValue`、`SettingKey` |
+| `src/constants.ts`        | `GRAPH_TYPES`、`GRAPH_API_CONF`                                                                    |
+| `src/utils.ts`            | `plugin`/`i18n`/`rawGraph`、`getThemeMode`、`STORAGE_NAME`                                         |
+| `src/i18n/*.json`         | 多语言文案                                                                                         |
+| `src/__tests__/*.test.ts` | Vitest 单测（当前主要为 graph）                                                                    |
+| `src/__mocks__/siyuan.ts` | 测试用 siyuan 桩，供 `resolve.alias` 使用                                                          |
 
 ---
 
