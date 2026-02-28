@@ -51,5 +51,12 @@
 
   "dockBtnPath": "Path Graph",
   "dockBtnShowDN": "Show DailyNote",
-  "dockBtnHideDN": "Hide DailyNote"
+  "dockBtnHideDN": "Hide DailyNote",
+
+  "fontTitle": "Font",
+  "fontDescription": "Node label font, select common fonts or input custom font",
+  "fontCustomOption": "Custom Font",
+  "fontSizeTitle": "Font Size",
+  "fontSizeDescription": "Node label font size (pixels)",
+  "checkFontSizeErrorMsg": "Font Size is not a number! Setting hasn't saved"
 }

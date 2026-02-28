@@ -20,6 +20,7 @@ import { DagreOutput } from "./types";
 import { openTab } from "siyuan";
 import { getThemeMode, plugin } from "./utils";
 import { title } from "./graph";
+import { getSetting } from "./settings";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
 
@@ -92,6 +93,8 @@ export function draw(dagreLayout: DagreOutput) {
     aEChart.off("click");
 
     const color = getNodeColor();
+    const font = getSetting("font");
+    const fontSize = parseInt(getSetting("fontSize"));
 
     const option: ECOption = {
         title: {
@@ -129,7 +132,8 @@ export function draw(dagreLayout: DagreOutput) {
                         },
                         label: {
                             color: "inherit",
-                            fontFamily: "OPPOSans",
+                            fontFamily: font,
+                            fontSize: fontSize,
                             width: x.value.label.length > 16 ? 160 : undefined,
                             overflow: "break",
                         }

@@ -52,4 +52,6 @@ export type SettingKey =
     | "neighborDepth"
     | "autoFollow"
     | "separation"
-    | "nodesExclusion";
+    | "nodesExclusion"
+    | "font"
+    | "fontSize";

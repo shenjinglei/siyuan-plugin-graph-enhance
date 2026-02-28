@@ -51,5 +51,12 @@
 
   "dockBtnPath": "路径图",
   "dockBtnShowDN": "显示 DailyNote",
-  "dockBtnHideDN": "隐藏 DailyNote"
+  "dockBtnHideDN": "隐藏 DailyNote",
+
+  "fontTitle": "字体",
+  "fontDescription": "节点标签字体，可选择常用字体或自定义输入",
+  "fontCustomOption": "自定义字体",
+  "fontSizeTitle": "字号",
+  "fontSizeDescription": "节点标签字号（像素）",
+  "checkFontSizeErrorMsg": "字号不是数字！设置未保存"
 }
