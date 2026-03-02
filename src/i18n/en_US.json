@@ -52,6 +52,8 @@
   "dockBtnPath": "Path Graph",
   "dockBtnShowDN": "Show DailyNote",
   "dockBtnHideDN": "Hide DailyNote",
+  "dockBtnFullscreen": "Fullscreen",
+  "dockBtnExitFullscreen": "Exit Fullscreen",
 
   "fontTitle": "Font",
   "fontDescription": "Node label font, select common fonts or input custom font",

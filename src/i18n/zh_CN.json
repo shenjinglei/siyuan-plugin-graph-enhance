@@ -52,6 +52,8 @@
   "dockBtnPath": "路径图",
   "dockBtnShowDN": "显示 DailyNote",
   "dockBtnHideDN": "隐藏 DailyNote",
+  "dockBtnFullscreen": "全屏",
+  "dockBtnExitFullscreen": "退出全屏",
 
   "fontTitle": "字体",
   "fontDescription": "节点标签字体，可选择常用字体或自定义输入",
