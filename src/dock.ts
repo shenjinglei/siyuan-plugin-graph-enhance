@@ -26,6 +26,7 @@ export function initDock() {
         <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg><use xlink:href="#iconGraph"></use></svg></span>
         <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg><use xlink:href="#iconGlobalGraph"></use></svg></span>
         <span id="graph_enhance_refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnRefresh}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+        <span id="graph_enhance_fullscreen" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnFullscreen}"><svg><use xlink:href="#iconFullscreen"></use></svg></span>
         <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__flex-1 plugin-sample__custom-dock">
@@ -64,6 +65,45 @@ export function initDock() {
             document.getElementById("graph_enhance_refresh")!.onclick = async () => {
                 await refreshGraph();
                 Display();
+            };
+
+            // Fullscreen functionality
+            let isFullscreen = false;
+            const fullscreenBtn = document.getElementById("graph_enhance_fullscreen")!;
+            const dockElement = (this.element.closest(".dock") || this.element.closest("[data-type=\"dock\"]") || this.element) as HTMLElement;
+
+            fullscreenBtn.onclick = () => {
+                if (!isFullscreen) {
+                    // Enter fullscreen
+                    dockElement.style.position = "fixed";
+                    dockElement.style.top = "0";
+                    dockElement.style.left = "0";
+                    dockElement.style.width = "100vw";
+                    dockElement.style.height = "100vh";
+                    dockElement.style.zIndex = "9999";
+                    dockElement.style.backgroundColor = "var(--b3-theme-background)";
+                    fullscreenBtn.setAttribute("aria-label", i18n.dockBtnExitFullscreen);
+                    isFullscreen = true;
+                } else {
+                    // Exit fullscreen
+                    dockElement.style.position = "";
+                    dockElement.style.top = "";
+                    dockElement.style.left = "";
+                    dockElement.style.width = "";
+                    dockElement.style.height = "";
+                    dockElement.style.zIndex = "";
+                    dockElement.style.backgroundColor = "";
+                    fullscreenBtn.setAttribute("aria-label", i18n.dockBtnFullscreen);
+                    isFullscreen = false;
+                }
+                // Trigger resize to adjust graph
+                setTimeout(() => {
+                    const container = document.getElementById("graph_enhance_container")!;
+                    resize({
+                        width: container.offsetWidth,
+                        height: container.offsetHeight
+                    });
+                }, 100);
             };
 
             const handleGraphButton = (graphType: GraphType) => async () => {
