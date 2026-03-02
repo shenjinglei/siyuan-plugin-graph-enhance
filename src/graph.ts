@@ -363,6 +363,7 @@ class PathGraph extends Graph {
         //console.log("middleGraph", dagre.graphlib.json.write(middleGraph));
         //console.log("sourceNode", rawGraph.node(sourceNodeId));
         //console.log("lastNodeId", rawGraph.node(lastNodeId));
+        q.length = 0;
         q.push({ id: lastNodeId, level: 0, count: 0 });
         branchFlag = 1;
         for (let head = 0; head < q.length; head++) {
