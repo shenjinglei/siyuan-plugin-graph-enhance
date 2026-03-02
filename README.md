@@ -21,41 +21,9 @@ This plugin emphasizes hierarchy in the graph.
 
 ## Changelog
 
-- v0.4.3
-  - Documentation: updated README with full feature description and polished wording; sponsor URL fix
-- v0.4.2
-  - Add show/hide Daily Note button
-- v0.4.1
-  - New: Path graph
-    - Draw path between two nodes
-    - **Start & end**: With auto-follow on, click "Start" then "End" then "Path graph"; with auto-follow off, click "Start" → "Path graph" → "End" → "Path graph".
-- v0.4.0
-  - Graph separation no longer configured in plugin settings; reference specific docs in your notes instead. See feature description.
-  - Source graph, sink graph, and long-tail graph moved to the "Note Sunburst" plugin.
-- v0.3.6
-  - Add colors to edges
-    - Colored edges run from the start node to the end of each branch, like a mind map.
-      ![](https://z1.ax1x.com/2023/12/07/pig5hc9.png)
-- v0.3.5
-  - [#10](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/issues/10) Updated sidebar icon.
-  - Adjusted label width.
-- v0.3.4
-  - Added color for nodes at the same level as the start.
-- v0.3.3
-  - New: Long tail graph
-  - New setting: Exclude nodes
-  - Edge separation: start node only sees adjacent nodes
-- v0.3.2
-  - Improved auto-follow of current document. Requires Siyuan 2.10.13+.
-- v0.3.1
-  - Max node limit applies to all graphs.
-  - Daily note used as separation node by default.
-- v0.3.0
-  - New: Graph separation
-- v0.2.0
-  - New: Source graph, sink graph, neighbor graph, V&H graph
-- v0.1.0
-  - New: Vertical graph, horizontal graph, global graph
+- v0.5.0
+  - NEW: Font and font size settings
+  - NEW: Fullscreen mode
 
 See [CHANGELOG](./CHANGELOG.md) for full history.
 
