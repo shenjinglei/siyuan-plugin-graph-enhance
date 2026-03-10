@@ -51,7 +51,6 @@ export type SettingKey =
     | "nodesMaximum"
     | "neighborDepth"
     | "autoFollow"
-    | "separation"
     | "nodesExclusion"
     | "font"
     | "fontSize";

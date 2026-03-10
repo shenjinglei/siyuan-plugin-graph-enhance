@@ -9,7 +9,6 @@
   "settingAlgNS": "network-simplex",
   "settingAlgTT": "tight-tree",
   "settingAlgLP": "longest-path",
-  "settingDailynoteExcluded": "Exclude note in daily note",
   "yes": "yes",
   "no": "no",
 
@@ -21,33 +20,19 @@
   "pleaseInputNumber": "please input a number",
   "nodesMaximum": "Nodes Maximum",
   "checkNodesMaximumErrorMsg": "Nodes Maximum is not a number! Setting hasn't saved",
-  "nodesMaximumParseErrorMsg": "Nodes Maximum is not a number! Drawing stopped",
   "needStartPointMsg": "need select a note first",
-  "needRefreshMsg": "current note not fund, try to refresh data",
 
   "autoFollow": "automatic follow the opened note",
 
-  "dockBtnSource": "Source Graph",
-  "dockBtnSink": "Sink Graph",
   "dockBtnNeighbor": "Neighbor Graph",
   "dockBtnCross": "V&H Graph",
   "settingNeighborDepth": "Neighbor Graph Depth",
-  "settingSourceThreshold": "Source Graph Threshold",
-  "settingSinkThreshold": "Sink Graph Threshold",
   "checkNeighborDepthErrorMsg": "Neighbor Graph Depth is not a number! Setting hasn't saved",
-  "checkSourceThresholdErrorMsg": "Source Graph Threshold is not a number! Setting hasn't saved",
-  "checkSinkThresholdErrorMsg": "Sink Graph Threshold is not a number! Setting hasn't saved",
 
-  "separationTitle": "graph separation configuration (invalid)",
-  "separationDescription": "support for regular expression, for example: ^Tag$,-1.5",
   "pleaseInput": "please input",
 
   "nodesExclusionTitle": "nodes exclusion",
   "nodesExclusionDescription": "support for regular expression, for example：^[0-9]+$",
-
-  "dockBtnTail": "Long Tail Graph",
-  "tailThresholdTitle": "Long Tail Graph Threshold",
-  "tailThresholdDescription": "Comma separated, for example: 1,2",
 
   "dockBtnPath": "Path Graph",
   "dockBtnShowDN": "Show DailyNote",

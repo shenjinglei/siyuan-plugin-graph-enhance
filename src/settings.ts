@@ -9,7 +9,6 @@ export const DEFAULT_SETTINGS = {
     nodesMaximum: "200",
     neighborDepth: "2",
     autoFollow: "true",
-    separation: "",
     nodesExclusion: "",
     font: "system-ui",
     fontSize: "12",
@@ -59,7 +58,6 @@ export function settingInit() {
                 nodesMaximum: nodesMaximumElement.value,
                 neighborDepth: neighborDepthElement.value,
                 autoFollow: autoFollowElement.value,
-                separation: separationElement.value,
                 nodesExclusion: nodesExclusionElement.value,
                 font: getFontValue(),
                 fontSize: fontSizeElement.value,
@@ -137,19 +135,6 @@ export function settingInit() {
         createActionElement: () => {
             neighborDepthElement.value = plugin.data[STORAGE_NAME].neighborDepth;
             return neighborDepthElement;
-        },
-    });
-
-    const separationElement = document.createElement("textarea");
-    separationElement.id = "separation";
-    separationElement.placeholder = i18n.pleaseInput;
-    separationElement.className = "b3-text-field fn__block";
-    plugin.setting.addItem({
-        title: i18n.separationTitle,
-        description: i18n.separationDescription,
-        createActionElement: () => {
-            separationElement.value = plugin.data[STORAGE_NAME].separation;
-            return separationElement;
         },
     });
 
