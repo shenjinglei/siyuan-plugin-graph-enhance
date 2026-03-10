@@ -9,7 +9,6 @@
   "settingAlgNS": "网络简单",
   "settingAlgTT": "紧密树",
   "settingAlgLP": "最长路径",
-  "settingDailynoteExcluded": "是否排除daily note中的文档",
   "yes": "是",
   "no": "否",
 
@@ -21,33 +20,19 @@
   "pleaseInputNumber": "请输入数字",
   "nodesMaximum": "最大节点数",
   "checkNodesMaximumErrorMsg": "最大节点数不是数字！设置未保存",
-  "nodesMaximumParseErrorMsg": "最大节点数设置不是一个数字，停止绘制",
   "needStartPointMsg": "需要先选中一篇笔记",
-  "needRefreshMsg": "未找到当前节点，可尝试刷新数据",
 
   "autoFollow": "自动跟随打开的文档",
 
-  "dockBtnSource": "起点图",
-  "dockBtnSink": "终点图",
   "dockBtnNeighbor": "邻近图",
   "dockBtnCross": "纵横图",
   "settingNeighborDepth": "邻近图深度",
-  "settingSourceThreshold": "起点图阈值",
-  "settingSinkThreshold": "终点图阈值",
   "checkNeighborDepthErrorMsg": "邻近图深度不是数字！设置未保存",
-  "checkSourceThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
-  "checkSinkThresholdErrorMsg": "起点图阈值不是数字！设置未保存",
 
-  "separationTitle": "图分割配置（无效）",
-  "separationDescription": "支持正则表达式，例如：^Tag$,-1.5。目前该配置已无效，新的配置方式见使用说明",
   "pleaseInput": "请输入",
 
   "nodesExclusionTitle": "排除节点",
   "nodesExclusionDescription": "支持正则表达式，例如去除纯数字的笔记：^[0-9]+$",
-
-  "dockBtnTail": "长尾图",
-  "tailThresholdTitle": "长尾图阈值",
-  "tailThresholdDescription": "最小值与最大值用英文逗号隔开，如：1,2",
 
   "dockBtnPath": "路径图",
   "dockBtnShowDN": "显示 DailyNote",
