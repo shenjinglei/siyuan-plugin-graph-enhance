@@ -40,6 +40,7 @@ export function initDock() {
             size: { width: 300, height: 500 },
             icon: "iconGraphEnhance",
             title: i18n.pluginName,
+            hotkey: "⌥Q",
         },
         data: {
             text: "graph-enhance-hello-world"
