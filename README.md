@@ -21,9 +21,11 @@ This plugin emphasizes hierarchy in the graph.
 
 ## Changelog
 
+- v0.5.1
+  - Add: Default hotkey ⌥Q for quick panel toggle, need to click the refresh button in shortcut settings to take effect
 - v0.5.0
-  - NEW: Font and font size settings
-  - NEW: Fullscreen mode
+  - Add: Font and font size settings
+  - Add: Fullscreen mode
 
 See [CHANGELOG](./CHANGELOG.md) for full history.
 
