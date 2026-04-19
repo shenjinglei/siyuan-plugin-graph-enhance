@@ -54,3 +54,9 @@ export type SettingKey =
     | "nodesExclusion"
     | "font"
     | "fontSize";
+
+/** State storage configuration for runtime data */
+export interface GraphEnhanceState {
+    graphType?: GraphType;
+    isHideDailynote?: boolean;
+}

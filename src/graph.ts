@@ -299,9 +299,9 @@ function insertEdge(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _proce
     }
 }
 
-export let isDailynote = true;
-export function setIsDailynote(_isDailynote: boolean) {
-    isDailynote = _isDailynote;
+export let isHideDailynote = false;
+export function setIsHideDailynote(_isHideDailynote: boolean) {
+    isHideDailynote = _isHideDailynote;
 }
 
 function searchUp(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
@@ -316,7 +316,7 @@ function searchUp(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Grap
     _rawGraph.inEdges(cur.id)
         ?.filter(e => _processedGraph.node(e.v)?.state !== 3)
         // Performance: use precomputed `dailynote` flag instead of regex on every traversal.
-        .filter(e => isDailynote || !_rawGraph.node(e.v)?.dailynote)
+        .filter(e => !isHideDailynote || !_rawGraph.node(e.v)?.dailynote)
         .filter(e => penetrate || cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
         .forEach(x => q.push({
             id: x.v,
@@ -337,7 +337,7 @@ function searchDown(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gr
 
     _rawGraph.outEdges(cur.id)
         ?.filter(e => _processedGraph.node(e.w)?.state !== 3)
-        .filter(e => isDailynote || !_rawGraph.node(e.w)?.dailynote)
+        .filter(e => !isHideDailynote || !_rawGraph.node(e.w)?.dailynote)
         .filter(e => penetrate || cur.count === 0 || _rawGraph.edge(e.v, e.w)?.state !== "broken")
         .forEach(e => q.push({
             id: e.w,

@@ -42,8 +42,8 @@ import {
     title,
     initRawGraph,
     Display,
-    setIsDailynote,
-    isDailynote,
+    setIsHideDailynote,
+    isHideDailynote,
 } from "../graph";
 import { draw } from "../renderer";
 
@@ -175,13 +175,13 @@ describe("graph", () => {
         });
     });
 
-    describe("setIsDailynote / isDailynote", () => {
-        it("toggles isDailynote", () => {
-            const initial = isDailynote;
-            setIsDailynote(!initial);
-            expect(isDailynote).toBe(!initial);
-            setIsDailynote(initial);
-            expect(isDailynote).toBe(initial);
+    describe("setIsHideDailynote / isHideDailynote", () => {
+        it("toggles the dailynote hidden flag", () => {
+            const initial = isHideDailynote;
+            setIsHideDailynote(!initial);
+            expect(isHideDailynote).toBe(!initial);
+            setIsHideDailynote(initial);
+            expect(isHideDailynote).toBe(initial);
         });
     });
 });

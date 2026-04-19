@@ -8,3 +8,7 @@ description: "Project-wide coding style guide, including comments and naming con
 ## Annotation
 
 All code comments must be in English.
+
+## Documentation
+
+The documentation is in '/doc'. The entry file is 'development_log.md'.

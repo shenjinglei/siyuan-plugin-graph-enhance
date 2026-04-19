@@ -1,4 +1,13 @@
 .plugin-sample {
+  &__dock-icon {
+    fill: #5f6368;
+    transition: fill 0.2s ease;
+  }
+
+  &__dock-icon--active {
+    fill: rgb(83, 180, 236);
+  }
+
   &__custom-tab {
     background-color: var(--b3-theme-background);
     height: 100%;
