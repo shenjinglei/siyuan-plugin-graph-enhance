@@ -1,7 +1,7 @@
 import { Plugin } from "siyuan";
 import "./index.scss";
 
-import { STORAGE_NAME, STATE_STORAGE_NAME, setPlugin } from "./utils";
+import { GRAPH_STATE_STORAGE_NAME, STORAGE_NAME, normalizeGraphPersistedState, setPlugin } from "./utils";
 import { initDock } from "./dock";
 import { DEFAULT_SETTINGS, settingInit } from "./settings";
 
@@ -17,6 +17,10 @@ export default class GraphEnhancePlugin extends Plugin {
             this.saveData(STORAGE_NAME, { ...DEFAULT_SETTINGS, ...this.data[STORAGE_NAME] });
         });
 
+        this.loadData(GRAPH_STATE_STORAGE_NAME).then(() => {
+            this.saveData(GRAPH_STATE_STORAGE_NAME, normalizeGraphPersistedState(this.data[GRAPH_STATE_STORAGE_NAME]));
+        });
+
 
         setPlugin(this);
         initDock();
@@ -27,7 +31,7 @@ export default class GraphEnhancePlugin extends Plugin {
 
     async uninstall() {
         await this.removeData(STORAGE_NAME);
-        await this.removeData(STATE_STORAGE_NAME);
+        await this.removeData(GRAPH_STATE_STORAGE_NAME);
         console.log("graph-enhance uninstalled");
     }
 }

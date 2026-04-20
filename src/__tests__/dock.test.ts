@@ -4,8 +4,12 @@ import { JSDOM } from "jsdom";
 const setIsHideDailynote = vi.fn();
 const setGraphType = vi.fn();
 const initEChart = vi.fn();
+const saveHideDailyNotesFilter = vi.fn((value: boolean) => {
+    savedHideDailyNotes = value;
+});
+const savePersistedGraphViewMode = vi.fn();
 
-let savedIsHideDailynote = true;
+let savedHideDailyNotes = true;
 let dockInit: (() => void) | undefined;
 
 vi.mock("../graph", () => ({
@@ -14,6 +18,17 @@ vi.mock("../graph", () => ({
     setGraphType,
     setIsHideDailynote,
     setSourceNode: vi.fn(),
+}));
+
+vi.mock("siyuan", () => ({
+    adaptHotkey: vi.fn((hotkey: string) => hotkey),
+    fetchSyncPost: vi.fn(async () => ({
+        data: {
+            nodes: [],
+            links: [],
+        },
+    })),
+    getFrontend: vi.fn(() => "desktop"),
 }));
 
 vi.mock("../utils", () => ({
@@ -39,13 +54,11 @@ vi.mock("../utils", () => ({
         eventBus: { on: vi.fn(), off: vi.fn() },
     },
     rawGraph: undefined,
-    getGraphType: vi.fn(() => "ancestor"),
-    saveGraphType: vi.fn(),
-    getIsHideDailynote: vi.fn(() => savedIsHideDailynote),
-    saveIsHideDailynote: vi.fn((value: boolean) => {
-        savedIsHideDailynote = value;
-    }),
-    STATE_STORAGE_NAME: "graph-enhance-state",
+    getPersistedGraphViewMode: vi.fn(() => "ancestor"),
+    savePersistedGraphViewMode,
+    getHideDailyNotesFilter: vi.fn(() => savedHideDailyNotes),
+    saveHideDailyNotesFilter,
+    GRAPH_STATE_STORAGE_NAME: "graph-enhance-graph-state",
 }));
 
 vi.mock("../settings", () => ({
@@ -68,7 +81,7 @@ describe("dock", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        savedIsHideDailynote = true;
+        savedHideDailyNotes = true;
         dockInit = undefined;
 
         dom = new JSDOM("<body></body>");
@@ -104,6 +117,36 @@ describe("dock", () => {
         expect(setIsHideDailynote).toHaveBeenCalledWith(true);
         expect(initEChart).toHaveBeenCalledTimes(1);
         expect(document.getElementById("graph_enhance_dailynote")?.getAttribute("aria-label")).toBe("Show DailyNote");
-        expect(document.getElementById("graph_enhance_dailynote_icon")?.getAttribute("style")).toBe("fill: #5f6368;");
+        expect(document.getElementById("graph_enhance_dailynote_icon")?.classList.contains("plugin-sample__dock-icon--active")).toBe(false);
+    });
+
+    it("persists the daily note filter with the semantic state helper", async () => {
+        const { initDock } = await import("../dock");
+
+        initDock();
+
+        const element = document.createElement("div");
+        document.body.appendChild(element);
+        dockInit?.call({ element });
+        await Promise.resolve();
+
+        await document.getElementById("graph_enhance_dailynote")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(saveHideDailyNotesFilter).toHaveBeenCalledWith(false);
+    });
+
+    it("persists the graph view mode with the semantic state helper", async () => {
+        const { initDock } = await import("../dock");
+
+        initDock();
+
+        const element = document.createElement("div");
+        document.body.appendChild(element);
+        dockInit?.call({ element });
+        await Promise.resolve();
+
+        await document.getElementById("graph_enhance_global")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(savePersistedGraphViewMode).toHaveBeenCalledWith("global");
     });
 });

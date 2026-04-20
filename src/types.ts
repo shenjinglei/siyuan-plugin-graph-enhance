@@ -55,8 +55,23 @@ export type SettingKey =
     | "font"
     | "fontSize";
 
-/** State storage configuration for runtime data */
-export interface GraphEnhanceState {
-    graphType?: GraphType;
-    isHideDailynote?: boolean;
+export interface GraphPersistedViewState {
+    mode: GraphType;
+}
+
+export interface GraphPersistedFiltersState {
+    hideDailyNotes: boolean;
+}
+
+/** Persisted graph runtime state */
+export interface GraphPersistedState {
+    version: 1;
+    view: GraphPersistedViewState;
+    filters: GraphPersistedFiltersState;
+}
+
+export interface GraphPersistedStatePatch {
+    version?: GraphPersistedState["version"];
+    view?: Partial<GraphPersistedViewState>;
+    filters?: Partial<GraphPersistedFiltersState>;
 }
