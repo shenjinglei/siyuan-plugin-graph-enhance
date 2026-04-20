@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Display, initRawGraph, setGraphType, setIsHideDailynote, setSourceNode } from "./graph";
-import { GRAPH_STATE_STORAGE_NAME, getHideDailyNotesFilter, getPersistedGraphViewMode, i18n, plugin, rawGraph, saveHideDailyNotesFilter, savePersistedGraphViewMode } from "./utils";
+import { getHideDailyNotesFilter, getPersistedGraphViewMode, i18n, plugin, rawGraph, saveHideDailyNotesFilter, savePersistedGraphViewMode } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 import "./index.scss";
 import { getSetting } from "./settings";
@@ -123,12 +123,10 @@ export function initDock() {
             document.getElementById("graph_enhance_neighbor")!.onclick = handleGraphButton("neighbor");
             document.getElementById("graph_enhance_path")!.onclick = handleGraphButton("path");
 
-            plugin.loadData(GRAPH_STATE_STORAGE_NAME).then(() => {
-                const savedGraphType = getPersistedGraphViewMode();
-                setGraphType(savedGraphType);
-                applyGraphTypeState(savedGraphType);
-                applyDailyNoteState(getHideDailyNotesFilter());
-            });
+            const savedGraphType = getPersistedGraphViewMode();
+            setGraphType(savedGraphType);
+            applyGraphTypeState(savedGraphType);
+            applyDailyNoteState(getHideDailyNotesFilter());
 
             initEChart();
         },

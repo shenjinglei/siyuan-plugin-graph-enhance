@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
     createDefaultGraphPersistedState,
+    GRAPH_STATE_STORAGE_NAME,
     getGraphPersistedState,
     getHideDailyNotesFilter,
     getPersistedGraphViewMode,
@@ -65,7 +66,7 @@ describe("utils/getThemeMode test suite", () => {
     it("reads normalized persisted graph state from plugin data", () => {
         setPlugin({
             data: {
-                "graph-enhance-graph-state": {
+                [GRAPH_STATE_STORAGE_NAME]: {
                     view: { mode: "global" },
                 },
             },
@@ -85,7 +86,7 @@ describe("utils/getThemeMode test suite", () => {
     it("saves merged persisted graph state patches", () => {
         setPlugin({
             data: {
-                "graph-enhance-graph-state": {
+                [GRAPH_STATE_STORAGE_NAME]: {
                     version: 1,
                     view: { mode: "ancestor" },
                     filters: { hideDailyNotes: false },
@@ -99,7 +100,7 @@ describe("utils/getThemeMode test suite", () => {
             filters: { hideDailyNotes: true },
         });
 
-        expect(saveData).toHaveBeenCalledWith("graph-enhance-graph-state", {
+        expect(saveData).toHaveBeenCalledWith(GRAPH_STATE_STORAGE_NAME, {
             version: 1,
             view: { mode: "ancestor" },
             filters: { hideDailyNotes: true },
@@ -110,12 +111,12 @@ describe("utils/getThemeMode test suite", () => {
         savePersistedGraphViewMode("path");
         saveHideDailyNotesFilter(true);
 
-        expect(saveData).toHaveBeenNthCalledWith(1, "graph-enhance-graph-state", {
+        expect(saveData).toHaveBeenNthCalledWith(1, GRAPH_STATE_STORAGE_NAME, {
             version: 1,
             view: { mode: "path" },
             filters: { hideDailyNotes: false },
         });
-        expect(saveData).toHaveBeenNthCalledWith(2, "graph-enhance-graph-state", {
+        expect(saveData).toHaveBeenNthCalledWith(2, GRAPH_STATE_STORAGE_NAME, {
             version: 1,
             view: { mode: "ancestor" },
             filters: { hideDailyNotes: true },
