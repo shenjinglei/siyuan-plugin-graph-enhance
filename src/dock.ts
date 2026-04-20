@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Display, initRawGraph, setGraphType, setIsHideDailynote, setSourceNode } from "./graph";
-import { i18n, plugin, rawGraph, getGraphType, saveGraphType, getIsHideDailynote, saveIsHideDailynote, STATE_STORAGE_NAME } from "./utils";
+import { GRAPH_STATE_STORAGE_NAME, getHideDailyNotesFilter, getPersistedGraphViewMode, i18n, plugin, rawGraph, saveHideDailyNotesFilter, savePersistedGraphViewMode } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 import "./index.scss";
 import { getSetting } from "./settings";
@@ -58,7 +58,7 @@ export function initDock() {
             this.element.innerHTML = dockHtml;
 
             document.getElementById("graph_enhance_dailynote")!.onclick = async () => {
-                applyDailyNoteState(!getIsHideDailynote(), true);
+                applyDailyNoteState(!getHideDailyNotesFilter(), true);
                 Display();
             };
 
@@ -112,8 +112,7 @@ export function initDock() {
                 if (!rawGraph) await refreshGraph();
                 setGraphType(graphType);
                 applyGraphTypeState(graphType);
-                // Save current graph type to state storage
-                saveGraphType(graphType);
+                savePersistedGraphViewMode(graphType);
                 Display();
             };
 
@@ -124,15 +123,13 @@ export function initDock() {
             document.getElementById("graph_enhance_neighbor")!.onclick = handleGraphButton("neighbor");
             document.getElementById("graph_enhance_path")!.onclick = handleGraphButton("path");
 
-            plugin.loadData(STATE_STORAGE_NAME).then(() => {
-                // Restore saved state on initialization
-                const savedGraphType = getGraphType();
+            plugin.loadData(GRAPH_STATE_STORAGE_NAME).then(() => {
+                const savedGraphType = getPersistedGraphViewMode();
                 setGraphType(savedGraphType);
                 applyGraphTypeState(savedGraphType);
-                applyDailyNoteState(getIsHideDailynote());
-                
+                applyDailyNoteState(getHideDailyNotesFilter());
             });
-            
+
             initEChart();
         },
         resize() {
@@ -152,7 +149,7 @@ export function initDock() {
 
     function applyDailyNoteState(isHidden: boolean, shouldPersist = false) {
         if (shouldPersist) {
-            saveIsHideDailynote(isHidden);
+            saveHideDailyNotesFilter(isHidden);
         }
 
         setIsHideDailynote(isHidden);

@@ -1,7 +1,7 @@
 import GraphEnhancePlugin from ".";
 import { I18N } from "siyuan";
 import { graphlib } from "@dagrejs/dagre";
-import type { DagreNodeValue, GraphEnhanceState, GraphType } from "./types";
+import type { DagreNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphType } from "./types";
 
 export let i18n: I18N;
 export let plugin: GraphEnhancePlugin;
@@ -12,7 +12,8 @@ export function setPlugin(instance: GraphEnhancePlugin) {
 }
 
 export const STORAGE_NAME = "graph-enhance-config";
-export const STATE_STORAGE_NAME = "graph-enhance-state";
+export const GRAPH_STATE_STORAGE_NAME = "graph-state";
+export const GRAPH_STATE_VERSION = 1;
 
 export let rawGraph: graphlib.Graph<DagreNodeValue>;
 export function setRawGraph(g: graphlib.Graph<DagreNodeValue>) {
@@ -24,30 +25,70 @@ export function getThemeMode(): string | undefined {
     return document.querySelector("html")?.getAttribute("data-theme-mode") ?? undefined;
 }
 
-/** State management functions */
-export function getState(): GraphEnhanceState {
-    console.log("getState", plugin.data[STATE_STORAGE_NAME]);
-    return plugin.data[STATE_STORAGE_NAME] || {};
+export function createDefaultGraphPersistedState(): GraphPersistedState {
+    return {
+        version: GRAPH_STATE_VERSION,
+        view: {
+            mode: "ancestor",
+        },
+        filters: {
+            hideDailyNotes: false,
+        },
+    };
 }
 
-export function saveState(state: Partial<GraphEnhanceState>): void {
-    const currentState = getState();
-    const newState = { ...currentState, ...state };
-    plugin.saveData(STATE_STORAGE_NAME, newState);
+export function normalizeGraphPersistedState(state?: GraphPersistedStatePatch): GraphPersistedState {
+    const defaultState = createDefaultGraphPersistedState();
+
+    return {
+        version: GRAPH_STATE_VERSION,
+        view: {
+            mode: state?.view?.mode ?? defaultState.view.mode,
+        },
+        filters: {
+            hideDailyNotes: state?.filters?.hideDailyNotes ?? defaultState.filters.hideDailyNotes,
+        },
+    };
 }
 
-export function getGraphType(): GraphType {
-    return getState().graphType ?? "ancestor";
+export function getGraphPersistedState(): GraphPersistedState {
+    return normalizeGraphPersistedState(plugin.data[GRAPH_STATE_STORAGE_NAME]);
 }
 
-export function saveGraphType(graphType: GraphType): void {
-    saveState({ graphType });
+export function saveGraphPersistedState(state: GraphPersistedStatePatch): void {
+    const currentState = getGraphPersistedState();
+    const nextState = normalizeGraphPersistedState({
+        ...currentState,
+        ...state,
+        view: {
+            ...currentState.view,
+            ...state.view,
+        },
+        filters: {
+            ...currentState.filters,
+            ...state.filters,
+        },
+    });
+
+    plugin.saveData(GRAPH_STATE_STORAGE_NAME, nextState);
 }
 
-export function getIsHideDailynote(): boolean {
-    return getState().isHideDailynote ?? false;
+export function getPersistedGraphViewMode(): GraphType {
+    return getGraphPersistedState().view.mode;
 }
 
-export function saveIsHideDailynote(isHideDailynote: boolean): void {
-    saveState({ isHideDailynote });
+export function savePersistedGraphViewMode(mode: GraphType): void {
+    saveGraphPersistedState({
+        view: { mode },
+    });
+}
+
+export function getHideDailyNotesFilter(): boolean {
+    return getGraphPersistedState().filters.hideDailyNotes;
+}
+
+export function saveHideDailyNotesFilter(hideDailyNotes: boolean): void {
+    saveGraphPersistedState({
+        filters: { hideDailyNotes },
+    });
 }
