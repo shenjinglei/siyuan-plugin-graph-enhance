@@ -12,7 +12,7 @@ export function setPlugin(instance: GraphEnhancePlugin) {
 }
 
 export const STORAGE_NAME = "graph-enhance-config";
-export const GRAPH_STATE_STORAGE_NAME = "graph-state";
+export const GRAPH_STATE_STORAGE_NAME = "graph-enhance-graph-state";
 export const GRAPH_STATE_VERSION = 1;
 
 export let rawGraph: graphlib.Graph<DagreNodeValue>;

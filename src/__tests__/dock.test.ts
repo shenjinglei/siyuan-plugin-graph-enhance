@@ -58,7 +58,7 @@ vi.mock("../utils", () => ({
     savePersistedGraphViewMode,
     getHideDailyNotesFilter: vi.fn(() => savedHideDailyNotes),
     saveHideDailyNotesFilter,
-    GRAPH_STATE_STORAGE_NAME: "graph-state",
+    GRAPH_STATE_STORAGE_NAME: "graph-enhance-graph-state",
 }));
 
 vi.mock("../settings", () => ({
