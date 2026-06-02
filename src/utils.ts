@@ -33,6 +33,7 @@ export function createDefaultGraphPersistedState(): GraphPersistedState {
         },
         filters: {
             hideDailyNotes: false,
+            autoFollow: true,
         },
     };
 }
@@ -47,6 +48,7 @@ export function normalizeGraphPersistedState(state?: GraphPersistedStatePatch): 
         },
         filters: {
             hideDailyNotes: state?.filters?.hideDailyNotes ?? defaultState.filters.hideDailyNotes,
+            autoFollow: state?.filters?.autoFollow ?? defaultState.filters.autoFollow,
         },
     };
 }
@@ -90,5 +92,15 @@ export function getHideDailyNotesFilter(): boolean {
 export function saveHideDailyNotesFilter(hideDailyNotes: boolean): void {
     saveGraphPersistedState({
         filters: { hideDailyNotes },
+    });
+}
+
+export function getAutoFollowFilter(): boolean {
+    return getGraphPersistedState().filters.autoFollow;
+}
+
+export function saveAutoFollowFilter(autoFollow: boolean): void {
+    saveGraphPersistedState({
+        filters: { autoFollow },
     });
 }

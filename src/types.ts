@@ -50,7 +50,6 @@ export type SettingKey =
     | "ranker"
     | "nodesMaximum"
     | "neighborDepth"
-    | "autoFollow"
     | "nodesExclusion"
     | "font"
     | "fontSize";
@@ -61,6 +60,7 @@ export interface GraphPersistedViewState {
 
 export interface GraphPersistedFiltersState {
     hideDailyNotes: boolean;
+    autoFollow: boolean;
 }
 
 /** Persisted graph runtime state */

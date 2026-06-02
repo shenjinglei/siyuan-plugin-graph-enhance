@@ -1,6 +1,5 @@
 import { i18n, plugin, STORAGE_NAME } from "./utils";
 import { Setting, showMessage } from "siyuan";
-import { autoFollow } from "./dock";
 import type { SettingKey } from "./types";
 
 export const DEFAULT_SETTINGS = {
@@ -8,7 +7,6 @@ export const DEFAULT_SETTINGS = {
     ranker: "network-simplex",
     nodesMaximum: "200",
     neighborDepth: "2",
-    autoFollow: "true",
     nodesExclusion: "",
     font: "system-ui",
     fontSize: "12",
@@ -57,21 +55,11 @@ export function settingInit() {
                 ranker: algorithmElement.value,
                 nodesMaximum: nodesMaximumElement.value,
                 neighborDepth: neighborDepthElement.value,
-                autoFollow: autoFollowElement.value,
                 nodesExclusion: nodesExclusionElement.value,
                 font: getFontValue(),
                 fontSize: fontSizeElement.value,
             };
             plugin.saveData(STORAGE_NAME, payload);
-
-
-            if (autoFollowElement.value === "true") {
-                plugin.eventBus.off("switch-protyle", autoFollow);
-                plugin.eventBus.on("switch-protyle", autoFollow);
-            } else {
-                plugin.eventBus.off("switch-protyle", autoFollow);
-            }
-
         }
     });
 
@@ -99,18 +87,6 @@ export function settingInit() {
         createActionElement: () => {
             algorithmElement.value = plugin.data[STORAGE_NAME].ranker;
             return algorithmElement;
-        },
-    });
-
-    const autoFollowElement = document.createElement("select");
-    autoFollowElement.id = "autoFollow";
-    autoFollowElement.add(new Option(i18n.yes, "true"));
-    autoFollowElement.add(new Option(i18n.no, "false"));
-    plugin.setting.addItem({
-        title: i18n.autoFollow,
-        createActionElement: () => {
-            autoFollowElement.value = plugin.data[STORAGE_NAME].autoFollow;
-            return autoFollowElement;
         },
     });
 

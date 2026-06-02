@@ -23,6 +23,8 @@
   "needStartPointMsg": "需要先选中一篇笔记",
 
   "autoFollow": "自动跟随打开的文档",
+  "dockBtnEnableAutoFollow": "开启自动跟随",
+  "dockBtnDisableAutoFollow": "关闭自动跟随",
 
   "dockBtnNeighbor": "邻近图",
   "dockBtnCross": "纵横图",

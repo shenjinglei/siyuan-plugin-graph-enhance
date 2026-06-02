@@ -1,9 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Display, initRawGraph, setGraphType, setIsHideDailynote, setSourceNode } from "./graph";
-import { getHideDailyNotesFilter, getPersistedGraphViewMode, i18n, plugin, rawGraph, saveHideDailyNotesFilter, savePersistedGraphViewMode } from "./utils";
+import {
+    getAutoFollowFilter,
+    getHideDailyNotesFilter,
+    getPersistedGraphViewMode,
+    i18n,
+    plugin,
+    rawGraph,
+    saveAutoFollowFilter,
+    saveHideDailyNotesFilter,
+    savePersistedGraphViewMode,
+} from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 import "./index.scss";
-import { getSetting } from "./settings";
 import { initEChart, resize } from "./renderer";
 import { GRAPH_API_CONF } from "./constants";
 import type { GraphType } from "./types";
@@ -26,16 +35,25 @@ export function initDock() {
             ${i18n.pluginName}
         </div>
         <span class="fn__flex-1 fn__space"></span>
-        <span id="graph_enhance_dailynote" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnHideDN}"><svg id="graph_enhance_dailynote_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconCalendar"></use></svg></span>
-        <span id="graph_enhance_path" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnPath}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconCode"></use></svg></span>
-        <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconLanguage"></use></svg></span>
-        <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnNeighbor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconWorkspace"></use></svg></span>
-        <span id="graph_enhance_cross" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnCross}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconFocus"></use></svg></span>
-        <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGraph"></use></svg></span>
-        <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGlobalGraph"></use></svg></span>
-        <span id="graph_enhance_refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnRefresh}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
-        <span id="graph_enhance_fullscreen" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnFullscreen}"><svg><use xlink:href="#iconFullscreen"></use></svg></span>
-        <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
+        <span class="plugin-sample__dock-group">
+            <span id="graph_enhance_autofollow" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnDisableAutoFollow}"><svg id="graph_enhance_autofollow_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconAutoFollow"></use></svg></span>
+            <span id="graph_enhance_dailynote" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnHideDN}"><svg id="graph_enhance_dailynote_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconCalendar"></use></svg></span>
+        </span>
+        <span class="plugin-sample__dock-divider" aria-hidden="true"></span>
+        <span class="plugin-sample__dock-group">
+            <span id="graph_enhance_path" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnPath}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconCode"></use></svg></span>
+            <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconLanguage"></use></svg></span>
+            <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnNeighbor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconWorkspace"></use></svg></span>
+            <span id="graph_enhance_cross" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnCross}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconFocus"></use></svg></span>
+            <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGraph"></use></svg></span>
+            <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGlobalGraph"></use></svg></span>
+        </span>
+        <span class="plugin-sample__dock-divider" aria-hidden="true"></span>
+        <span class="plugin-sample__dock-group">
+            <span id="graph_enhance_refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnRefresh}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+            <span id="graph_enhance_fullscreen" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnFullscreen}"><svg><use xlink:href="#iconFullscreen"></use></svg></span>
+            <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
+        </span>
     </div>
     <div class="fn__flex-1 plugin-sample__custom-dock">
     <div id="graph_enhance_container" style="position:absolute;width:100%;height:100%;" ></div>
@@ -56,6 +74,10 @@ export function initDock() {
         type: DOCK_TYPE,
         init() {
             this.element.innerHTML = dockHtml;
+
+            document.getElementById("graph_enhance_autofollow")!.onclick = async () => {
+                applyAutoFollowState(!getAutoFollowFilter(), true);
+            };
 
             document.getElementById("graph_enhance_dailynote")!.onclick = async () => {
                 applyDailyNoteState(!getHideDailyNotesFilter(), true);
@@ -126,6 +148,7 @@ export function initDock() {
             const savedGraphType = getPersistedGraphViewMode();
             setGraphType(savedGraphType);
             applyGraphTypeState(savedGraphType);
+            applyAutoFollowState(getAutoFollowFilter());
             applyDailyNoteState(getHideDailyNotesFilter());
 
             initEChart();
@@ -136,14 +159,22 @@ export function initDock() {
                 width: container.offsetWidth,
                 height: container.offsetHeight
             });
-            if (getSetting("autoFollow") === "true" && container.offsetWidth !== 0 && container.offsetHeight !== 0) {
-                plugin.eventBus.off("switch-protyle", autoFollow);
-                plugin.eventBus.on("switch-protyle", autoFollow);
-            } else {
-                plugin.eventBus.off("switch-protyle", autoFollow);
-            }
+            syncAutoFollowSubscription();
         }
     });
+
+    function applyAutoFollowState(isEnabled: boolean, shouldPersist = false) {
+        if (shouldPersist) {
+            saveAutoFollowFilter(isEnabled);
+        }
+
+        document.getElementById("graph_enhance_autofollow")?.setAttribute(
+            "aria-label",
+            isEnabled ? i18n.dockBtnDisableAutoFollow : i18n.dockBtnEnableAutoFollow
+        );
+        toggleDockIconState("graph_enhance_autofollow_icon", isEnabled);
+        syncAutoFollowSubscription(isEnabled);
+    }
 
     function applyDailyNoteState(isHidden: boolean, shouldPersist = false) {
         if (shouldPersist) {
@@ -170,6 +201,16 @@ export function initDock() {
 
     function toggleDockIconState(elementId: string, isActive: boolean) {
         document.getElementById(elementId)?.classList.toggle("plugin-sample__dock-icon--active", isActive);
+    }
+
+    function syncAutoFollowSubscription(isEnabled = getAutoFollowFilter()) {
+        const container = document.getElementById("graph_enhance_container");
+        const isVisible = container !== null && container.offsetWidth !== 0 && container.offsetHeight !== 0;
+
+        plugin.eventBus.off("switch-protyle", autoFollow);
+        if (isEnabled && isVisible) {
+            plugin.eventBus.on("switch-protyle", autoFollow);
+        }
     }
 }
 

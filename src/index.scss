@@ -1,4 +1,18 @@
 .plugin-sample {
+  &__dock-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__dock-divider {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    background: var(--b3-border-color);
+    opacity: 0.7;
+  }
+
   &__dock-icon {
     fill: #5f6368;
     transition: fill 0.2s ease;
