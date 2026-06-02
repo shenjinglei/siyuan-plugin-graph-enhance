@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+    getAutoFollowFilter,
     createDefaultGraphPersistedState,
     GRAPH_STATE_STORAGE_NAME,
     getGraphPersistedState,
@@ -8,6 +9,7 @@ import {
     getPersistedGraphViewMode,
     getThemeMode,
     normalizeGraphPersistedState,
+    saveAutoFollowFilter,
     saveGraphPersistedState,
     saveHideDailyNotesFilter,
     savePersistedGraphViewMode,
@@ -49,7 +51,7 @@ describe("utils/getThemeMode test suite", () => {
         expect(createDefaultGraphPersistedState()).toEqual({
             version: 1,
             view: { mode: "ancestor" },
-            filters: { hideDailyNotes: false },
+            filters: { hideDailyNotes: false, autoFollow: true },
         });
     });
 
@@ -59,7 +61,7 @@ describe("utils/getThemeMode test suite", () => {
         })).toEqual({
             version: 1,
             view: { mode: "ancestor" },
-            filters: { hideDailyNotes: true },
+            filters: { hideDailyNotes: true, autoFollow: true },
         });
     });
 
@@ -77,10 +79,11 @@ describe("utils/getThemeMode test suite", () => {
         expect(getGraphPersistedState()).toEqual({
             version: 1,
             view: { mode: "global" },
-            filters: { hideDailyNotes: false },
+            filters: { hideDailyNotes: false, autoFollow: true },
         });
         expect(getPersistedGraphViewMode()).toBe("global");
         expect(getHideDailyNotesFilter()).toBe(false);
+        expect(getAutoFollowFilter()).toBe(true);
     });
 
     it("saves merged persisted graph state patches", () => {
@@ -89,7 +92,7 @@ describe("utils/getThemeMode test suite", () => {
                 [GRAPH_STATE_STORAGE_NAME]: {
                     version: 1,
                     view: { mode: "ancestor" },
-                    filters: { hideDailyNotes: false },
+                    filters: { hideDailyNotes: false, autoFollow: true },
                 },
             },
             i18n: {},
@@ -103,23 +106,29 @@ describe("utils/getThemeMode test suite", () => {
         expect(saveData).toHaveBeenCalledWith(GRAPH_STATE_STORAGE_NAME, {
             version: 1,
             view: { mode: "ancestor" },
-            filters: { hideDailyNotes: true },
+            filters: { hideDailyNotes: true, autoFollow: true },
         });
     });
 
-    it("saves semantic view mode and daily note filter helpers", () => {
+    it("saves semantic view mode and filter helpers", () => {
         savePersistedGraphViewMode("path");
         saveHideDailyNotesFilter(true);
+        saveAutoFollowFilter(false);
 
         expect(saveData).toHaveBeenNthCalledWith(1, GRAPH_STATE_STORAGE_NAME, {
             version: 1,
             view: { mode: "path" },
-            filters: { hideDailyNotes: false },
+            filters: { hideDailyNotes: false, autoFollow: true },
         });
         expect(saveData).toHaveBeenNthCalledWith(2, GRAPH_STATE_STORAGE_NAME, {
             version: 1,
             view: { mode: "ancestor" },
-            filters: { hideDailyNotes: true },
+            filters: { hideDailyNotes: true, autoFollow: true },
+        });
+        expect(saveData).toHaveBeenNthCalledWith(3, GRAPH_STATE_STORAGE_NAME, {
+            version: 1,
+            view: { mode: "ancestor" },
+            filters: { hideDailyNotes: false, autoFollow: false },
         });
     });
 });

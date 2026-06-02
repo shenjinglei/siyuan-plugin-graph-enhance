@@ -23,6 +23,8 @@
   "needStartPointMsg": "need select a note first",
 
   "autoFollow": "automatic follow the opened note",
+  "dockBtnEnableAutoFollow": "Enable Auto Follow",
+  "dockBtnDisableAutoFollow": "Disable Auto Follow",
 
   "dockBtnNeighbor": "Neighbor Graph",
   "dockBtnCross": "V&H Graph",
