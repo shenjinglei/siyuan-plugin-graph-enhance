@@ -1,5 +1,17 @@
 # CHANGE LOG
 
+## 0.5.1/2026-06-03
+
+- [v0.5.0 ... v0.5.1](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.5.0...v0.5.1)
+  - NEW: Default hotkey `⌥Q` for quick panel toggle
+  - NEW: Persist plugin config data
+  - NEW: Remove plugin data on uninstall
+  - IMPROVE: Reimplement auto-follow with UI controls and state management
+  - FIX: Improve data handling
+  - FIX: Improve config file name consistency
+  - REFACTOR: Redesign state structure for graph persistence
+  - CLEANUP: Remove obsolete code
+
 ## 0.5.0/2026-03-02
 
 - [v0.4.3 ... v0.5.0](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.4.3...v0.5.0)

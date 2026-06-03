@@ -22,7 +22,9 @@ This plugin emphasizes hierarchy in the graph.
 ## Changelog
 
 - v0.5.1
-  - Add: Default hotkey ⌥Q for quick panel toggle, need to click the refresh button in shortcut settings to take effect
+  - Add: Default hotkey ⌥Q for quick panel toggle; click the refresh button in shortcut settings for it to take effect
+  - Add: Persist plugin config data
+  - Improve: Reworked "Follow current document" with UI controls and more stable state handling
 - v0.5.0
   - Add: Font and font size settings
   - Add: Fullscreen mode
