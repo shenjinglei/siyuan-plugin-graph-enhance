@@ -26,10 +26,7 @@
   "dockBtnEnableAutoFollow": "Enable Auto Follow",
   "dockBtnDisableAutoFollow": "Disable Auto Follow",
 
-  "dockBtnNeighbor": "Neighbor Graph",
   "dockBtnCross": "V&H Graph",
-  "settingNeighborDepth": "Neighbor Graph Depth",
-  "checkNeighborDepthErrorMsg": "Neighbor Graph Depth is not a number! Setting hasn't saved",
 
   "pleaseInput": "please input",
 

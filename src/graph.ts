@@ -244,27 +244,6 @@ class GlobalGraph extends Graph {
     }
 }
 
-class NeighborGraph extends Graph {
-    exec() {
-        const q = initQueue();
-        q.push({ id: sourceNodeId, level: 0, count: 0 });
-        const nodesMaximum = +getSetting("nodesMaximum");
-        const neighborDepth = +getSetting("neighborDepth");
-
-        let count = 0;
-        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
-            const cur = q[head]!;
-            insertNode(cur, rawGraph, processedGraph);
-            insertEdge(cur, rawGraph, processedGraph);
-            if (cur.count < neighborDepth) {
-                searchDown(cur, q, rawGraph, processedGraph);
-                searchUp(cur, q, rawGraph, processedGraph);
-            }
-            count++;
-        }
-    }
-}
-
 function insertNode(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
     if (_processedGraph.hasNode(cur.id)) return;
 
@@ -353,7 +332,6 @@ function createGraph(type: GraphType): Graph {
         case "brother": return new BrotherGraph();
         case "cross": return new CrossGraph();
         case "global": return new GlobalGraph();
-        case "neighbor": return new NeighborGraph();
         default: return new Graph();
     }
 }

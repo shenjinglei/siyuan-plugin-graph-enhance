@@ -6,7 +6,6 @@ export const GRAPH_TYPES: readonly GraphType[] = [
     "brother",
     "cross",
     "global",
-    "neighbor",
 ] as const;
 
 /** Request body for Siyuan graph API (getGraph) */

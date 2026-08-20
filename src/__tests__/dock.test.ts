@@ -46,7 +46,6 @@ vi.mock("../utils", () => ({
         dockBtnHideDN: "Hide DailyNote",
         dockBtnShowDN: "Show DailyNote",
         dockBtnGlobal: "Global Graph",
-        dockBtnNeighbor: "Neighbor Graph",
         dockBtnCross: "Cross Graph",
         dockBtnAncestor: "Ancestor Graph",
         dockBtnBrother: "Brother Graph",

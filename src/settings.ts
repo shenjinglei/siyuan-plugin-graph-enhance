@@ -6,7 +6,6 @@ export const DEFAULT_SETTINGS = {
     rankdir: "LR",
     ranker: "network-simplex",
     nodesMaximum: "200",
-    neighborDepth: "2",
     nodesExclusion: "",
     font: "system-ui",
     fontSize: "12",
@@ -22,14 +21,6 @@ export function settingInit() {
             if (!/^[0-9]+$/.test(nodesMaximumElement.value)) {
                 showMessage(
                     i18n.checkNodesMaximumErrorMsg,
-                    3000,
-                    "error"
-                );
-                return;
-            }
-            if (!/^[0-9]+$/.test(neighborDepthElement.value)) {
-                showMessage(
-                    i18n.checkNeighborDepthErrorMsg,
                     3000,
                     "error"
                 );
@@ -54,7 +45,6 @@ export function settingInit() {
                 rankdir: directionElement.value,
                 ranker: algorithmElement.value,
                 nodesMaximum: nodesMaximumElement.value,
-                neighborDepth: neighborDepthElement.value,
                 nodesExclusion: nodesExclusionElement.value,
                 font: getFontValue(),
                 fontSize: fontSizeElement.value,
@@ -99,18 +89,6 @@ export function settingInit() {
         createActionElement: () => {
             nodesMaximumElement.value = plugin.data[STORAGE_NAME].nodesMaximum;
             return nodesMaximumElement;
-        },
-    });
-
-    const neighborDepthElement = document.createElement("input");
-    neighborDepthElement.id = "neighborDepth";
-    neighborDepthElement.placeholder = i18n.pleaseInputNumber;
-    neighborDepthElement.className = "b3-text-field";
-    plugin.setting.addItem({
-        title: i18n.settingNeighborDepth,
-        createActionElement: () => {
-            neighborDepthElement.value = plugin.data[STORAGE_NAME].neighborDepth;
-            return neighborDepthElement;
         },
     });
 

@@ -26,10 +26,7 @@
   "dockBtnEnableAutoFollow": "开启自动跟随",
   "dockBtnDisableAutoFollow": "关闭自动跟随",
 
-  "dockBtnNeighbor": "邻近图",
   "dockBtnCross": "纵横图",
-  "settingNeighborDepth": "邻近图深度",
-  "checkNeighborDepthErrorMsg": "邻近图深度不是数字！设置未保存",
 
   "pleaseInput": "请输入",
 

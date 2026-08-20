@@ -25,7 +25,6 @@ vi.mock("../settings", () => ({
             rankdir: "LR",
             ranker: "network-simplex",
             nodesMaximum: "200",
-            neighborDepth: "2",
             nodesExclusion: "",
         };
         return defaults[key] ?? "";
