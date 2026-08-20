@@ -14,12 +14,14 @@
   }
 
   &__dock-icon {
-    fill: #5f6368;
-    transition: fill 0.2s ease;
+    color: #5f6368;
+    fill: currentColor;
+    transition: color 0.2s ease;
   }
 
   &__dock-icon--active {
-    fill: rgb(83, 180, 236);
+    color: rgb(83, 180, 236);
+    fill: currentColor;
   }
 
   &__custom-tab {
