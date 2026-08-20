@@ -19,7 +19,6 @@ type ECOption = ComposeOption<GraphSeriesOption | TitleComponentOption>;
 import { DagreOutput } from "./types";
 import { openTab } from "siyuan";
 import { getThemeMode, plugin } from "./utils";
-import { title } from "./graph";
 import { getSetting } from "./settings";
 
 const ColorJs = require("colorjs.io/dist/color.legacy.cjs").default;
@@ -97,13 +96,6 @@ export function draw(dagreLayout: DagreOutput) {
     const fontSize = parseInt(getSetting("fontSize"));
 
     const option: ECOption = {
-        title: {
-            text: title(),
-            textStyle: {
-                fontSize: 16,
-                fontWeight: "normal"
-            }
-        },
         tooltip: {},
         animation: dagreLayout.nodes.length > 100 ? false : true,
         series: [
