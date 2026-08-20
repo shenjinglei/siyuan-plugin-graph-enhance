@@ -23,8 +23,7 @@ const GRAPH_BUTTON_IDS: Record<GraphType, string> = {
     ancestor: "graph_enhance_ancestor",
     brother: "graph_enhance_brother",
     cross: "graph_enhance_cross",
-    neighbor: "graph_enhance_neighbor",
-    path: "graph_enhance_path"
+    neighbor: "graph_enhance_neighbor"
 };
 
 export function initDock() {
@@ -41,7 +40,6 @@ export function initDock() {
         </span>
         <span class="plugin-sample__dock-divider" aria-hidden="true"></span>
         <span class="plugin-sample__dock-group">
-            <span id="graph_enhance_path" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnPath}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconCode"></use></svg></span>
             <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconLanguage"></use></svg></span>
             <span id="graph_enhance_neighbor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnNeighbor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconWorkspace"></use></svg></span>
             <span id="graph_enhance_cross" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnCross}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconFocus"></use></svg></span>
@@ -143,7 +141,6 @@ export function initDock() {
             document.getElementById("graph_enhance_brother")!.onclick = handleGraphButton("brother");
             document.getElementById("graph_enhance_cross")!.onclick = handleGraphButton("cross");
             document.getElementById("graph_enhance_neighbor")!.onclick = handleGraphButton("neighbor");
-            document.getElementById("graph_enhance_path")!.onclick = handleGraphButton("path");
 
             const savedGraphType = getPersistedGraphViewMode();
             setGraphType(savedGraphType);

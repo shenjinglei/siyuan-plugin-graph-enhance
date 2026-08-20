@@ -45,7 +45,6 @@ vi.mock("../utils", () => ({
         dockBtnDisableAutoFollow: "Disable Auto Follow",
         dockBtnHideDN: "Hide DailyNote",
         dockBtnShowDN: "Show DailyNote",
-        dockBtnPath: "Path Graph",
         dockBtnGlobal: "Global Graph",
         dockBtnNeighbor: "Neighbor Graph",
         dockBtnCross: "Cross Graph",

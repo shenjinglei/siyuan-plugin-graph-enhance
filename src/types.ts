@@ -1,5 +1,5 @@
 /** Graph type identifier for display mode */
-export type GraphType = "ancestor" | "brother" | "cross" | "global" | "neighbor" | "path";
+export type GraphType = "ancestor" | "brother" | "cross" | "global" | "neighbor";
 
 /** Node/edge shape from Siyuan API */
 export interface SiyuanNode {

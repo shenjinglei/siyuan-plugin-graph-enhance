@@ -25,8 +25,6 @@ export function setGraphType(type: GraphType) {
 
 export function title() {
     //console.log("label", rawGraph.node(sourceNodeId)?.label);
-    if (graphType === "path")
-        return rawGraph.node(lastNodeId)?.label + " → " + rawGraph.node(sourceNodeId)?.label;
     return rawGraph.node(sourceNodeId)?.label;
 }
 
@@ -349,34 +347,6 @@ function searchDown(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gr
 
 }
 
-class PathGraph extends Graph {
-    exec() {
-        const q = initQueue();
-        const middleGraph = new dagre.graphlib.Graph<DagreNodeValue>().setDefaultEdgeLabel(() => { return {}; });
-        q.push({ id: sourceNodeId, level: 0, count: 0 });
-        for (let head = 0; head < q.length; head++) {
-            const cur = q[head]!;
-            insertNode(cur, rawGraph, middleGraph);
-            insertEdge(cur, rawGraph, middleGraph);
-            searchUp(cur, q, rawGraph, middleGraph, 1);
-        }
-        //console.log("middleGraph", dagre.graphlib.json.write(middleGraph));
-        //console.log("sourceNode", rawGraph.node(sourceNodeId));
-        //console.log("lastNodeId", rawGraph.node(lastNodeId));
-        q.length = 0;
-        q.push({ id: lastNodeId, level: 0, count: 0 });
-        branchFlag = 1;
-        for (let head = 0; head < q.length; head++) {
-            const cur = q[head]!;
-            insertNode(cur, middleGraph, processedGraph);
-            insertEdge(cur, middleGraph, processedGraph);
-            searchDown(cur, q, middleGraph, processedGraph, 1);
-        }
-        //console.log("processedGraph", dagre.graphlib.json.write(processedGraph));
-
-    }
-}
-
 function createGraph(type: GraphType): Graph {
     switch (type) {
         case "ancestor": return new AncestorGraph();
@@ -384,7 +354,6 @@ function createGraph(type: GraphType): Graph {
         case "cross": return new CrossGraph();
         case "global": return new GlobalGraph();
         case "neighbor": return new NeighborGraph();
-        case "path": return new PathGraph();
         default: return new Graph();
     }
 }

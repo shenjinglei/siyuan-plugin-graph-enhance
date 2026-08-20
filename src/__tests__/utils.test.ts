@@ -109,26 +109,4 @@ describe("utils/getThemeMode test suite", () => {
             filters: { hideDailyNotes: true, autoFollow: true },
         });
     });
-
-    it("saves semantic view mode and filter helpers", () => {
-        savePersistedGraphViewMode("path");
-        saveHideDailyNotesFilter(true);
-        saveAutoFollowFilter(false);
-
-        expect(saveData).toHaveBeenNthCalledWith(1, GRAPH_STATE_STORAGE_NAME, {
-            version: 1,
-            view: { mode: "path" },
-            filters: { hideDailyNotes: false, autoFollow: true },
-        });
-        expect(saveData).toHaveBeenNthCalledWith(2, GRAPH_STATE_STORAGE_NAME, {
-            version: 1,
-            view: { mode: "ancestor" },
-            filters: { hideDailyNotes: true, autoFollow: true },
-        });
-        expect(saveData).toHaveBeenNthCalledWith(3, GRAPH_STATE_STORAGE_NAME, {
-            version: 1,
-            view: { mode: "ancestor" },
-            filters: { hideDailyNotes: false, autoFollow: false },
-        });
-    });
 });

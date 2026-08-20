@@ -36,7 +36,6 @@
   "nodesExclusionTitle": "nodes exclusion",
   "nodesExclusionDescription": "support for regular expression, for example：^[0-9]+$",
 
-  "dockBtnPath": "Path Graph",
   "dockBtnShowDN": "Show DailyNote",
   "dockBtnHideDN": "Hide DailyNote",
   "dockBtnFullscreen": "Fullscreen",

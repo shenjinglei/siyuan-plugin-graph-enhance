@@ -96,16 +96,6 @@ describe("graph", () => {
             rawGraphRef.setNode("n1", { label: "A", width: 200, height: 30, state: 0, branch: 0 });
             expect(title()).toBe("A");
         });
-
-        it("returns path-style title when graphType is path (lastNodeId → sourceNodeId)", () => {
-            setSourceNode("start");
-            setSourceNode("end");
-            setGraphType("path");
-            rawGraphRef = new dagre.graphlib.Graph();
-            rawGraphRef.setNode("start", { label: "Start", width: 200, height: 30, state: 0, branch: 0 });
-            rawGraphRef.setNode("end", { label: "End", width: 200, height: 30, state: 0, branch: 0 });
-            expect(title()).toBe("Start → End");
-        });
     });
 
     describe("initRawGraph", () => {

@@ -36,7 +36,6 @@
   "nodesExclusionTitle": "排除节点",
   "nodesExclusionDescription": "支持正则表达式，例如去除纯数字的笔记：^[0-9]+$",
 
-  "dockBtnPath": "路径图",
   "dockBtnShowDN": "显示 DailyNote",
   "dockBtnHideDN": "隐藏 DailyNote",
   "dockBtnFullscreen": "全屏",
