@@ -1,6 +1,7 @@
 import GraphEnhancePlugin from ".";
 import { I18N } from "siyuan";
 import { graphlib } from "@dagrejs/dagre";
+import { GRAPH_TYPES } from "./constants";
 import type { DagreNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphType } from "./types";
 
 export let i18n: I18N;
@@ -40,11 +41,12 @@ export function createDefaultGraphPersistedState(): GraphPersistedState {
 
 export function normalizeGraphPersistedState(state?: GraphPersistedStatePatch): GraphPersistedState {
     const defaultState = createDefaultGraphPersistedState();
+    const mode = state?.view?.mode;
 
     return {
         version: GRAPH_STATE_VERSION,
         view: {
-            mode: state?.view?.mode ?? defaultState.view.mode,
+            mode: mode && GRAPH_TYPES.includes(mode) ? mode : defaultState.view.mode,
         },
         filters: {
             hideDailyNotes: state?.filters?.hideDailyNotes ?? defaultState.filters.hideDailyNotes,

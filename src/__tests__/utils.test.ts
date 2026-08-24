@@ -65,6 +65,16 @@ describe("utils/getThemeMode test suite", () => {
         });
     });
 
+    it("falls back to the default view mode for invalid persisted values", () => {
+        expect(normalizeGraphPersistedState({
+            view: { mode: "legacy-mode" as any },
+        })).toEqual({
+            version: 1,
+            view: { mode: "ancestor" },
+            filters: { hideDailyNotes: false, autoFollow: true },
+        });
+    });
+
     it("reads normalized persisted graph state from plugin data", () => {
         setPlugin({
             data: {
