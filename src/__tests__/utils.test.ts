@@ -109,4 +109,34 @@ describe("utils/getThemeMode test suite", () => {
             filters: { hideDailyNotes: true, autoFollow: true },
         });
     });
+
+    it("coerces invalid/legacy view modes to default mode", () => {
+        // Test legacy modes like "neighbor" and "path" which may be in stored data
+        const legacyModes = ["neighbor", "path", "unknown", "invalid"];
+
+        legacyModes.forEach((legacyMode) => {
+            const result = normalizeGraphPersistedState({
+                view: { mode: legacyMode as any },
+                filters: { hideDailyNotes: true, autoFollow: false },
+            });
+
+            expect(result).toEqual({
+                version: 1,
+                view: { mode: "ancestor" }, // Should fall back to default
+                filters: { hideDailyNotes: true, autoFollow: false },
+            });
+        });
+    });
+
+    it("preserves valid view modes during normalization", () => {
+        const validModes = ["ancestor", "brother", "cross", "global"];
+
+        validModes.forEach((validMode) => {
+            const result = normalizeGraphPersistedState({
+                view: { mode: validMode as any },
+            });
+
+            expect(result.view.mode).toBe(validMode);
+        });
+    });
 });
