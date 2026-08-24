@@ -5,11 +5,9 @@ import * as dagre from "@dagrejs/dagre";
 import type { DagreNodeValue, DagreOutput, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
 import { draw } from "./renderer";
 
-let lastNodeId: string;
 let sourceNodeId: string;
 export function setSourceNode(_id: string) {
     if (!_id || sourceNodeId === _id) return false;
-    lastNodeId = sourceNodeId;
     sourceNodeId = _id;
     return true;
 }
