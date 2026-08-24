@@ -5,11 +5,9 @@ import * as dagre from "@dagrejs/dagre";
 import type { DagreNodeValue, DagreOutput, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
 import { draw } from "./renderer";
 
-let lastNodeId: string;
 let sourceNodeId: string;
 export function setSourceNode(_id: string) {
     if (!_id || sourceNodeId === _id) return false;
-    lastNodeId = sourceNodeId;
     sourceNodeId = _id;
     return true;
 }
@@ -25,8 +23,6 @@ export function setGraphType(type: GraphType) {
 
 export function title() {
     //console.log("label", rawGraph.node(sourceNodeId)?.label);
-    if (graphType === "path")
-        return rawGraph.node(lastNodeId)?.label + " → " + rawGraph.node(sourceNodeId)?.label;
     return rawGraph.node(sourceNodeId)?.label;
 }
 
@@ -246,27 +242,6 @@ class GlobalGraph extends Graph {
     }
 }
 
-class NeighborGraph extends Graph {
-    exec() {
-        const q = initQueue();
-        q.push({ id: sourceNodeId, level: 0, count: 0 });
-        const nodesMaximum = +getSetting("nodesMaximum");
-        const neighborDepth = +getSetting("neighborDepth");
-
-        let count = 0;
-        for (let head = 0; head < q.length && count < nodesMaximum; head++) {
-            const cur = q[head]!;
-            insertNode(cur, rawGraph, processedGraph);
-            insertEdge(cur, rawGraph, processedGraph);
-            if (cur.count < neighborDepth) {
-                searchDown(cur, q, rawGraph, processedGraph);
-                searchUp(cur, q, rawGraph, processedGraph);
-            }
-            count++;
-        }
-    }
-}
-
 function insertNode(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
     if (_processedGraph.hasNode(cur.id)) return;
 
@@ -349,42 +324,12 @@ function searchDown(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Gr
 
 }
 
-class PathGraph extends Graph {
-    exec() {
-        const q = initQueue();
-        const middleGraph = new dagre.graphlib.Graph<DagreNodeValue>().setDefaultEdgeLabel(() => { return {}; });
-        q.push({ id: sourceNodeId, level: 0, count: 0 });
-        for (let head = 0; head < q.length; head++) {
-            const cur = q[head]!;
-            insertNode(cur, rawGraph, middleGraph);
-            insertEdge(cur, rawGraph, middleGraph);
-            searchUp(cur, q, rawGraph, middleGraph, 1);
-        }
-        //console.log("middleGraph", dagre.graphlib.json.write(middleGraph));
-        //console.log("sourceNode", rawGraph.node(sourceNodeId));
-        //console.log("lastNodeId", rawGraph.node(lastNodeId));
-        q.length = 0;
-        q.push({ id: lastNodeId, level: 0, count: 0 });
-        branchFlag = 1;
-        for (let head = 0; head < q.length; head++) {
-            const cur = q[head]!;
-            insertNode(cur, middleGraph, processedGraph);
-            insertEdge(cur, middleGraph, processedGraph);
-            searchDown(cur, q, middleGraph, processedGraph, 1);
-        }
-        //console.log("processedGraph", dagre.graphlib.json.write(processedGraph));
-
-    }
-}
-
 function createGraph(type: GraphType): Graph {
     switch (type) {
         case "ancestor": return new AncestorGraph();
         case "brother": return new BrotherGraph();
         case "cross": return new CrossGraph();
         case "global": return new GlobalGraph();
-        case "neighbor": return new NeighborGraph();
-        case "path": return new PathGraph();
         default: return new Graph();
     }
 }

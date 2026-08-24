@@ -110,25 +110,33 @@ describe("utils/getThemeMode test suite", () => {
         });
     });
 
-    it("saves semantic view mode and filter helpers", () => {
-        savePersistedGraphViewMode("path");
-        saveHideDailyNotesFilter(true);
-        saveAutoFollowFilter(false);
+    it("coerces invalid/legacy view modes to default mode", () => {
+        // Test legacy modes like "neighbor" and "path" which may be in stored data
+        const legacyModes = ["neighbor", "path", "unknown", "invalid"];
 
-        expect(saveData).toHaveBeenNthCalledWith(1, GRAPH_STATE_STORAGE_NAME, {
-            version: 1,
-            view: { mode: "path" },
-            filters: { hideDailyNotes: false, autoFollow: true },
+        legacyModes.forEach((legacyMode) => {
+            const result = normalizeGraphPersistedState({
+                view: { mode: legacyMode as any },
+                filters: { hideDailyNotes: true, autoFollow: false },
+            });
+
+            expect(result).toEqual({
+                version: 1,
+                view: { mode: "ancestor" }, // Should fall back to default
+                filters: { hideDailyNotes: true, autoFollow: false },
+            });
         });
-        expect(saveData).toHaveBeenNthCalledWith(2, GRAPH_STATE_STORAGE_NAME, {
-            version: 1,
-            view: { mode: "ancestor" },
-            filters: { hideDailyNotes: true, autoFollow: true },
-        });
-        expect(saveData).toHaveBeenNthCalledWith(3, GRAPH_STATE_STORAGE_NAME, {
-            version: 1,
-            view: { mode: "ancestor" },
-            filters: { hideDailyNotes: false, autoFollow: false },
+    });
+
+    it("preserves valid view modes during normalization", () => {
+        const validModes = ["ancestor", "brother", "cross", "global"];
+
+        validModes.forEach((validMode) => {
+            const result = normalizeGraphPersistedState({
+                view: { mode: validMode as any },
+            });
+
+            expect(result.view.mode).toBe(validMode);
         });
     });
 });

@@ -42,11 +42,6 @@ The relation graph above can be described as three basic types: vertical graph (
 - The current document is the start node (red); linked nodes are blue.
 - Layout direction, layout mode, and max node count can be adjusted in settings.
 
-### Neighbor Graph
-
-- Graph of nodes reachable from the start within a given number of hops.
-- Hop count is configurable in settings.
-
 ### V&H Graph
 
 - Combination of vertical and horizontal graphs.
