@@ -7,14 +7,12 @@ import {
 import type {
     ComposeOption,
 } from "echarts/core";
-import { TitleComponent, TitleComponentOption } from "echarts/components";
 
 echarts.use([
     GraphChart,
-    CanvasRenderer,
-    TitleComponent
+    CanvasRenderer
 ]);
-type ECOption = ComposeOption<GraphSeriesOption | TitleComponentOption>;
+type ECOption = ComposeOption<GraphSeriesOption>;
 
 import { DagreOutput } from "./types";
 import { openTab } from "siyuan";
