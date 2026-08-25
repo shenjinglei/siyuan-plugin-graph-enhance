@@ -1,21 +1,25 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Display, initRawGraph, setGraphType, setIsHideDailynote, setSourceNode } from "./graph";
+import { Display, initRawGraph, setGraphRankdir, setGraphType, setIsHideDailynote, setSourceNode } from "./graph";
 import {
     getAutoFollowFilter,
     getHideDailyNotesFilter,
+    getLastHorizontalRankdir,
+    getLastVerticalRankdir,
+    getPersistedGraphRankdir,
     getPersistedGraphViewMode,
     i18n,
     plugin,
     rawGraph,
     saveAutoFollowFilter,
     saveHideDailyNotesFilter,
+    savePersistedGraphRankdir,
     savePersistedGraphViewMode,
 } from "./utils";
 import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
 import "./index.scss";
 import { initEChart, resize } from "./renderer";
 import { GRAPH_API_CONF } from "./constants";
-import type { GraphType } from "./types";
+import type { GraphRankDir, GraphType } from "./types";
 
 const DOCK_TYPE = "dock_tab";
 const GRAPH_BUTTON_IDS: Record<GraphType, string> = {
@@ -34,6 +38,8 @@ export function initDock() {
         </div>
         <span class="fn__flex-1 fn__space"></span>
         <span class="plugin-sample__dock-group">
+            <span id="graph_enhance_dir_vertical" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.settingDirTB}"><svg id="graph_enhance_dir_vertical_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconDirVertical"></use></svg></span>
+            <span id="graph_enhance_dir_horizontal" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.settingDirLR}"><svg id="graph_enhance_dir_horizontal_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconDirHorizontal"></use></svg></span>
             <span id="graph_enhance_autofollow" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnDisableAutoFollow}"><svg id="graph_enhance_autofollow_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconAutoFollow"></use></svg></span>
             <span id="graph_enhance_dailynote" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnHideDN}"><svg id="graph_enhance_dailynote_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconCalendar"></use></svg></span>
         </span>
@@ -70,6 +76,28 @@ export function initDock() {
         type: DOCK_TYPE,
         init() {
             this.element.innerHTML = dockHtml;
+
+            document.getElementById("graph_enhance_dir_vertical")!.onclick = () => {
+                const current = getPersistedGraphRankdir();
+                const next: GraphRankDir = current === "TB" || current === "BT"
+                    ? (current === "TB" ? "BT" : "TB")
+                    : getLastVerticalRankdir();
+                setGraphRankdir(next);
+                savePersistedGraphRankdir(next);
+                applyDirectionState(next);
+                Display();
+            };
+
+            document.getElementById("graph_enhance_dir_horizontal")!.onclick = () => {
+                const current = getPersistedGraphRankdir();
+                const next: GraphRankDir = current === "LR" || current === "RL"
+                    ? (current === "LR" ? "RL" : "LR")
+                    : getLastHorizontalRankdir();
+                setGraphRankdir(next);
+                savePersistedGraphRankdir(next);
+                applyDirectionState(next);
+                Display();
+            };
 
             document.getElementById("graph_enhance_autofollow")!.onclick = async () => {
                 applyAutoFollowState(!getAutoFollowFilter(), true);
@@ -144,6 +172,9 @@ export function initDock() {
             applyGraphTypeState(savedGraphType);
             applyAutoFollowState(getAutoFollowFilter());
             applyDailyNoteState(getHideDailyNotesFilter());
+            const savedRankdir = getPersistedGraphRankdir();
+            setGraphRankdir(savedRankdir);
+            applyDirectionState(savedRankdir);
 
             initEChart();
         },
@@ -191,6 +222,28 @@ export function initDock() {
             const icon = document.getElementById(elementId)?.querySelector("svg");
             icon?.classList.toggle("plugin-sample__dock-icon--active", graphType === activeGraphType);
         });
+    }
+
+    function applyDirectionState(rankdir: GraphRankDir) {
+        const directionLabels: Record<GraphRankDir, string> = {
+            TB: i18n.settingDirTB,
+            BT: i18n.settingDirBT,
+            LR: i18n.settingDirLR,
+            RL: i18n.settingDirRL,
+        };
+        const isVertical = rankdir === "TB" || rankdir === "BT";
+        // Inactive axis shows the direction clicking it would restore.
+        const verticalDir = isVertical ? rankdir : getLastVerticalRankdir();
+        const horizontalDir = isVertical ? getLastHorizontalRankdir() : rankdir;
+
+        document.getElementById("graph_enhance_dir_vertical")?.setAttribute("aria-label", directionLabels[verticalDir]);
+        document.getElementById("graph_enhance_dir_horizontal")?.setAttribute("aria-label", directionLabels[horizontalDir]);
+
+        toggleDockIconState("graph_enhance_dir_vertical_icon", isVertical);
+        toggleDockIconState("graph_enhance_dir_horizontal_icon", !isVertical);
+
+        document.getElementById("graph_enhance_dir_vertical_icon")?.classList.toggle("plugin-sample__dock-icon--reversed", verticalDir === "BT");
+        document.getElementById("graph_enhance_dir_horizontal_icon")?.classList.toggle("plugin-sample__dock-icon--reversed", horizontalDir === "RL");
     }
 
     function toggleDockIconState(elementId: string, isActive: boolean) {

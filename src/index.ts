@@ -13,6 +13,10 @@ export default class GraphEnhancePlugin extends Plugin {
         <path d="M4 4h8v2h-6v6h-2v-8zM10 26h-6v-6h2v6h6v2zM28 4h-8v2h6v6h2v-8zM22 26v2h8v-8h-2v6h-6z"></path>
         </symbol><symbol id="iconAutoFollow" viewBox="0 0 32 32">
         <path d="M25.414 10.586l-8-8c-0.781-0.781-2.047-0.781-2.828 0l-8 8 2.828 2.828 4.586-4.586v11.172c0 3.309 2.691 6 6 6h6v4l6-6-6-6v4h-6c-1.103 0-2-0.897-2-2v-11.172l4.586 4.586 2.828-2.828z"></path>
+        </symbol><symbol id="iconDirVertical" viewBox="0 0 32 32">
+        <path d="M14 4h4v14h6l-8 10-8-10h6z"></path>
+        </symbol><symbol id="iconDirHorizontal" viewBox="0 0 32 32">
+        <path d="M4 14v4h14v6l10-8-10-8v6z"></path>
         </symbol>`);
 
         await this.loadData(STORAGE_NAME);

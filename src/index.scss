@@ -24,6 +24,10 @@
     fill: currentColor;
   }
 
+  &__dock-icon--reversed {
+    transform: rotate(180deg);
+  }
+
   &__custom-tab {
     background-color: var(--b3-theme-background);
     height: 100%;

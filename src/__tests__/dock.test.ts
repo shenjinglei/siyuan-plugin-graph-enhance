@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JSDOM } from "jsdom";
 
+const Display = vi.fn();
 const setIsHideDailynote = vi.fn();
 const setGraphType = vi.fn();
+const setGraphRankdir = vi.fn();
 const initEChart = vi.fn();
 const saveAutoFollowFilter = vi.fn((value: boolean) => {
     savedAutoFollow = value;
@@ -11,18 +13,27 @@ const saveHideDailyNotesFilter = vi.fn((value: boolean) => {
     savedHideDailyNotes = value;
 });
 const savePersistedGraphViewMode = vi.fn();
+const savePersistedGraphRankdir = vi.fn((value: string) => {
+    savedRankdir = value;
+    if (value === "TB" || value === "BT") savedLastVertical = value;
+    else savedLastHorizontal = value;
+});
 
 let savedAutoFollow = true;
 let savedHideDailyNotes = true;
+let savedRankdir = "LR";
+let savedLastVertical = "TB";
+let savedLastHorizontal = "LR";
 let dockInit: (() => void) | undefined;
 let dockResize: (() => void) | undefined;
 const eventBusOn = vi.fn();
 const eventBusOff = vi.fn();
 
 vi.mock("../graph", () => ({
-    Display: vi.fn(),
+    Display,
     initRawGraph: vi.fn(),
     setGraphType,
+    setGraphRankdir,
     setIsHideDailynote,
     setSourceNode: vi.fn(),
 }));
@@ -52,6 +63,10 @@ vi.mock("../utils", () => ({
         dockBtnRefresh: "Refresh",
         dockBtnFullscreen: "Fullscreen",
         dockBtnExitFullscreen: "Exit Fullscreen",
+        settingDirLR: "Left to Right",
+        settingDirRL: "Right to Left",
+        settingDirTB: "Top Down",
+        settingDirBT: "Bottom Up",
     },
     plugin: {
         addDock: vi.fn(({ init, resize }: { init: () => void; resize: () => void }) => {
@@ -68,6 +83,10 @@ vi.mock("../utils", () => ({
     savePersistedGraphViewMode,
     getHideDailyNotesFilter: vi.fn(() => savedHideDailyNotes),
     saveHideDailyNotesFilter,
+    getPersistedGraphRankdir: vi.fn(() => savedRankdir),
+    getLastVerticalRankdir: vi.fn(() => savedLastVertical),
+    getLastHorizontalRankdir: vi.fn(() => savedLastHorizontal),
+    savePersistedGraphRankdir,
     GRAPH_STATE_STORAGE_NAME: "graph-enhance-graph-state",
 }));
 
@@ -89,6 +108,9 @@ describe("dock", () => {
         vi.clearAllMocks();
         savedAutoFollow = true;
         savedHideDailyNotes = true;
+        savedRankdir = "LR";
+        savedLastVertical = "TB";
+        savedLastHorizontal = "LR";
         dockInit = undefined;
         dockResize = undefined;
 
@@ -191,5 +213,62 @@ describe("dock", () => {
         await document.getElementById("graph_enhance_global")?.onclick?.(new dom.window.MouseEvent("click") as any);
 
         expect(savePersistedGraphViewMode).toHaveBeenCalledWith("global");
+    });
+
+    it("restores persisted direction state on dock init", async () => {
+        savedRankdir = "RL";
+        savedLastVertical = "BT";
+        savedLastHorizontal = "RL";
+        const { initDock } = await import("../dock");
+
+        initDock();
+
+        mountDock();
+        await Promise.resolve();
+
+        expect(document.getElementById("graph_enhance_dir_horizontal")?.getAttribute("aria-label")).toBe("Right to Left");
+        expect(document.getElementById("graph_enhance_dir_horizontal_icon")?.classList.contains("plugin-sample__dock-icon--active")).toBe(true);
+        expect(document.getElementById("graph_enhance_dir_horizontal_icon")?.classList.contains("plugin-sample__dock-icon--reversed")).toBe(true);
+        expect(document.getElementById("graph_enhance_dir_vertical")?.getAttribute("aria-label")).toBe("Bottom Up");
+        expect(document.getElementById("graph_enhance_dir_vertical_icon")?.classList.contains("plugin-sample__dock-icon--active")).toBe(false);
+        expect(setGraphRankdir).toHaveBeenCalledWith("RL");
+    });
+
+    it("toggles the horizontal direction between LR and RL on repeated clicks", async () => {
+        const { initDock } = await import("../dock");
+
+        initDock();
+        mountDock();
+        await Promise.resolve();
+
+        await document.getElementById("graph_enhance_dir_horizontal")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(savePersistedGraphRankdir).toHaveBeenCalledWith("RL");
+        expect(setGraphRankdir).toHaveBeenCalledWith("RL");
+        expect(document.getElementById("graph_enhance_dir_horizontal")?.getAttribute("aria-label")).toBe("Right to Left");
+        expect(Display).toHaveBeenCalledTimes(1);
+
+        await document.getElementById("graph_enhance_dir_horizontal")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(savePersistedGraphRankdir).toHaveBeenCalledWith("LR");
+    });
+
+    it("switches to the last-used vertical direction when the axis changes, then toggles within it", async () => {
+        savedLastVertical = "BT";
+        const { initDock } = await import("../dock");
+
+        initDock();
+        mountDock();
+        await Promise.resolve();
+
+        await document.getElementById("graph_enhance_dir_vertical")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(savePersistedGraphRankdir).toHaveBeenCalledWith("BT");
+        expect(setGraphRankdir).toHaveBeenCalledWith("BT");
+        expect(document.getElementById("graph_enhance_dir_vertical_icon")?.classList.contains("plugin-sample__dock-icon--active")).toBe(true);
+
+        await document.getElementById("graph_enhance_dir_vertical")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(savePersistedGraphRankdir).toHaveBeenCalledWith("TB");
     });
 });

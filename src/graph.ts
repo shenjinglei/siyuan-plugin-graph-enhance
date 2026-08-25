@@ -2,7 +2,7 @@ import { i18n, rawGraph, setRawGraph } from "./utils";
 import { showMessage } from "siyuan";
 import { getSetting } from "./settings";
 import * as dagre from "@dagrejs/dagre";
-import type { DagreNodeValue, DagreOutput, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
+import type { DagreNodeValue, DagreOutput, GraphRankDir, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
 import { draw } from "./renderer";
 
 let sourceNodeId: string;
@@ -19,6 +19,11 @@ export function sourceNode() {
 let graphType: GraphType = "ancestor";
 export function setGraphType(type: GraphType) {
     graphType = type;
+}
+
+let rankdir: GraphRankDir = "LR";
+export function setGraphRankdir(dir: GraphRankDir) {
+    rankdir = dir;
 }
 
 export function title() {
@@ -46,7 +51,7 @@ export function Display() {
 
     const layoutGraph = dagre.graphlib.json.read(JSON.parse(JSON.stringify(processedJson)));
 
-    layoutGraph.setGraph({ rankdir: getSetting("rankdir"), ranker: getSetting("ranker") });
+    layoutGraph.setGraph({ rankdir, ranker: getSetting("ranker") });
     layoutGraph.setDefaultEdgeLabel(() => { return {}; });
 
     dagre.layout(layoutGraph);
