@@ -1,4 +1,4 @@
-[中文](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/blob/main/README_zh_CN.md)
+[中文](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/blob/main/README.zh-CN.md)
 
 ![GitHub release](https://img.shields.io/github/v/release/shenjinglei/siyuan-plugin-graph-enhance)
 ![GitHub Release Date](https://img.shields.io/github/release-date/shenjinglei/siyuan-plugin-graph-enhance)
