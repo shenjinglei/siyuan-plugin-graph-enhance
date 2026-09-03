@@ -46,12 +46,17 @@ export interface DagreNodeValue {
 
 /** Plugin storage key and setting keys for type-safe access */
 export type SettingKey =
-    | "rankdir"
     | "ranker"
     | "nodesMaximum"
     | "nodesExclusion"
     | "font"
     | "fontSize";
+
+export type VerticalRankDir = "TB" | "BT";
+export type HorizontalRankDir = "LR" | "RL";
+
+/** Dagre `rankdir` layout direction */
+export type GraphRankDir = VerticalRankDir | HorizontalRankDir;
 
 export interface GraphPersistedViewState {
     mode: GraphType;
@@ -62,15 +67,25 @@ export interface GraphPersistedFiltersState {
     autoFollow: boolean;
 }
 
+export interface GraphPersistedLayoutState {
+    rankdir: GraphRankDir;
+    /** Remembers the last vertical direction so switching axes and back restores it */
+    lastVertical: VerticalRankDir;
+    /** Remembers the last horizontal direction so switching axes and back restores it */
+    lastHorizontal: HorizontalRankDir;
+}
+
 /** Persisted graph runtime state */
 export interface GraphPersistedState {
     version: 1;
     view: GraphPersistedViewState;
     filters: GraphPersistedFiltersState;
+    layout: GraphPersistedLayoutState;
 }
 
 export interface GraphPersistedStatePatch {
     version?: GraphPersistedState["version"];
     view?: Partial<GraphPersistedViewState>;
     filters?: Partial<GraphPersistedFiltersState>;
+    layout?: Partial<GraphPersistedLayoutState>;
 }

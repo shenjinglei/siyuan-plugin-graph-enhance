@@ -2,7 +2,7 @@ import GraphEnhancePlugin from ".";
 import { I18N } from "siyuan";
 import { graphlib } from "@dagrejs/dagre";
 import { GRAPH_TYPES } from "./constants";
-import type { DagreNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphType } from "./types";
+import type { DagreNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphRankDir, GraphType, HorizontalRankDir, VerticalRankDir } from "./types";
 
 export let i18n: I18N;
 export let plugin: GraphEnhancePlugin;
@@ -26,6 +26,10 @@ export function getThemeMode(): string | undefined {
     return document.querySelector("html")?.getAttribute("data-theme-mode") ?? undefined;
 }
 
+const VERTICAL_RANK_DIRS: readonly VerticalRankDir[] = ["TB", "BT"];
+const HORIZONTAL_RANK_DIRS: readonly HorizontalRankDir[] = ["LR", "RL"];
+const RANK_DIRS: readonly GraphRankDir[] = [...VERTICAL_RANK_DIRS, ...HORIZONTAL_RANK_DIRS];
+
 export function createDefaultGraphPersistedState(): GraphPersistedState {
     return {
         version: GRAPH_STATE_VERSION,
@@ -35,6 +39,11 @@ export function createDefaultGraphPersistedState(): GraphPersistedState {
         filters: {
             hideDailyNotes: false,
             autoFollow: true,
+        },
+        layout: {
+            rankdir: "LR",
+            lastVertical: "TB",
+            lastHorizontal: "LR",
         },
     };
 }
@@ -47,6 +56,24 @@ export function normalizeGraphPersistedState(state?: GraphPersistedStatePatch): 
             ? persistedMode
             : defaultState.view.mode;
 
+    const persistedRankdir = state?.layout?.rankdir;
+    const rankdir: GraphRankDir =
+        persistedRankdir && RANK_DIRS.includes(persistedRankdir)
+            ? persistedRankdir
+            : defaultState.layout.rankdir;
+
+    const persistedLastVertical = state?.layout?.lastVertical;
+    const lastVertical: VerticalRankDir =
+        persistedLastVertical && VERTICAL_RANK_DIRS.includes(persistedLastVertical)
+            ? persistedLastVertical
+            : defaultState.layout.lastVertical;
+
+    const persistedLastHorizontal = state?.layout?.lastHorizontal;
+    const lastHorizontal: HorizontalRankDir =
+        persistedLastHorizontal && HORIZONTAL_RANK_DIRS.includes(persistedLastHorizontal)
+            ? persistedLastHorizontal
+            : defaultState.layout.lastHorizontal;
+
     return {
         version: GRAPH_STATE_VERSION,
         view: {
@@ -55,6 +82,11 @@ export function normalizeGraphPersistedState(state?: GraphPersistedStatePatch): 
         filters: {
             hideDailyNotes: state?.filters?.hideDailyNotes ?? defaultState.filters.hideDailyNotes,
             autoFollow: state?.filters?.autoFollow ?? defaultState.filters.autoFollow,
+        },
+        layout: {
+            rankdir,
+            lastVertical,
+            lastHorizontal,
         },
     };
 }
@@ -75,6 +107,10 @@ export function saveGraphPersistedState(state: GraphPersistedStatePatch): void {
         filters: {
             ...currentState.filters,
             ...state.filters,
+        },
+        layout: {
+            ...currentState.layout,
+            ...state.layout,
         },
     });
 
@@ -108,5 +144,27 @@ export function getAutoFollowFilter(): boolean {
 export function saveAutoFollowFilter(autoFollow: boolean): void {
     saveGraphPersistedState({
         filters: { autoFollow },
+    });
+}
+
+export function getPersistedGraphRankdir(): GraphRankDir {
+    return getGraphPersistedState().layout.rankdir;
+}
+
+export function getLastVerticalRankdir(): VerticalRankDir {
+    return getGraphPersistedState().layout.lastVertical;
+}
+
+export function getLastHorizontalRankdir(): HorizontalRankDir {
+    return getGraphPersistedState().layout.lastHorizontal;
+}
+
+export function savePersistedGraphRankdir(rankdir: GraphRankDir): void {
+    const isVertical: boolean = (VERTICAL_RANK_DIRS as readonly GraphRankDir[]).includes(rankdir);
+    saveGraphPersistedState({
+        layout: {
+            rankdir,
+            ...(isVertical ? { lastVertical: rankdir as VerticalRankDir } : { lastHorizontal: rankdir as HorizontalRankDir }),
+        },
     });
 }

@@ -3,7 +3,6 @@ import { Setting, showMessage } from "siyuan";
 import type { SettingKey } from "./types";
 
 export const DEFAULT_SETTINGS = {
-    rankdir: "LR",
     ranker: "network-simplex",
     nodesMaximum: "200",
     nodesExclusion: "",
@@ -42,7 +41,6 @@ export function settingInit() {
             };
 
             const payload: Record<SettingKey, string> = {
-                rankdir: directionElement.value,
                 ranker: algorithmElement.value,
                 nodesMaximum: nodesMaximumElement.value,
                 nodesExclusion: nodesExclusionElement.value,
@@ -51,20 +49,6 @@ export function settingInit() {
             };
             plugin.saveData(STORAGE_NAME, payload);
         }
-    });
-
-    const directionElement = document.createElement("select");
-    directionElement.id = "direction";
-    directionElement.add(new Option(i18n.settingDirLR, "LR"));
-    directionElement.add(new Option(i18n.settingDirRL, "RL"));
-    directionElement.add(new Option(i18n.settingDirTB, "TB"));
-    directionElement.add(new Option(i18n.settingDirBT, "BT"));
-    plugin.setting.addItem({
-        title: i18n.settingDirTitle,
-        createActionElement: () => {
-            directionElement.value = plugin.data[STORAGE_NAME].rankdir;
-            return directionElement;
-        },
     });
 
     const algorithmElement = document.createElement("select");

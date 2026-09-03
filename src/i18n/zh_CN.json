@@ -1,6 +1,5 @@
 {
   "pluginName": "关系图增强",
-  "settingDirTitle": "布局方向",
   "settingDirLR": "从左向右",
   "settingDirRL": "从右向左",
   "settingDirTB": "自顶向下",

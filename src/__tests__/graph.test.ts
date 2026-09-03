@@ -22,7 +22,6 @@ vi.mock("../utils", () => ({
 vi.mock("../settings", () => ({
     getSetting: vi.fn((key: string) => {
         const defaults: Record<string, string> = {
-            rankdir: "LR",
             ranker: "network-simplex",
             nodesMaximum: "200",
             nodesExclusion: "",
@@ -38,6 +37,7 @@ import {
     setSourceNode,
     sourceNode,
     setGraphType,
+    setGraphRankdir,
     title,
     initRawGraph,
     Display,
@@ -161,6 +161,17 @@ describe("graph", () => {
             setSourceNode("missing-id");
             Display();
             expect(draw).not.toHaveBeenCalled();
+        });
+
+        it("applies the rankdir set via setGraphRankdir immediately, without re-reading persisted state", () => {
+            const setGraphSpy = vi.spyOn(dagre.graphlib.Graph.prototype, "setGraph");
+            initRawGraph([{ id: "a", label: "A" }], []);
+            setSourceNode("a");
+            setGraphType("global");
+            setGraphRankdir("TB");
+            Display();
+            expect(setGraphSpy).toHaveBeenCalledWith(expect.objectContaining({ rankdir: "TB" }));
+            setGraphSpy.mockRestore();
         });
     });
 

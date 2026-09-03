@@ -6,12 +6,16 @@ import {
     GRAPH_STATE_STORAGE_NAME,
     getGraphPersistedState,
     getHideDailyNotesFilter,
+    getLastHorizontalRankdir,
+    getLastVerticalRankdir,
+    getPersistedGraphRankdir,
     getPersistedGraphViewMode,
     getThemeMode,
     normalizeGraphPersistedState,
     saveAutoFollowFilter,
     saveGraphPersistedState,
     saveHideDailyNotesFilter,
+    savePersistedGraphRankdir,
     savePersistedGraphViewMode,
     setPlugin,
 } from "../utils";
@@ -52,6 +56,7 @@ describe("utils/getThemeMode test suite", () => {
             version: 1,
             view: { mode: "ancestor" },
             filters: { hideDailyNotes: false, autoFollow: true },
+            layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
         });
     });
 
@@ -62,6 +67,7 @@ describe("utils/getThemeMode test suite", () => {
             version: 1,
             view: { mode: "ancestor" },
             filters: { hideDailyNotes: true, autoFollow: true },
+            layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
         });
     });
 
@@ -80,6 +86,7 @@ describe("utils/getThemeMode test suite", () => {
             version: 1,
             view: { mode: "global" },
             filters: { hideDailyNotes: false, autoFollow: true },
+            layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
         });
         expect(getPersistedGraphViewMode()).toBe("global");
         expect(getHideDailyNotesFilter()).toBe(false);
@@ -107,6 +114,7 @@ describe("utils/getThemeMode test suite", () => {
             version: 1,
             view: { mode: "ancestor" },
             filters: { hideDailyNotes: true, autoFollow: true },
+            layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
         });
     });
 
@@ -124,6 +132,7 @@ describe("utils/getThemeMode test suite", () => {
                 version: 1,
                 view: { mode: "ancestor" }, // Should fall back to default
                 filters: { hideDailyNotes: true, autoFollow: false },
+                layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
             });
         });
     });
@@ -138,5 +147,48 @@ describe("utils/getThemeMode test suite", () => {
 
             expect(result.view.mode).toBe(validMode);
         });
+    });
+
+    it("coerces invalid persisted rankdir to the default", () => {
+        const result = normalizeGraphPersistedState({
+            layout: { rankdir: "invalid" as any },
+        });
+
+        expect(result.layout).toEqual({ rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" });
+    });
+
+    it("reads and writes the persisted rankdir, tracking the last direction per axis", () => {
+        const pluginData: Record<string, unknown> = {
+            [GRAPH_STATE_STORAGE_NAME]: {
+                version: 1,
+                view: { mode: "ancestor" },
+                filters: { hideDailyNotes: false, autoFollow: true },
+                layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
+            },
+        };
+        const persistingSaveData = vi.fn((key: string, value: unknown) => {
+            pluginData[key] = value;
+        });
+        setPlugin({
+            data: pluginData,
+            i18n: {},
+            saveData: persistingSaveData,
+        } as any);
+
+        expect(getPersistedGraphRankdir()).toBe("LR");
+        expect(getLastVerticalRankdir()).toBe("TB");
+        expect(getLastHorizontalRankdir()).toBe("LR");
+
+        savePersistedGraphRankdir("BT");
+
+        expect(persistingSaveData).toHaveBeenCalledWith(GRAPH_STATE_STORAGE_NAME, expect.objectContaining({
+            layout: { rankdir: "BT", lastVertical: "BT", lastHorizontal: "LR" },
+        }));
+
+        savePersistedGraphRankdir("RL");
+
+        expect(persistingSaveData).toHaveBeenCalledWith(GRAPH_STATE_STORAGE_NAME, expect.objectContaining({
+            layout: { rankdir: "RL", lastVertical: "BT", lastHorizontal: "RL" },
+        }));
     });
 });

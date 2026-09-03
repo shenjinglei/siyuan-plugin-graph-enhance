@@ -9,7 +9,6 @@ vi.mock("../dock", () => ({
 
 vi.mock("../settings", () => ({
     DEFAULT_SETTINGS: {
-        rankdir: "LR",
         ranker: "network-simplex",
         nodesMaximum: "200",
         nodesExclusion: "",
@@ -26,7 +25,6 @@ vi.mock("siyuan", () => ({
         data = {
             "graph-enhance-config": {
                 autoFollow: "false",
-                rankdir: "RL",
                 nodesMaximum: "300",
             },
             "graph-enhance-graph-state": {
@@ -53,7 +51,6 @@ describe("plugin startup", () => {
         await plugin.onload();
 
         expect(plugin.saveData).toHaveBeenNthCalledWith(1, "graph-enhance-config", {
-            rankdir: "RL",
             ranker: "network-simplex",
             nodesMaximum: "300",
             nodesExclusion: "",
@@ -64,6 +61,7 @@ describe("plugin startup", () => {
             version: 1,
             view: { mode: "global" },
             filters: { hideDailyNotes: true, autoFollow: true },
+            layout: { rankdir: "LR", lastVertical: "TB", lastHorizontal: "LR" },
         });
         expect(initDock).toHaveBeenCalledTimes(1);
         expect(settingInit).toHaveBeenCalledTimes(1);
