@@ -1,5 +1,11 @@
 # CHANGE LOG
 
+## 0.5.4/2026-09-04
+
+- [v0.5.3 ... v0.5.4](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.5.3...v0.5.4)
+  - IMPROVE: Port direction setting to dock panel
+  - IMPROVE: Keep dock buttons always visible
+
 ## 0.5.3/2026-08-25
 
 - [v0.5.2 ... v0.5.3](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.5.2...v0.5.3)
