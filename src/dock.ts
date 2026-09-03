@@ -38,23 +38,23 @@ export function initDock() {
         </div>
         <span class="fn__flex-1 fn__space"></span>
         <span class="plugin-sample__dock-group">
-            <span id="graph_enhance_dir_vertical" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.settingDirTB}"><svg id="graph_enhance_dir_vertical_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconDirVertical"></use></svg></span>
-            <span id="graph_enhance_dir_horizontal" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.settingDirLR}"><svg id="graph_enhance_dir_horizontal_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconDirHorizontal"></use></svg></span>
-            <span id="graph_enhance_autofollow" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnDisableAutoFollow}"><svg id="graph_enhance_autofollow_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconAutoFollow"></use></svg></span>
-            <span id="graph_enhance_dailynote" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnHideDN}"><svg id="graph_enhance_dailynote_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconCalendar"></use></svg></span>
+            <span id="graph_enhance_dir_vertical" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.settingDirTB}"><svg id="graph_enhance_dir_vertical_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconDirVertical"></use></svg></span>
+            <span id="graph_enhance_dir_horizontal" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.settingDirLR}"><svg id="graph_enhance_dir_horizontal_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconDirHorizontal"></use></svg></span>
+            <span id="graph_enhance_autofollow" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnDisableAutoFollow}"><svg id="graph_enhance_autofollow_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconAutoFollow"></use></svg></span>
+            <span id="graph_enhance_dailynote" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnHideDN}"><svg id="graph_enhance_dailynote_icon" class="plugin-sample__dock-icon"><use xlink:href="#iconCalendar"></use></svg></span>
         </span>
         <span class="plugin-sample__dock-divider" aria-hidden="true"></span>
         <span class="plugin-sample__dock-group">
-            <span id="graph_enhance_global" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconLanguage"></use></svg></span>
-            <span id="graph_enhance_cross" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnCross}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconFocus"></use></svg></span>
-            <span id="graph_enhance_ancestor" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGraph"></use></svg></span>
-            <span id="graph_enhance_brother" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGlobalGraph"></use></svg></span>
+            <span id="graph_enhance_global" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnGlobal}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconLanguage"></use></svg></span>
+            <span id="graph_enhance_cross" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnCross}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconFocus"></use></svg></span>
+            <span id="graph_enhance_ancestor" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnAncestor}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGraph"></use></svg></span>
+            <span id="graph_enhance_brother" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnBrother}"><svg class="plugin-sample__dock-icon"><use xlink:href="#iconGlobalGraph"></use></svg></span>
         </span>
         <span class="plugin-sample__dock-divider" aria-hidden="true"></span>
         <span class="plugin-sample__dock-group">
-            <span id="graph_enhance_refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnRefresh}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
-            <span id="graph_enhance_fullscreen" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnFullscreen}"><svg><use xlink:href="#iconFullscreen"></use></svg></span>
-            <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
+            <span id="graph_enhance_refresh" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnRefresh}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+            <span id="graph_enhance_fullscreen" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${i18n.dockBtnFullscreen}"><svg><use xlink:href="#iconFullscreen"></use></svg></span>
+            <span data-type="min" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="Min ${adaptHotkey("⌘W")}"><svg><use xlink:href="#iconMin"></use></svg></span>
         </span>
     </div>
     <div class="fn__flex-1 plugin-sample__custom-dock">
