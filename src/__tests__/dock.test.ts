@@ -168,6 +168,9 @@ describe("dock", () => {
         expect(document.getElementById("graph_enhance_dailynote")?.getAttribute("aria-label")).toBe("Show DailyNote");
         expect(document.getElementById("graph_enhance_dailynote_icon")?.classList.contains("plugin-sample__dock-icon--active")).toBe(false);
         expect(document.querySelectorAll(".plugin-sample__dock-divider")).toHaveLength(2);
+        const dockButtons = document.querySelectorAll(".plugin-sample__dock-group > .block__icon");
+        expect(dockButtons).toHaveLength(11);
+        dockButtons.forEach((button) => expect(button.classList.contains("block__icon--show")).toBe(true));
     });
 
     it("persists the daily note filter with the semantic state helper", async () => {
