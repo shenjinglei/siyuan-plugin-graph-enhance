@@ -52,8 +52,8 @@ importers:
         specifier: ^12.6.0
         version: 12.6.0(sass@1.97.3)(webpack@5.104.1)
       siyuan:
-        specifier: 1.1.8
-        version: 1.1.8
+        specifier: 1.2.7
+        version: 1.2.7
       tslib:
         specifier: 2.4.0
         version: 2.4.0
@@ -132,6 +132,15 @@ packages:
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
+
+  '@dop251/types-goja_nodejs-buffer@0.0.0-20260212111938-1f56ff5bcf14':
+    resolution: {integrity: sha512-+ZEK3z3RVSE9O7Ml8HoeLtYSI/yR2ifa7Ppabfjq5fW06Kf00PcUz6hjz2we1h9CxlhiI7pLglEy4+hTUYGsQA==}
+
+  '@dop251/types-goja_nodejs-global@0.0.0-20260212111938-1f56ff5bcf14':
+    resolution: {integrity: sha512-NYnSveyts20w79Qp+Cs6a8vyrP3+8QVisseCU/2F0rMXK/WmLvbQYmyjNFMlDbY8g3HcooTIB/2AwcwonabQEg==}
+
+  '@dop251/types-goja_nodejs-url@0.0.0-20260212111938-1f56ff5bcf14':
+    resolution: {integrity: sha512-RyxfUr5u0WOO0dV2/BxV+zJ2QwUqnIoSwIoPQcGHakWp8elJ/nSU86pUB9gSO77e2XHWZYAZvNN5tXa9yOXJaA==}
 
   '@esbuild/aix-ppc64@0.19.12':
     resolution: {integrity: sha512-bmoCYyWdEL3wDQIVbcyzRyeKLgk2WtWLTWz1ZIAZF/EGbNOwSA6ew3PftJ1PqMiOOGu0OyFMzG53L0zqIpPeNA==}
@@ -1787,8 +1796,8 @@ packages:
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
 
-  siyuan@1.1.8:
-    resolution: {integrity: sha512-58Ub76EFROPytymqx8bgb6BnL7M+DeZZFRwMzcpVAJDngGw7XmrE0uaHFnBf9tc89faY4aWovL3zsFQT12JJfw==}
+  siyuan@1.2.7:
+    resolution: {integrity: sha512-IskEiST5wpnYbzwuCo4P98vRxnIj0a1nz9FyKfubqWmDKTjq0q/e39Pm9clVYpbOE9a7KDgoFqwF+0wjBR7UQg==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -2112,6 +2121,9 @@ packages:
       webpack: ^4.0.0 || ^5.0.0
       webpack-sources: '*'
 
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+
   zrender@5.6.1:
     resolution: {integrity: sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==}
 
@@ -2170,6 +2182,16 @@ snapshots:
   '@dagrejs/graphlib@2.2.4': {}
 
   '@discoveryjs/json-ext@0.5.7': {}
+
+  '@dop251/types-goja_nodejs-buffer@0.0.0-20260212111938-1f56ff5bcf14':
+    dependencies:
+      '@dop251/types-goja_nodejs-global': 0.0.0-20260212111938-1f56ff5bcf14
+
+  '@dop251/types-goja_nodejs-global@0.0.0-20260212111938-1f56ff5bcf14': {}
+
+  '@dop251/types-goja_nodejs-url@0.0.0-20260212111938-1f56ff5bcf14':
+    dependencies:
+      '@dop251/types-goja_nodejs-global': 0.0.0-20260212111938-1f56ff5bcf14
 
   '@esbuild/aix-ppc64@0.19.12':
     optional: true
@@ -3669,7 +3691,12 @@ snapshots:
 
   siginfo@2.0.0: {}
 
-  siyuan@1.1.8: {}
+  siyuan@1.2.7:
+    dependencies:
+      '@dop251/types-goja_nodejs-buffer': 0.0.0-20260212111938-1f56ff5bcf14
+      '@dop251/types-goja_nodejs-global': 0.0.0-20260212111938-1f56ff5bcf14
+      '@dop251/types-goja_nodejs-url': 0.0.0-20260212111938-1f56ff5bcf14
+      zod: 4.6.5
 
   slash@3.0.0: {}
 
@@ -3971,6 +3998,8 @@ snapshots:
       webpack: 5.104.1(webpack-cli@5.1.4)
       webpack-sources: 3.3.3
       yazl: 2.5.1
+
+  zod@4.6.5: {}
 
   zrender@5.6.1:
     dependencies:

@@ -33,6 +33,10 @@ export default class GraphEnhancePlugin extends Plugin {
         console.log("graph-enhance loaded");
     }
 
+    // Triggered when data stored using saveData() changes. If commented out, the plugin will be automatically disabled and then re-enabled.
+    onDataChanged() {
+    }
+
     async uninstall() {
         await this.removeData(STORAGE_NAME);
         await this.removeData(GRAPH_STATE_STORAGE_NAME);
