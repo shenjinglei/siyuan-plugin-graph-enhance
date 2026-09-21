@@ -11,8 +11,8 @@
     "test:watch": "vitest"
   },
   "keywords": [],
-  "author": "Vanessa",
-  "license": "MIT",
+  "author": "Jerry",
+  "license": "AGPL-3.0-only",
   "devDependencies": {
     "@types/node": "^20.8.2",
     "@typescript-eslint/eslint-plugin": "5.29.0",
@@ -34,7 +34,8 @@
     "zip-webpack-plugin": "^4.0.1"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.0.4",
+    "@dagrejs/dagre": "^3.1.1",
+    "@dagrejs/graphlib": "^4.0.5",
     "colorjs.io": "^0.4.5",
     "echarts": "^5.4.3"
   }
