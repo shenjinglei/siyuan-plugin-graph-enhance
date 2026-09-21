@@ -3,7 +3,7 @@ import { showMessage } from "siyuan";
 import { getSetting } from "./settings";
 import * as dagre from "@dagrejs/dagre";
 import { json as graphlibJson } from "@dagrejs/graphlib";
-import type { DagreNodeValue, DagreOutput, GraphRankDir, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
+import type { GraphNodeValue, GraphOutput, GraphRankDir, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
 import { draw } from "./renderer";
 
 let sourceNodeId: string;
@@ -45,7 +45,7 @@ export function Display() {
 
     createGraph(graphType).exec();
 
-    const processedJson = graphlibJson.write(processedGraph) as DagreOutput;
+    const processedJson = graphlibJson.write(processedGraph) as GraphOutput;
 
     processedJson.nodes.sort((x, y) => x.v.localeCompare(y.v));
     processedJson.edges.sort((x, y) => Math.min(x.v.localeCompare(y.v), x.w.localeCompare(y.w)));
@@ -57,7 +57,7 @@ export function Display() {
 
     dagre.layout(layoutGraph);
 
-    const dagreLayout = graphlibJson.write(layoutGraph) as DagreOutput;
+    const dagreLayout = graphlibJson.write(layoutGraph) as GraphOutput;
 
     draw(dagreLayout);
 }
@@ -140,11 +140,11 @@ export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
     }
 }
 
-let processedGraph: dagre.graphlib.Graph<DagreNodeValue>;
+let processedGraph: dagre.graphlib.Graph<GraphNodeValue>;
 let branchFlag = 1;
 
 function createProcessedGraph() {
-    return new dagre.graphlib.Graph<DagreNodeValue>().setDefaultEdgeLabel(() => { return {}; });
+    return new dagre.graphlib.Graph<GraphNodeValue>().setDefaultEdgeLabel(() => { return {}; });
 }
 
 function initQueue() {
