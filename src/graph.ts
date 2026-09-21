@@ -2,6 +2,7 @@ import { i18n, rawGraph, setRawGraph } from "./utils";
 import { showMessage } from "siyuan";
 import { getSetting } from "./settings";
 import * as dagre from "@dagrejs/dagre";
+import { json as graphlibJson } from "@dagrejs/graphlib";
 import type { DagreNodeValue, DagreOutput, GraphRankDir, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
 import { draw } from "./renderer";
 
@@ -44,19 +45,19 @@ export function Display() {
 
     createGraph(graphType).exec();
 
-    const processedJson: DagreOutput = dagre.graphlib.json.write(processedGraph);
+    const processedJson = graphlibJson.write(processedGraph) as DagreOutput;
 
     processedJson.nodes.sort((x, y) => x.v.localeCompare(y.v));
     processedJson.edges.sort((x, y) => Math.min(x.v.localeCompare(y.v), x.w.localeCompare(y.w)));
 
-    const layoutGraph = dagre.graphlib.json.read(JSON.parse(JSON.stringify(processedJson)));
+    const layoutGraph = graphlibJson.read(JSON.parse(JSON.stringify(processedJson)));
 
     layoutGraph.setGraph({ rankdir, ranker: getSetting("ranker") });
     layoutGraph.setDefaultEdgeLabel(() => { return {}; });
 
     dagre.layout(layoutGraph);
 
-    const dagreLayout: DagreOutput = dagre.graphlib.json.write(layoutGraph);
+    const dagreLayout = graphlibJson.write(layoutGraph) as DagreOutput;
 
     draw(dagreLayout);
 }
@@ -72,7 +73,7 @@ export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
     dailynoteNodeInit();
     ExclusionNodeInit();
 
-    //console.log("rawGraph", dagre.graphlib.json.write(rawGraph));
+    //console.log("rawGraph", graphlibJson.write(rawGraph));
 
     function ExclusionNodeInit() {
         // Performance: avoid scanning `nodes` repeatedly for each pattern.
