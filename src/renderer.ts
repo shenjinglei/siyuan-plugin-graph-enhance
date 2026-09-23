@@ -14,7 +14,7 @@ echarts.use([
 ]);
 type ECOption = ComposeOption<GraphSeriesOption>;
 
-import { DagreOutput } from "./types";
+import { GraphOutput } from "./types";
 import { openTab } from "siyuan";
 import { getThemeMode, plugin } from "./utils";
 import { getSetting } from "./settings";
@@ -85,7 +85,7 @@ function getNodeColor() {
     }
 }
 
-export function draw(dagreLayout: DagreOutput) {
+export function draw(dagreLayout: GraphOutput) {
     aEChart.clear();
     aEChart.off("click");
 

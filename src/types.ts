@@ -20,28 +20,28 @@ export interface QueueItem {
     count: number;
 }
 
-/** Dagre graph serialization format */
-export interface DagreOutput {
-    options: {
-        directed: boolean;
-        multigraph: boolean;
-        compound: boolean;
-    };
-    nodes: Array<{ v: string; value: DagreNodeValue }>;
-    edges: Array<{ v: string; w: string; value: { branch?: number } }>;
-}
+import { json as graphlibJson } from "@dagrejs/graphlib";
+import type { NodeLabel } from "@dagrejs/dagre";
 
-export interface DagreNodeValue {
+export interface GraphNodeValue extends NodeLabel {
     label: string;
-    width: number;
-    height: number;
-    x?: number;
-    y?: number;
     color?: "start" | "normal" | "from" | "to" | "separate" | "brother";
     separate?: boolean;
     dailynote?: boolean;
     state: number;
     branch: number;
+}
+
+export interface GraphEdgeValue {
+    branch?: number;
+}
+
+type GraphlibJson = ReturnType<typeof graphlibJson.write>;
+
+/** Serialized graph data with application-specific node and edge values. */
+export interface GraphOutput extends Omit<GraphlibJson, "nodes" | "edges"> {
+    nodes: Array<{ v: string; value: GraphNodeValue }>;
+    edges: Array<{ v: string; w: string; value: GraphEdgeValue }>;
 }
 
 /** Plugin storage key and setting keys for type-safe access */

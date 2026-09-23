@@ -105,19 +105,3 @@
   - 只改 `constants.ts` 中的 `GRAPH_API_CONF` 即可。
 
 ---
-
-## 开发命令
-
-- `pnpm install`：安装依赖
-- `pnpm run dev`：开发构建（watch 模式，编译成功后会有 "Watching for file changes..."）
-- `pnpm run build`：生产构建并打包
-- `pnpm test`：运行 Vitest 单测（单次）
-- `pnpm run test:watch`：Vitest watch 模式
-
----
-
-## 约定与注意
-
-- **类型**：图类型、设置键、API 请求体等尽量用 `types.ts` / `constants.ts` 中定义，避免魔法字符串。
-- **命名**：函数名与变量使用清晰英文（如 `refreshGraph`、`getDocId`、`handleGraphButton`）。
-- **维护本文档**：每次做结构性变更、新增/删除模块或扩展点时，在「开发记录」中追加日期与简要说明，并视情况更新「项目结构」、「扩展指南」和「约定与注意」。

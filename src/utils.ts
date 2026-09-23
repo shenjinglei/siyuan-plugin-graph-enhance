@@ -2,7 +2,7 @@ import GraphEnhancePlugin from ".";
 import { I18N } from "siyuan";
 import { graphlib } from "@dagrejs/dagre";
 import { GRAPH_TYPES } from "./constants";
-import type { DagreNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphRankDir, GraphType, HorizontalRankDir, VerticalRankDir } from "./types";
+import type { GraphNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphRankDir, GraphType, HorizontalRankDir, VerticalRankDir } from "./types";
 
 export let i18n: I18N;
 export let plugin: GraphEnhancePlugin;
@@ -16,8 +16,8 @@ export const STORAGE_NAME = "graph-enhance-config";
 export const GRAPH_STATE_STORAGE_NAME = "graph-enhance-graph-state";
 export const GRAPH_STATE_VERSION = 1;
 
-export let rawGraph: graphlib.Graph<DagreNodeValue>;
-export function setRawGraph(g: graphlib.Graph<DagreNodeValue>) {
+export let rawGraph: graphlib.Graph<GraphNodeValue>;
+export function setRawGraph(g: graphlib.Graph<GraphNodeValue>) {
     rawGraph = g;
 }
 
