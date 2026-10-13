@@ -22,7 +22,7 @@ vi.mock("../index.scss", () => ({}));
 
 vi.mock("siyuan", () => ({
     Plugin: class {
-        data = {
+        data: Record<string, unknown>  = {
             "graph-enhance-config": {
                 autoFollow: "false",
                 nodesMaximum: "300",
@@ -47,7 +47,7 @@ describe("plugin startup", () => {
     it("defaults autoFollow on in graph runtime state and removes the legacy settings key", async () => {
         const { default: GraphEnhancePlugin } = await import("../index");
 
-        const plugin = new GraphEnhancePlugin();
+        const plugin = new GraphEnhancePlugin({} as any);
         await plugin.onload();
 
         expect(plugin.saveData).toHaveBeenNthCalledWith(1, "graph-enhance-config", {

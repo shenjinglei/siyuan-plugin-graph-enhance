@@ -1,9 +1,10 @@
 import { i18n, rawGraph, setRawGraph } from "./utils";
 import { showMessage } from "siyuan";
+import type { GraphLink, GraphNode } from "siyuan";
 import { getSetting } from "./settings";
 import * as dagre from "@dagrejs/dagre";
-import { json as graphlibJson } from "@dagrejs/graphlib";
-import type { GraphNodeValue, GraphOutput, GraphRankDir, GraphType, QueueItem, SiyuanEdge, SiyuanNode } from "./types";
+import { json as graphlibJson, Label } from "@dagrejs/graphlib";
+import type { GraphEdgeValue, GraphNodeValue, GraphOutput, GraphRankDir, GraphType, QueueItem, RawGraphEdgeValue } from "./types";
 import { draw } from "./renderer";
 
 let sourceNodeId: string;
@@ -33,6 +34,7 @@ export function title() {
 }
 
 export function Display() {
+
     if (!sourceNodeId) {
         showMessage(i18n.needStartPointMsg, 3000, "info");
         return;
@@ -62,8 +64,8 @@ export function Display() {
     draw(dagreLayout);
 }
 
-export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
-    setRawGraph(new dagre.graphlib.Graph());
+export function initRawGraph(nodes: GraphNode[], edges: GraphLink[]) {
+    setRawGraph(new dagre.graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>());
 
     nodes.forEach((x) => rawGraph.setNode(x.id, { label: x.label, color: "normal", width: 200, height: 30, state: 0, branch: 0 }));
     edges.forEach((x) => rawGraph.setEdge(x.from, x.to));
@@ -140,11 +142,11 @@ export function initRawGraph(nodes: SiyuanNode[], edges: SiyuanEdge[]) {
     }
 }
 
-let processedGraph: dagre.graphlib.Graph<GraphNodeValue>;
+let processedGraph: dagre.graphlib.Graph<Label, GraphNodeValue, GraphEdgeValue>;
 let branchFlag = 1;
 
 function createProcessedGraph() {
-    return new dagre.graphlib.Graph<GraphNodeValue>().setDefaultEdgeLabel(() => { return {}; });
+    return new dagre.graphlib.Graph<Label, GraphNodeValue, GraphEdgeValue>().setDefaultEdgeLabel(() => { return {}; });
 }
 
 function initQueue() {
@@ -248,7 +250,11 @@ class GlobalGraph extends Graph {
     }
 }
 
-function insertNode(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
+function insertNode(
+    cur: QueueItem,
+    _rawGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>,
+    _processedGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, GraphEdgeValue>
+) {
     if (_processedGraph.hasNode(cur.id)) return;
 
     const rawNodeValue = _rawGraph.node(cur.id);
@@ -261,7 +267,11 @@ function insertNode(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _proce
 
 }
 
-function insertEdge(cur: QueueItem, _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>) {
+function insertEdge(
+    cur: QueueItem,
+    _rawGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>,
+    _processedGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, GraphEdgeValue>
+) {
 
     if (!cur.edge) return;
 
@@ -285,7 +295,13 @@ export function setIsHideDailynote(_isHideDailynote: boolean) {
     isHideDailynote = _isHideDailynote;
 }
 
-function searchUp(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
+function searchUp(
+    cur: QueueItem,
+    q: QueueItem[],
+    _rawGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>,
+    _processedGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, GraphEdgeValue>,
+    penetrate = 0
+) {
     const curNodeValue = _processedGraph.node(cur.id);
     if (curNodeValue.state & 2) return; // search is already done
 
@@ -307,7 +323,13 @@ function searchUp(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Grap
         }));
 }
 
-function searchDown(cur: QueueItem, q: QueueItem[], _rawGraph: dagre.graphlib.Graph<any>, _processedGraph: dagre.graphlib.Graph<any>, penetrate = 0) {
+function searchDown(
+    cur: QueueItem,
+    q: QueueItem[],
+    _rawGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>,
+    _processedGraph: dagre.graphlib.Graph<unknown, GraphNodeValue, GraphEdgeValue>,
+    penetrate = 0
+) {
     const curNodeValue = _processedGraph.node(cur.id);
 
     if (curNodeValue.state & 1) return; // search is already done

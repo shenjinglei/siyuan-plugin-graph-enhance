@@ -4,7 +4,15 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as dagre from "@dagrejs/dagre";
-import type { SiyuanNode, SiyuanEdge } from "../types";
+import type { GraphLink, GraphNode } from "siyuan";
+
+function makeGraphNode(id: string, label: string): GraphNode {
+    return { box: "box", defs: 0, id, label, path: "", refs: 0, size: 1, type: "p" };
+}
+
+function makeGraphLink(from: string, to: string): GraphLink {
+    return { arrows: null, from, ref: false, to };
+}
 
 // Mutable ref so graph module sees updated rawGraph after setRawGraph()
 let rawGraphRef: dagre.graphlib.Graph<any> | null = null;
@@ -99,11 +107,11 @@ describe("graph", () => {
 
     describe("initRawGraph", () => {
         it("builds graph with nodes and edges", () => {
-            const nodes: SiyuanNode[] = [
-                { id: "a", label: "A" },
-                { id: "b", label: "B" },
+            const nodes: GraphNode[] = [
+                makeGraphNode("a", "A"),
+                makeGraphNode("b", "B"),
             ];
-            const edges: SiyuanEdge[] = [{ from: "a", to: "b" }];
+            const edges: GraphLink[] = [makeGraphLink("a", "b")];
             initRawGraph(nodes, edges);
             expect(rawGraphRef).not.toBeNull();
             expect(rawGraphRef!.nodeCount()).toBe(2);
@@ -114,23 +122,23 @@ describe("graph", () => {
         });
 
         it("marks dailynote nodes by label pattern YYYY-MM-DD", () => {
-            const nodes: SiyuanNode[] = [
-                { id: "d1", label: "2024-01-15" },
-                { id: "n1", label: "Normal" },
+            const nodes: GraphNode[] = [
+                makeGraphNode("d1", "2024-01-15"),
+                makeGraphNode("n1", "Normal"),
             ];
-            const edges: SiyuanEdge[] = [];
+            const edges: GraphLink[] = [];
             initRawGraph(nodes, edges);
             expect(rawGraphRef!.node("d1").dailynote).toBe(true);
             expect((rawGraphRef!.node("n1") as any).dailynote).toBeUndefined();
         });
 
         it("excludes nodes matching nodesExclusion and built-in ge- patterns", () => {
-            const nodes: SiyuanNode[] = [
-                { id: "a", label: "A" },
-                { id: "ge-moc", label: "ge-moc" },
-                { id: "ge-tag", label: "ge-tag" },
+            const nodes: GraphNode[] = [
+                makeGraphNode("a", "A"),
+                makeGraphNode("ge-moc", "ge-moc"),
+                makeGraphNode("ge-tag", "ge-tag"),
             ];
-            const edges: SiyuanEdge[] = [];
+            const edges: GraphLink[] = [];
             initRawGraph(nodes, edges);
             expect(rawGraphRef!.hasNode("a")).toBe(true);
             expect(rawGraphRef!.hasNode("ge-moc")).toBe(false);
@@ -140,11 +148,11 @@ describe("graph", () => {
 
     describe("Display", () => {
         it("calls draw with dagre layout when source exists in rawGraph", () => {
-            const nodes: SiyuanNode[] = [
-                { id: "a", label: "A" },
-                { id: "b", label: "B" },
+            const nodes: GraphNode[] = [
+                makeGraphNode("a", "A"),
+                makeGraphNode("b", "B"),
             ];
-            const edges: SiyuanEdge[] = [{ from: "a", to: "b" }];
+            const edges: GraphLink[] = [makeGraphLink("a", "b")];
             initRawGraph(nodes, edges);
             setSourceNode("a");
             setGraphType("global");
@@ -157,7 +165,7 @@ describe("graph", () => {
         });
 
         it("does not call draw when source node is not in rawGraph", () => {
-            initRawGraph([{ id: "a", label: "A" }], []);
+            initRawGraph([makeGraphNode("a", "A")], []);
             setSourceNode("missing-id");
             Display();
             expect(draw).not.toHaveBeenCalled();
@@ -165,7 +173,7 @@ describe("graph", () => {
 
         it("applies the rankdir set via setGraphRankdir immediately, without re-reading persisted state", () => {
             const setGraphSpy = vi.spyOn(dagre.graphlib.Graph.prototype, "setGraph");
-            initRawGraph([{ id: "a", label: "A" }], []);
+            initRawGraph([makeGraphNode("a", "A")], []);
             setSourceNode("a");
             setGraphType("global");
             setGraphRankdir("TB");

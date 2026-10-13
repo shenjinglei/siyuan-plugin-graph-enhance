@@ -1,23 +1,24 @@
 import GraphEnhancePlugin from ".";
-import { I18N } from "siyuan";
 import { graphlib } from "@dagrejs/dagre";
 import { GRAPH_TYPES } from "./constants";
-import type { GraphNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphRankDir, GraphType, HorizontalRankDir, VerticalRankDir } from "./types";
+import type { GraphNodeValue, GraphPersistedState, GraphPersistedStatePatch, GraphRankDir, GraphType, HorizontalRankDir, RawGraphEdgeValue, VerticalRankDir } from "./types";
 
-export let i18n: I18N;
+type I18nMessages = Record<string, string>;
+
+export let i18n: I18nMessages;
 export let plugin: GraphEnhancePlugin;
 
 export function setPlugin(instance: GraphEnhancePlugin) {
     plugin = instance;
-    i18n = plugin.i18n;
+    i18n = plugin.i18n as I18nMessages;
 }
 
 export const STORAGE_NAME = "graph-enhance-config";
 export const GRAPH_STATE_STORAGE_NAME = "graph-enhance-graph-state";
 export const GRAPH_STATE_VERSION = 1;
 
-export let rawGraph: graphlib.Graph<GraphNodeValue>;
-export function setRawGraph(g: graphlib.Graph<GraphNodeValue>) {
+export let rawGraph: graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>;
+export function setRawGraph(g: graphlib.Graph<unknown, GraphNodeValue, RawGraphEdgeValue>) {
     rawGraph = g;
 }
 
