@@ -6,6 +6,8 @@ const setIsHideDailynote = vi.fn();
 const setGraphType = vi.fn();
 const setGraphRankdir = vi.fn();
 const initEChart = vi.fn();
+const fetchSyncPost = vi.fn();
+const showMessage = vi.fn();
 const saveAutoFollowFilter = vi.fn((value: boolean) => {
     savedAutoFollow = value;
 });
@@ -40,13 +42,9 @@ vi.mock("../graph", () => ({
 
 vi.mock("siyuan", () => ({
     adaptHotkey: vi.fn((hotkey: string) => hotkey),
-    fetchSyncPost: vi.fn(async () => ({
-        data: {
-            nodes: [],
-            links: [],
-        },
-    })),
+    fetchSyncPost,
     getFrontend: vi.fn(() => "desktop"),
+    showMessage,
 }));
 
 vi.mock("../utils", () => ({
@@ -106,6 +104,11 @@ describe("dock", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        fetchSyncPost.mockResolvedValue({
+            code: 0,
+            msg: "",
+            data: { nodes: [], links: [] },
+        });
         savedAutoFollow = true;
         savedHideDailyNotes = true;
         savedRankdir = "LR";
@@ -184,6 +187,18 @@ describe("dock", () => {
         await document.getElementById("graph_enhance_dailynote")?.onclick?.(new dom.window.MouseEvent("click") as any);
 
         expect(saveHideDailyNotesFilter).toHaveBeenCalledWith(false);
+    });
+
+    it("shows the API error when refreshing the graph fails", async () => {
+        const { initDock } = await import("../dock");
+        fetchSyncPost.mockResolvedValueOnce({ code: -1, msg: "Graph request failed", data: null });
+
+        initDock();
+        mountDock();
+
+        await document.getElementById("graph_enhance_refresh")?.onclick?.(new dom.window.MouseEvent("click") as any);
+
+        expect(showMessage).toHaveBeenCalledWith("Graph request failed", 3000, "error");
     });
 
     it("persists auto follow with the semantic state helper and registers listener when visible", async () => {

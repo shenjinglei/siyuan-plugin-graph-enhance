@@ -15,7 +15,7 @@ import {
     savePersistedGraphRankdir,
     savePersistedGraphViewMode,
 } from "./utils";
-import { adaptHotkey, fetchSyncPost, getFrontend } from "siyuan";
+import { adaptHotkey, fetchSyncPost, getFrontend, showMessage } from "siyuan";
 import "./index.scss";
 import { initEChart, resize } from "./renderer";
 import { GRAPH_API_CONF } from "./constants";
@@ -272,8 +272,20 @@ export async function autoFollow({ detail }: any) {
 }
 
 async function refreshGraph(): Promise<void> {
-    const result = await fetchSyncPost("api/graph/getGraph", GRAPH_API_CONF);
-    initRawGraph(result.data.nodes, result.data.links);
+    const result = await fetchSyncPost("/api/graph/getGraph", GRAPH_API_CONF);
+    if (result.code !== 0) {
+        showMessage(result.msg || "Failed to load graph", 3000, "error");
+        return;
+    }
+
+    if (!("nodes" in result.data) || !("links" in result.data)) {
+        showMessage(result.msg || "Graph data is unavailable", 3000, "error");
+        return;
+    }
+
+    const nodes = result.data.nodes?.filter((node): node is NonNullable<typeof node> => node !== null) ?? [];
+    const links = result.data.links?.filter((link): link is NonNullable<typeof link> => link !== null) ?? [];
+    initRawGraph(nodes, links);
 }
 
 function getDocId(): string | undefined {

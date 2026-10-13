@@ -1,17 +1,6 @@
 /** Graph type identifier for display mode */
 export type GraphType = "ancestor" | "brother" | "cross" | "global";
 
-/** Node/edge shape from Siyuan API */
-export interface SiyuanNode {
-    id: string;
-    label: string;
-}
-
-export interface SiyuanEdge {
-    from: string;
-    to: string;
-}
-
 /** Internal queue item for BFS-style graph traversal */
 export interface QueueItem {
     id: string;
@@ -34,6 +23,10 @@ export interface GraphNodeValue extends NodeLabel {
 
 export interface GraphEdgeValue {
     branch?: number;
+}
+
+export interface RawGraphEdgeValue {
+    state?: "broken";
 }
 
 type GraphlibJson = ReturnType<typeof graphlibJson.write>;
