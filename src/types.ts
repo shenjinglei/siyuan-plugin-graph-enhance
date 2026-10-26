@@ -43,7 +43,12 @@ export type SettingKey =
     | "nodesMaximum"
     | "nodesExclusion"
     | "font"
-    | "fontSize";
+    | "fontSize"
+    | "popoverTrigger"
+    | "popoverDelay";
+
+/** How the note preview popover is triggered when hovering a node */
+export type PopoverTrigger = "hover" | "ctrl" | "none";
 
 export type VerticalRankDir = "TB" | "BT";
 export type HorizontalRankDir = "LR" | "RL";
