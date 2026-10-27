@@ -4,6 +4,7 @@ import "./index.scss";
 import { GRAPH_STATE_STORAGE_NAME, STORAGE_NAME, normalizeGraphPersistedState, setPlugin } from "./utils";
 import { initDock } from "./dock";
 import { DEFAULT_SETTINGS, settingInit } from "./settings";
+import { teardownRenderer } from "./renderer";
 
 export default class GraphEnhancePlugin extends Plugin {
     async onload() {
@@ -33,6 +34,10 @@ export default class GraphEnhancePlugin extends Plugin {
         console.log("graph-enhance loaded");
     }
 
+    onunload() {
+        teardownRenderer();
+    }
+
     // Triggered when data stored using saveData() changes. If commented out, the plugin will be automatically disabled and then re-enabled.
     onDataChanged() {
     }
@@ -43,4 +48,3 @@ export default class GraphEnhancePlugin extends Plugin {
         console.log("graph-enhance uninstalled");
     }
 }
-

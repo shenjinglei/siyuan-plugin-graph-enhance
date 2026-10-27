@@ -33,6 +33,16 @@ export function initEChart() {
     }
 }
 
+export function teardownRenderer() {
+    if (keydownListenerAdded) {
+        document.removeEventListener("keydown", onPopoverKeydown);
+        keydownListenerAdded = false;
+    }
+    hoveredNode = undefined;
+    cancelHoverPreview();
+    hidePreview();
+}
+
 export function resize(param: { width: number, height: number }) {
     aEChart.resize(param);
 }

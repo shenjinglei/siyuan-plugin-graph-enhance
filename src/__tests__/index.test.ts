@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const initDock = vi.fn();
 const settingInit = vi.fn();
+const teardownRenderer = vi.fn();
 
 vi.mock("../dock", () => ({
     initDock,
@@ -18,6 +19,10 @@ vi.mock("../settings", () => ({
         popoverDelay: "620",
     },
     settingInit,
+}));
+
+vi.mock("../renderer", () => ({
+    teardownRenderer,
 }));
 
 vi.mock("../index.scss", () => ({}));
@@ -69,5 +74,8 @@ describe("plugin startup", () => {
         });
         expect(initDock).toHaveBeenCalledTimes(1);
         expect(settingInit).toHaveBeenCalledTimes(1);
+
+        plugin.onunload();
+        expect(teardownRenderer).toHaveBeenCalledTimes(1);
     });
 });
