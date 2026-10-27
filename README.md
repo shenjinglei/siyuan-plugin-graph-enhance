@@ -104,18 +104,13 @@ A graph starting from `c` still draws edge `c-d`.
 ### Other
 
 - Click a node to jump to the corresponding note.
-- Enable "Follow current document" in settings to keep the graph in sync with the note.
-- Consider backing up complex settings to avoid loss.
+- Hover over a node to preview the note content.
+- Enable "Follow current document" to keep the graph in sync with the note.
 
 ### Guides
 
 - [Note visualization – using the Graph Enhance plugin](https://ld246.com/article/1696579047798) (Chinese)
 - [About the Graph Enhance plugin](https://ld246.com/article/1702042778713) (Chinese)
-
-## Future Plans
-
-- [ ] Layout improvements
-- [x] Color distinction
 
 ## Feedback
 

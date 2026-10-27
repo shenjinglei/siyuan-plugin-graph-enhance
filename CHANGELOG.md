@@ -1,5 +1,10 @@
 # CHANGE LOG
 
+## Unreleased
+
+- FEATURE: Preview note content in a SiYuan popover when hovering over a graph node
+  - Popover trigger setting: Hover (configurable delay), Ctrl + Hover (⌘ on macOS), or Never
+
 ## 0.5.4/2026-09-04
 
 - [v0.5.3 ... v0.5.4](https://github.com/shenjinglei/siyuan-plugin-graph-enhance/compare/v0.5.3...v0.5.4)

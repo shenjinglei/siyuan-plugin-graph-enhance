@@ -14,6 +14,8 @@ vi.mock("../settings", () => ({
         nodesExclusion: "",
         font: "system-ui",
         fontSize: "12",
+        popoverTrigger: "hover",
+        popoverDelay: "620",
     },
     settingInit,
 }));
@@ -56,6 +58,8 @@ describe("plugin startup", () => {
             nodesExclusion: "",
             font: "system-ui",
             fontSize: "12",
+            popoverTrigger: "hover",
+            popoverDelay: "620",
         });
         expect(plugin.saveData).toHaveBeenNthCalledWith(2, "graph-enhance-graph-state", {
             version: 1,

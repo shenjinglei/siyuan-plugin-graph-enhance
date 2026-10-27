@@ -42,5 +42,13 @@
   "fontCustomOption": "Custom Font",
   "fontSizeTitle": "Font Size",
   "fontSizeDescription": "Node label font size (pixels)",
-  "checkFontSizeErrorMsg": "Font Size is not a number! Setting hasn't saved"
+  "checkFontSizeErrorMsg": "Font Size is not a number! Setting hasn't saved",
+  "popoverTriggerTitle": "Popover Trigger",
+  "popoverTriggerDescription": "How to show the note content in a popover when hovering over a node",
+  "popoverTriggerHover": "Hover",
+  "popoverTriggerCtrl": "Ctrl + Hover",
+  "popoverTriggerNone": "Never",
+  "popoverDelayTitle": "Hover Delay",
+  "popoverDelayDescription": "Delay before showing the popover in Hover mode (milliseconds, 0–5000)",
+  "checkPopoverDelayErrorMsg": "Hover Delay must be a number between 0 and 5000! Setting hasn't saved"
 }

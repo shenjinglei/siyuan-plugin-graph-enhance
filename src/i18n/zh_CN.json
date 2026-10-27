@@ -42,5 +42,13 @@
   "fontCustomOption": "自定义字体",
   "fontSizeTitle": "字号",
   "fontSizeDescription": "节点标签字号（像素）",
-  "checkFontSizeErrorMsg": "字号不是数字！设置未保存"
+  "checkFontSizeErrorMsg": "字号不是数字！设置未保存",
+  "popoverTriggerTitle": "浮窗触发方式",
+  "popoverTriggerDescription": "鼠标悬停在节点上时，以浮窗显示笔记内容的触发方式",
+  "popoverTriggerHover": "悬停",
+  "popoverTriggerCtrl": "Ctrl+悬停",
+  "popoverTriggerNone": "不触发浮窗",
+  "popoverDelayTitle": "悬停延迟",
+  "popoverDelayDescription": "「悬停」方式下显示浮窗前的等待时间（毫秒，0–5000）",
+  "checkPopoverDelayErrorMsg": "悬停延迟必须是 0–5000 之间的数字！设置未保存"
 }

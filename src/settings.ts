@@ -1,6 +1,7 @@
 import { i18n, plugin, STORAGE_NAME } from "./utils";
 import { Setting, showMessage } from "siyuan";
-import type { SettingKey } from "./types";
+import type { PopoverTrigger, SettingKey } from "./types";
+import { DEFAULT_POPOVER_DELAY_MS, MAX_POPOVER_DELAY_MS } from "./constants";
 
 export const DEFAULT_SETTINGS = {
     ranker: "network-simplex",
@@ -8,7 +9,13 @@ export const DEFAULT_SETTINGS = {
     nodesExclusion: "",
     font: "system-ui",
     fontSize: "12",
+    popoverTrigger: "hover",
+    popoverDelay: String(DEFAULT_POPOVER_DELAY_MS),
 } as Record<SettingKey, string>;
+
+export function isValidPopoverDelay(value: string): boolean {
+    return /^[0-9]+$/.test(value) && parseInt(value) <= MAX_POPOVER_DELAY_MS;
+}
 
 export function getSetting(name: SettingKey): string {
     return plugin.data[STORAGE_NAME][name] ?? DEFAULT_SETTINGS[name];
@@ -33,6 +40,14 @@ export function settingInit() {
                 );
                 return;
             }
+            if (popoverTriggerElement.value === "hover" && !isValidPopoverDelay(popoverDelayElement.value)) {
+                showMessage(
+                    i18n.checkPopoverDelayErrorMsg,
+                    3000,
+                    "error"
+                );
+                return;
+            }
             const getFontValue = () => {
                 if (fontElement.value === "custom") {
                     return customFontInput.value.trim() || "system-ui";
@@ -46,6 +61,10 @@ export function settingInit() {
                 nodesExclusion: nodesExclusionElement.value,
                 font: getFontValue(),
                 fontSize: fontSizeElement.value,
+                popoverTrigger: popoverTriggerElement.value,
+                popoverDelay: isValidPopoverDelay(popoverDelayElement.value)
+                    ? popoverDelayElement.value
+                    : getSetting("popoverDelay"),
             };
             plugin.saveData(STORAGE_NAME, payload);
         }
@@ -172,6 +191,56 @@ export function settingInit() {
         createActionElement: () => {
             fontSizeElement.value = plugin.data[STORAGE_NAME].fontSize;
             return fontSizeElement;
+        },
+    });
+
+    const popoverTriggerElement = document.createElement("select");
+    popoverTriggerElement.id = "popoverTrigger";
+    popoverTriggerElement.className = "b3-select";
+    const popoverTriggers: [PopoverTrigger, string][] = [
+        ["hover", i18n.popoverTriggerHover],
+        ["ctrl", i18n.popoverTriggerCtrl],
+        ["none", i18n.popoverTriggerNone],
+    ];
+    popoverTriggers.forEach(([value, label]) => {
+        popoverTriggerElement.add(new Option(label, value));
+    });
+
+    const popoverDelayElement = document.createElement("input");
+    popoverDelayElement.id = "popoverDelay";
+    popoverDelayElement.type = "number";
+    popoverDelayElement.min = "0";
+    popoverDelayElement.max = String(MAX_POPOVER_DELAY_MS);
+    popoverDelayElement.step = "100";
+    popoverDelayElement.placeholder = i18n.pleaseInputNumber;
+    popoverDelayElement.className = "b3-text-field";
+
+    // The delay only applies to the "hover" trigger, so hide its whole setting row otherwise.
+    const updatePopoverDelayVisibility = () => {
+        const row = popoverDelayElement.closest<HTMLElement>(".config-item");
+        if (row) {
+            row.style.display = popoverTriggerElement.value === "hover" ? "" : "none";
+        }
+    };
+    popoverTriggerElement.addEventListener("change", updatePopoverDelayVisibility);
+
+    plugin.setting.addItem({
+        title: i18n.popoverTriggerTitle,
+        description: i18n.popoverTriggerDescription,
+        createActionElement: () => {
+            popoverTriggerElement.value = getSetting("popoverTrigger");
+            return popoverTriggerElement;
+        },
+    });
+
+    plugin.setting.addItem({
+        title: i18n.popoverDelayTitle,
+        description: i18n.popoverDelayDescription,
+        createActionElement: () => {
+            popoverDelayElement.value = getSetting("popoverDelay");
+            // Rows are inserted into the dialog right after this returns.
+            setTimeout(updatePopoverDelayVisibility, 0);
+            return popoverDelayElement;
         },
     });
 }
