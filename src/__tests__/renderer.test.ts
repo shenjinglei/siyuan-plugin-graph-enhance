@@ -82,7 +82,7 @@ vi.mock("../settings", () => ({
     }),
 }));
 
-import { draw, initEChart, positionPanel } from "../renderer";
+import { draw, initEChart, positionPanel, teardownRenderer } from "../renderer";
 import { DEFAULT_POPOVER_DELAY_MS, HOVER_PREVIEW_HIDE_DELAY_MS } from "../constants";
 
 const layout = {
@@ -116,6 +116,9 @@ describe("renderer hover preview", () => {
             getElementById: () => ({}),
             addEventListener: (event: string, listener: (e: any) => void) => {
                 if (event === "keydown") keydownHandler = listener;
+            },
+            removeEventListener: (event: string, listener: (e: any) => void) => {
+                if (event === "keydown" && keydownHandler === listener) keydownHandler = undefined;
             },
         });
         vi.stubGlobal("window", { siyuan: { blockPanels } });
@@ -294,6 +297,44 @@ describe("renderer hover preview", () => {
             keydownHandler!({ key: "Control" });
             vi.advanceTimersByTime(DEFAULT_POPOVER_DELAY_MS * 10);
             expect(addFloatLayer).not.toHaveBeenCalled();
+        });
+
+        it("tears down key handling and hover previews", () => {
+            popoverTriggerSetting = "ctrl";
+            handlers.mouseover(hoverParams());
+            const keydownListener = keydownHandler;
+            const removeEventListener = vi.spyOn(document, "removeEventListener");
+
+            teardownRenderer();
+
+            expect(removeEventListener).toHaveBeenCalledWith("keydown", keydownListener);
+            expect(keydownHandler).toBeUndefined();
+            keydownListener!({ key: "Control" });
+            expect(addFloatLayer).not.toHaveBeenCalled();
+
+            initEChart();
+            expect(keydownHandler).toBeTypeOf("function");
+
+            popoverTriggerSetting = "hover";
+            handlers.mouseover(hoverParams());
+            teardownRenderer();
+            vi.advanceTimersByTime(DEFAULT_POPOVER_DELAY_MS);
+            expect(addFloatLayer).not.toHaveBeenCalled();
+
+            initEChart();
+            const disconnectObserver = vi.fn();
+            vi.stubGlobal("MutationObserver", class {
+                observe() { return undefined; }
+                disconnect() { disconnectObserver(); }
+            });
+            handlers.mouseover(hoverParams());
+            vi.advanceTimersByTime(DEFAULT_POPOVER_DELAY_MS);
+            const panel = blockPanels[0];
+            teardownRenderer();
+            expect(panel.destroy).toHaveBeenCalledTimes(1);
+            expect(disconnectObserver).toHaveBeenCalledTimes(1);
+            vi.advanceTimersByTime(DEFAULT_POPOVER_DELAY_MS * 2);
+            expect(addFloatLayer).toHaveBeenCalledTimes(1);
         });
     });
 
